@@ -401,7 +401,11 @@ checkpoint. At epoch 2, mean Oracle qualities were 0.934053 (vision) and
 0.935742 (audio), with non-zero standard deviations 0.074186 and 0.073381.
 All four mean auxiliary weights were exactly 0.1; visual/audio weight standard
 deviations were 0.007948/0.007847. Reliability supervision remained identical
-to matched controls. Checkpoint load and inference are the next smoke gate.
+to matched controls. The checkpoint loaded successfully and completed full-test
+inference: Has0 Acc-2=0.8192, Has0 F1=0.8193, Non0 Acc-2=0.8415, Non0
+F1=0.8422, Acc-5=0.4723, Acc-7=0.3892, MAE=0.8588, Corr=0.7383, and
+Loss=1.3551. This completes the Oracle engineering smoke gate. These two-epoch
+metrics are not formal evidence; the matched 25-epoch Oracle run is required.
 
 ## Current Evidence Summary
 
