@@ -415,6 +415,18 @@ favorable on both binary metric pairs, Corr, and test loss. The five-control
 seed-1111 evidence is therefore metric-dependent and requires multi-seed
 replication before a stable actionability claim.
 
+## 2026-08-06 P2 Learned Multi-seed Replication
+
+The matched seed-1112 Learned run completed, but did not reproduce the
+seed-1111 improvement. It produced Has0 Acc-2=0.8163, Has0 F1=0.8168,
+Non0 Acc-2=0.8247, Non0 F1=0.8257, Acc-5=0.4636, Acc-7=0.4111,
+MAE=0.7802, Corr=0.7855, and Loss=1.0828. Relative to the repaired seed-1112
+baseline, the deltas are -0.0102 Has0 Acc-2, -0.0090 Has0 F1, -0.0213 Non0
+Acc-2, -0.0202 Non0 F1, -0.0349 Acc-5, -0.0379 Acc-7, +0.0533 MAE, and
+-0.0086 Corr. This is a material cross-seed failure rather than evidence of
+stable improvement. A full reliability audit is required before spending GPU
+time on the seed-1112 Permuted control.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:

@@ -92,6 +92,17 @@ corr(q_a, audio_energy)=-0.024787
 
 ## 7. 当前立即任务
 
+MOSI seed 1112的Learned正式实验已完成，结果未复现seed 1111的提升：
+
+| Method, seed 1112 | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Repaired baseline | 0.8265 | 0.8258 | 0.8460 | 0.8459 | 0.4985 | 0.4490 | 0.7269 | 0.7941 | TBD |
+| Learned | 0.8163 | 0.8168 | 0.8247 | 0.8257 | 0.4636 | 0.4111 | 0.7802 | 0.7855 | 1.0828 |
+
+Learned在全部已知指标上均差于baseline，属于实质性跨种子失败，
+不应解释为普通随机波动。当前先对该checkpoint运行完整686样本可靠性审计，
+区分“可靠性头未学好”与“可靠性学好但分配机制无效”。
+
 Oracle两轮烟雾训练、checkpoint保存、重新加载和完整测试均已通过。第2轮真实日志为：
 
 ```text
@@ -109,8 +120,8 @@ Loss=1.3551。这些是工程烟雾结果，不与25轮正式结果作论文结�
 Non0 Acc-2=0.8537、Non0 F1=0.8531、Acc-5=0.5146、Acc-7=0.4548、
 MAE=0.7164、Corr=0.7923、Loss=0.9769。
 
-当前任务：先清理已完成的smoke checkpoint释放磁盘，再确认seed 1112/1113的
-单模态encoder checkpoint是否存在；随后优先复现Learned和Permuted对照。
+已清理smoke checkpoint，可用磁盘空间恢复到6.7GB；seed 1112/1113的四个
+单模态encoder checkpoint均存在。
 
 ## 8. Oracle之后的决策
 
