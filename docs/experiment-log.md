@@ -427,6 +427,17 @@ Acc-2, -0.0202 Non0 F1, -0.0349 Acc-5, -0.0379 Acc-7, +0.0533 MAE, and
 stable improvement. A full reliability audit is required before spending GPU
 time on the seed-1112 Permuted control.
 
+The full 686-sample seed-1112 reliability audit remained strong: vision
+Spearman=-0.963491 and AUROC=0.994929; audio Spearman=-0.789313 and
+AUROC=0.916853. Energy confounds were near zero (vision 0.009095, audio
+-0.015360), while the recurring audio-length correlation was 0.238209. Thus,
+the replication failure is not explained by a collapsed reliability head. The
+current diagnosis is unstable downstream optimization from reliability-based
+allocation. A matched seed-1112 Constant run is the next isolating control:
+if it recovers baseline-level performance, learned redistribution is the
+failure source; if it also degrades, the broader interventional auxiliary
+training setup is implicated.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
