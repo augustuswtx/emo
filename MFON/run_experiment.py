@@ -94,6 +94,15 @@ def parse_args():
     parser.add_argument('--reliability-invariance-weight', type=float, default=0.1)
     parser.add_argument('--reliability-task-warmup-epoch', type=int, default=10)
     parser.add_argument(
+        '--reliability-task-corrupt-scale',
+        type=float,
+        default=1.0,
+        help=(
+            'Scale task-path corruption in [0, 1] without disabling '
+            'clean/corrupt supervision for the reliability heads.'
+        ),
+    )
+    parser.add_argument(
         '--reliability-allocation-control',
         choices=['learned', 'constant', 'permuted', 'reversed', 'oracle'],
         default='learned',
@@ -134,6 +143,9 @@ def main():
     train_cfg.reliability_loss_weight = args.reliability_loss_weight
     train_cfg.reliability_invariance_weight = args.reliability_invariance_weight
     train_cfg.reliability_task_warmup_epoch = args.reliability_task_warmup_epoch
+    if not 0.0 <= args.reliability_task_corrupt_scale <= 1.0:
+        raise ValueError('--reliability-task-corrupt-scale must be in [0, 1].')
+    train_cfg.reliability_task_corrupt_scale = args.reliability_task_corrupt_scale
     train_cfg.reliability_allocation_control = args.reliability_allocation_control
     if args.use_interventional_reliability:
         if args.dataset != 'MOSI':
@@ -179,6 +191,7 @@ def main():
         f'use_alw={args.use_alw} | use_budgeted_aux={args.use_budgeted_aux} | '
         f'q_type={args.q_type} | warmup={args.warmup_epoch} | '
         f'interventional_reliability={args.use_interventional_reliability} | '
+        f'task_corrupt_scale={args.reliability_task_corrupt_scale} | '
         f'allocation_control={args.reliability_allocation_control} | '
         f'use_dpg={args.use_dpg} | use_css={args.use_css}'
     )

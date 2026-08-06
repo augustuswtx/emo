@@ -15,6 +15,7 @@ from interventional_reliability import (
     TemporalReliabilityHead,
     blend_corruption,
     ordinal_reliability_pair,
+    scheduled_corruption_progress,
 )
 
 import os
@@ -159,6 +160,11 @@ class TVA_fusion(nn.Module):
         self.reliability_task_warmup_epoch = max(
             1, getattr(train_cfg, 'reliability_task_warmup_epoch', 10)
         )
+        self.reliability_task_corrupt_scale = getattr(
+            train_cfg, 'reliability_task_corrupt_scale', 1.0
+        )
+        if not 0.0 <= float(self.reliability_task_corrupt_scale) <= 1.0:
+            raise ValueError('reliability task corruption scale must be in [0, 1].')
         self.reliability_allocation_control = getattr(
             train_cfg, 'reliability_allocation_control', 'learned'
         )
@@ -192,8 +198,10 @@ class TVA_fusion(nn.Module):
         reliability_v = reliability_a = None
         if mode == 'train' and self.use_interventional_reliability:
             epoch_value = 1 if epoch is None else epoch
-            task_corruption_progress = min(
-                float(epoch_value) / float(self.reliability_task_warmup_epoch), 1.0
+            task_corruption_progress = scheduled_corruption_progress(
+                epoch_value,
+                self.reliability_task_warmup_epoch,
+                self.reliability_task_corrupt_scale,
             )
             reliability_v = ordinal_reliability_pair(
                 self.vision_reliability,

@@ -166,6 +166,17 @@ def blend_corruption(clean, corrupted, progress):
     return clean + float(progress) * (corrupted - clean)
 
 
+def scheduled_corruption_progress(epoch, warmup_epoch, scale=1.0):
+    """Return a bounded task-corruption schedule independent of head training."""
+    if float(epoch) < 0:
+        raise ValueError('epoch must be non-negative.')
+    if int(warmup_epoch) < 1:
+        raise ValueError('warmup_epoch must be at least one.')
+    if not 0.0 <= float(scale) <= 1.0:
+        raise ValueError('scale must be in [0, 1].')
+    return min(float(epoch) / float(warmup_epoch), 1.0) * float(scale)
+
+
 def ordinal_reliability_pair(
     head,
     features,

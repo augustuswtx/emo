@@ -438,6 +438,22 @@ if it recovers baseline-level performance, learned redistribution is the
 failure source; if it also degrades, the broader interventional auxiliary
 training setup is implicated.
 
+The matched seed-1112 Constant control produced Has0 Acc-2=0.8105, Has0
+F1=0.8110, Non0 Acc-2=0.8186, Non0 F1=0.8196, Acc-5=0.4723,
+Acc-7=0.4155, MAE=0.7695, Corr=0.7870, and Loss=1.0607. Constant improves
+MAE, Corr, loss, Acc-5, and Acc-7 relative to seed-1112 Learned, but is worse
+on both binary metric pairs; both variants remain materially below the repaired
+baseline. Learned redistribution is therefore not the sole failure source.
+Because both variants progressively blend synthetic corruption into the task
+features, task-path corruption is now the primary isolating hypothesis.
+
+A new `--reliability-task-corrupt-scale` control preserves ordered corruption
+supervision for both reliability heads while independently scaling corruption
+entering the sentiment task. Scale zero keeps task inputs clean. The default is
+one, preserving every completed experiment. Twenty-seven local unit tests pass.
+The next diagnostic is seed-1112 Constant with scale zero; Permuted and seed
+1113 expansion remain paused until this gate is resolved.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:

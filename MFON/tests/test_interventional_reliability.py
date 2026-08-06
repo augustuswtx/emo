@@ -8,6 +8,7 @@ from interventional_reliability import (
     blend_corruption,
     gaussian_corruption_pair,
     ordinal_reliability_pair,
+    scheduled_corruption_progress,
     sample_ordered_severities,
     scale_active_content,
 )
@@ -78,6 +79,19 @@ class InterventionalReliabilityTest(unittest.TestCase):
                 torch.full_like(clean, 0.25),
             )
         )
+
+    def test_task_corruption_schedule_can_keep_task_features_clean(self):
+        self.assertEqual(scheduled_corruption_progress(25, 10, 0.0), 0.0)
+        self.assertEqual(scheduled_corruption_progress(2, 10, 1.0), 0.2)
+        self.assertEqual(scheduled_corruption_progress(25, 10, 0.25), 0.25)
+
+    def test_task_corruption_schedule_validates_inputs(self):
+        with self.assertRaises(ValueError):
+            scheduled_corruption_progress(-1, 10, 1.0)
+        with self.assertRaises(ValueError):
+            scheduled_corruption_progress(1, 0, 1.0)
+        with self.assertRaises(ValueError):
+            scheduled_corruption_progress(1, 10, 1.1)
 
     def test_ordinal_objective_reaches_head_parameters(self):
         head = ReliabilityHead(feature_dim=3, hidden_dim=8)

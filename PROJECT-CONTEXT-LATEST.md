@@ -105,6 +105,16 @@ Spearman=-0.963491、AUROC=0.994929；音频Spearman=-0.789313、AUROC=0.916853�
 可靠性头仍能稳定识别退化，因此当前问题定位为可靠性动态分配的优化效果不稳定。
 下一个诊断实验是seed 1112 Constant；暂不运行Permuted。
 
+seed 1112 Constant已完成：Has0 Acc-2=0.8105、Has0 F1=0.8110、Non0 Acc-2=0.8186、
+Non0 F1=0.8196、Acc-5=0.4723、Acc-7=0.4155、MAE=0.7695、Corr=0.7870、
+Loss=1.0607。Constant相对Learned在MAE、Corr、Loss和Acc-5/7上更好，但二分类更差；
+两者均明显差于seed 1112 repaired baseline。因此动态分配不是唯一问题，
+主任务特征混入人工退化是当前首要待验证原因。
+
+已新增 `--reliability-task-corrupt-scale`。设为0时，可靠性头仍在干净/退化对上学习，
+但情感主任务始终使用干净音视频。本地27项测试全部通过。下一实验是
+seed 1112 Constant + clean task path，用于严格隔离主任务污染效应。
+
 Oracle两轮烟雾训练、checkpoint保存、重新加载和完整测试均已通过。第2轮真实日志为：
 
 ```text

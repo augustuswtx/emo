@@ -156,3 +156,14 @@ the same score multiset in reverse reliability rank. `oracle` uses the known
 effective synthetic-corruption severity. All controls preserve the exact mean
 KL and InfoNCE budgets, keep reliability-head supervision active, and change
 only which samples receive the auxiliary supervision.
+
+To train the reliability heads on ordered corruptions while keeping the
+sentiment task inputs clean, set:
+
+```bash
+--reliability-task-corrupt-scale 0
+```
+
+The default is `1`, which preserves the original progressive task-corruption
+behavior. Values between `0` and `1` scale the final corruption strength
+without disabling reliability-head supervision.

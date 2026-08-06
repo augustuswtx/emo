@@ -102,6 +102,7 @@ class MOSI:
             reliability_loss_weight = 0.1
             reliability_invariance_weight = 0.1
             reliability_task_warmup_epoch = 10
+            reliability_task_corrupt_scale = 1.0
             reliability_allocation_control = 'learned'
 
             use_dpg = False
