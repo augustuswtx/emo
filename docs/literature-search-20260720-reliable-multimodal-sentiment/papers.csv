@@ -1,0 +1,19 @@
+title,year,venue,cluster,status,priority,url
+Provable Dynamic Fusion for Low-Quality Multimodal Data,2023,ICML,reliability_fusion,published,A/Risk,https://proceedings.mlr.press/v202/zhang23ar.html
+Predictive Dynamic Fusion,2024,ICML,reliability_fusion,published,A/Risk,https://proceedings.mlr.press/v235/cao24c.html
+Enhancing Multimodal Cooperation via Sample-level Modality Valuation,2024,CVPR,sample_valuation,published,A/Risk,https://openaccess.thecvf.com/content/CVPR2024/html/Wei_Enhancing_Multimodal_Cooperation_via_Sample-level_Modality_Valuation_CVPR_2024_paper.html
+Analyzing Modality Robustness in Multimodal Sentiment Analysis,2022,NAACL,robustness_diagnostic,published,A,https://aclanthology.org/2022.naacl-main.50/
+Modal Feature Optimization Network with Prompt for Multimodal Sentiment Analysis,2025,COLING,weak_modality_optimization,published,A,https://aclanthology.org/2025.coling-main.309/
+Supervised Attention Mechanism for Low-quality Multimodal Data,2025,EMNLP,low_quality_attention,published,A/Risk,https://aclanthology.org/2025.emnlp-main.1084/
+Proxy-Driven Robust Multimodal Sentiment Analysis with Incomplete Data,2025,ACL,missing_modality,published,A,https://aclanthology.org/2025.acl-long.1075/
+DFMU: Distribution-based Framework for Modeling Aleatoric Uncertainty in Multimodal Sentiment Analysis,2025,IJCAI,uncertainty,published,A,https://www.ijcai.org/proceedings/2025/917
+QA-MoE: Towards a Continuous Reliability Spectrum with Quality-Aware Mixture of Experts,2026,ACL,reliability_routing,published,A/Risk,https://aclanthology.org/2026.acl-long.1461/
+Enhance-then-Balance Modality Collaboration for Robust Multimodal Sentiment Analysis,2026,CVPR,weak_modality_reliability,published,A/Risk,https://openaccess.thecvf.com/content/CVPR2026/html/He_Enhance-then-Balance_Modality_Collaboration_for_Robust_Multimodal_Sentiment_Analysis_CVPR_2026_paper.html
+Multimodal Learning on Low-Quality Data with Conformal Predictive Self-Calibration,2026,CVPR,calibration,published,A/Risk,https://openaccess.thecvf.com/content/CVPR2026/html/Jiang_Multimodal_Learning_on_Low-Quality_Data_with_Conformal_Predictive_Self-Calibration_CVPR_2026_paper.html
+TMDC: A Two-Stage Modality Denoising and Complementation Framework,2026,AAAI,missing_noisy,published,A,https://ojs.aaai.org/index.php/AAAI/article/view/37212
+Recovering Coherent Affective Patterns,2026,AAAI,missing_modality,published,A,https://ojs.aaai.org/index.php/AAAI/article/view/39349
+Uncertainty-Calibrated Elastic Alignment for Multimodal Sentiment Analysis with Missing Modalities,2026,Findings ACL,missing_modality,published,A,https://aclanthology.org/2026.findings-acl.260/
+DEAR: Distributional Error-Aware Reliability for Robust Multimodal Sentiment Analysis with Missing Modalities,2026,Findings ACL,reliability_missing,published,A/Risk,https://aclanthology.org/2026.findings-acl.1517/
+When Does Quality-Aware Multimodal Fusion Matter?,2026,INTERSPEECH,decision_diagnostic,published,A/Risk,https://arxiv.org/abs/2606.26473
+MRUF: Multi-granularity Routing with Uncertainty-Aware Fusion,2026,arXiv,reliability_routing,preprint,Risk,https://arxiv.org/abs/2607.10599
+MoLAN: A Unified Modality-Aware Noise Dynamic Editing Framework,2026,Findings ACL,fine_grained_denoising,published,Risk,https://aclanthology.org/2026.findings-acl.1225/

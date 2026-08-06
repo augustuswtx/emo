@@ -1,0 +1,24 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+.idea/
+.vscode/
+
+# Datasets, pretrained models, and checkpoints
+*.pkl
+*.pt
+*.pth
+*.ckpt
+bert-base-uncased/
+save_models/
+
+# Runtime output and local transfer bundles
+*.log
+*.tar.gz
+*.zip
+
+# Personal/generated presentation artifacts
+*.pptx
+*.ppt
+*.inspect.ndjson
