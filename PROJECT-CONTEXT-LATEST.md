@@ -80,13 +80,15 @@ corr(q_a, audio_energy)=-0.024787
 | Constant | 0.8309 | 0.8300 | 0.8491 | 0.8487 | 0.5087 | 0.4504 | 0.7221 | 0.7900 | 0.9845 |
 | Reversed | 0.8338 | 0.8335 | 0.8521 | 0.8524 | 0.4985 | 0.4242 | 0.7393 | 0.7993 | 1.0266 |
 | Permuted | 0.8294 | 0.8284 | 0.8476 | 0.8471 | 0.5219 | 0.4577 | 0.7190 | 0.7940 | 0.9812 |
+| Oracle | 0.8338 | 0.8326 | 0.8537 | 0.8531 | 0.5146 | 0.4548 | 0.7164 | 0.7923 | 0.9769 |
 
 当前诚实结论：
 
 - Learned相对Constant在二分类、Acc-5、MAE、Corr和Loss上更好，但Acc-7较低。
 - Learned相对Reversed在除Corr外的主要指标上更好，Acc-7 +0.0204，MAE -0.0222。
 - Learned相对Permuted在二分类、MAE、Corr和Loss上更好，Permuted在Acc-5/7上更好。
-- 单种子证据总体支持主要回归/二分类目标，但不支持“所有指标稳定提升”。
+- Learned相对Oracle在二分类、Corr和Loss上更好；Oracle在Acc-5/7和MAE上更好。
+- 单种子证据总体支持主要回归/二分类目标，但作用性证据呈现指标权衡，不支持“所有指标稳定提升”。
 
 ## 7. 当前立即任务
 
@@ -103,28 +105,17 @@ w_v_std=0.007948, w_a_std=0.007847
 Non0 F1=0.8422、Acc-5=0.4723、Acc-7=0.3892、MAE=0.8588、Corr=0.7383、
 Loss=1.3551。这些是工程烟雾结果，不与25轮正式结果作论文结论。
 
-当前继续运行匹配的25轮Oracle正式对照：
+匹配的25轮Oracle正式对照已完成：Has0 Acc-2=0.8338、Has0 F1=0.8326、
+Non0 Acc-2=0.8537、Non0 F1=0.8531、Acc-5=0.5146、Acc-7=0.4548、
+MAE=0.7164、Corr=0.7923、Loss=0.9769。
 
-```bash
-cd /home/jovyan/projects/MFON
-
-python run_experiment.py \
-  --dataset MOSI \
-  --stage train-fusion \
-  --seed 1111 \
-  --use-budgeted-aux \
-  --use-interventional-reliability \
-  --warmup-epoch 10 \
-  --reliability-task-warmup-epoch 10 \
-  --reliability-allocation-control oracle \
-  --exp-name interventional_rel_p2_oracle \
-  2>&1 | tee mosi_interventional_rel_p2_oracle_1111.log
-```
+当前任务：先清理已完成的smoke checkpoint释放磁盘，再确认seed 1112/1113的
+单模态encoder checkpoint是否存在；随后优先复现Learned和Permuted对照。
 
 ## 8. Oracle之后的决策
 
-1. 完成Oracle后，判断作用性证据是否总体成立。
-2. 若成立，在MOSI seeds 1112/1113上优先复现Learned和最有信息量的对照，再决定是否扩展到5种子。
+1. seed 1111作用性证据呈现指标权衡，总体有利但不足以单独形成稳定结论。
+2. 在MOSI seeds 1112/1113上优先复现Learned和Permuted对照，再决定是否扩展到5种子。
 3. 然后扩展MOSEI和SIMS，完成跨数据集、鲁棒性、消融、效率和统计显著性。
 4. 小论文当前不可宣称已达到CCF-B投稿证据要求。
 

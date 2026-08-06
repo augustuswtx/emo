@@ -407,6 +407,14 @@ F1=0.8422, Acc-5=0.4723, Acc-7=0.3892, MAE=0.8588, Corr=0.7383, and
 Loss=1.3551. This completes the Oracle engineering smoke gate. These two-epoch
 metrics are not formal evidence; the matched 25-epoch Oracle run is required.
 
+The matched 25-epoch Oracle control completed and produced Has0 Acc-2=0.8338,
+Has0 F1=0.8326, Non0 Acc-2=0.8537, Non0 F1=0.8531, Acc-5=0.5146,
+Acc-7=0.4548, MAE=0.7164, Corr=0.7923, and Loss=0.9769. Relative to
+Learned, Oracle is favorable on Acc-5, Acc-7, and MAE, whereas Learned is
+favorable on both binary metric pairs, Corr, and test loss. The five-control
+seed-1111 evidence is therefore metric-dependent and requires multi-seed
+replication before a stable actionability claim.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
