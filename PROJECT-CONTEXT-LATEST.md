@@ -90,26 +90,34 @@ corr(q_a, audio_energy)=-0.024787
 
 ## 7. 当前立即任务
 
-当前尚未运行Oracle对照。先在服务器运行2轮烟雾测试：
+Oracle两轮烟雾训练已通过并保存checkpoint。第2轮真实日志为：
+
+```text
+q_v=0.934053, q_a=0.935742
+q_v_std=0.074186, q_a_std=0.073381
+w_v=w_a=w_nce_v=w_nce_a=0.1
+w_v_std=0.007948, w_a_std=0.007847
+```
+
+当前先测试Oracle烟雾checkpoint的加载和推理：
 
 ```bash
 cd /home/jovyan/projects/MFON
 
 python run_experiment.py \
   --dataset MOSI \
-  --stage train-fusion \
+  --stage test-fusion \
   --seed 1111 \
-  --epochs 2 \
   --use-budgeted-aux \
   --use-interventional-reliability \
   --warmup-epoch 10 \
   --reliability-task-warmup-epoch 10 \
   --reliability-allocation-control oracle \
   --exp-name p2_oracle_smoke \
-  2>&1 | tee mosi_p2_oracle_smoke_1111.log
+  2>&1 | tee mosi_p2_oracle_smoke_test_1111.log
 ```
 
-通过后测试checkpoint，再运行25轮`interventional_rel_p2_oracle`。
+加载通过后，再运行25轮`interventional_rel_p2_oracle`。
 
 ## 8. Oracle之后的决策
 

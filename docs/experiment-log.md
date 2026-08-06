@@ -394,6 +394,15 @@ permuted is higher on Acc-5 and Acc-7. The single-seed actionability evidence is
 therefore metric-dependent rather than uniform. The Oracle control and
 multi-seed uncertainty are required before making a stable allocation claim.
 
+## 2026-08-06 P2 Oracle-Control Smoke
+
+The two-epoch Oracle-allocation training path completed and saved its
+checkpoint. At epoch 2, mean Oracle qualities were 0.934053 (vision) and
+0.935742 (audio), with non-zero standard deviations 0.074186 and 0.073381.
+All four mean auxiliary weights were exactly 0.1; visual/audio weight standard
+deviations were 0.007948/0.007847. Reliability supervision remained identical
+to matched controls. Checkpoint load and inference are the next smoke gate.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:

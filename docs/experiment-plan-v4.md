@@ -188,6 +188,7 @@ P0 通过条件：
 | P2 | MOSI seed 1111 P1.1收敛训练 | medium | P1.1全量审计通过 | done：八项指标均优于匹配baseline；MAE 0.7171，Corr 0.7972；仍为单种子 |
 | P2 | 25轮最佳checkpoint全量审计 | low | P1.1收敛训练 | done：视觉/音频AUROC 0.999/0.945，能量混淆近零；音频长度相关0.252 |
 | P2 | 等预算作用性对照 | medium | P2正常分数路径 | constant/reversed/permuted 25轮done；learned在二分类、MAE、Corr、Loss总体更优，permuted在Acc-5/7更高；Oracle next |
+| P2 | Oracle正对照 | medium | P2对照代码 | 2轮训练和保存通过，预算严格守恒；checkpoint加载TBD，随后25轮 |
 | P1 | MOSI五种子 | medium | 单种子pilot通过 | 平均方向不一致则不扩展 |
 | P2 | MOSEI/SIMS | high | MOSI 通过 | 两数据集均失败则收窄论文 |
 | P3 | 多骨干与最近强基线 | high | 代码复现 | 无迁移性则不能声称 model-agnostic |
