@@ -144,6 +144,9 @@ class TVA_fusion(nn.Module):
         self.alw_temperature = getattr(train_cfg, 'alw_temperature', 1.0)
         self.use_budgeted_aux = getattr(train_cfg, 'use_budgeted_aux', False)
         self.budget_warmup_epoch = max(1, getattr(train_cfg, 'budget_warmup_epoch', 10))
+        self.budget_warmup_mode = getattr(train_cfg, 'budget_warmup_mode', 'scale')
+        if self.budget_warmup_mode not in {'scale', 'allocation'}:
+            raise ValueError('budget warmup mode must be scale or allocation.')
         self.budget_epsilon = getattr(train_cfg, 'budget_epsilon', 1e-8)
         self.use_interventional_reliability = getattr(
             train_cfg, 'use_interventional_reliability', False
@@ -435,6 +438,7 @@ class TVA_fusion(nn.Module):
             self.budget_epsilon,
             quality_v,
             quality_a,
+            self.budget_warmup_mode,
         )
         if reliability_v is not None and reliability_a is not None:
             reliability_loss = reliability_v['loss'] + reliability_a['loss']

@@ -55,6 +55,28 @@ class BudgetedAuxiliaryTest(unittest.TestCase):
         actual = weighted_batch_mean(losses, weights)
         self.assertTrue(torch.allclose(actual, 0.5 * losses.mean(), atol=1e-7))
 
+    def test_allocation_warmup_preserves_mean_budget(self):
+        quality = torch.tensor([0.1, 0.2, 0.8, 1.0])
+        initial = fixed_budget_weights(
+            quality, base_weight=0.5, progress=0.0, warmup_mode='allocation'
+        )
+        middle = fixed_budget_weights(
+            quality, base_weight=0.5, progress=0.4, warmup_mode='allocation'
+        )
+        final = fixed_budget_weights(
+            quality, base_weight=0.5, progress=1.0, warmup_mode='allocation'
+        )
+        self.assertTrue(torch.allclose(initial, torch.full_like(initial, 0.5)))
+        self.assertTrue(torch.allclose(middle.mean(), torch.tensor(0.5)))
+        self.assertTrue(torch.allclose(final.mean(), torch.tensor(0.5)))
+        self.assertLess(middle.std(unbiased=False), final.std(unbiased=False))
+
+    def test_budget_warmup_mode_is_validated(self):
+        with self.assertRaises(ValueError):
+            fixed_budget_weights(
+                torch.ones(3), base_weight=0.5, warmup_mode='unsupported'
+            )
+
     def test_quality_permutation_changes_nonuniform_allocation(self):
         losses = torch.tensor([0.1, 0.2, 1.0, 2.0])
         quality = torch.tensor([1.0, 0.8, 0.2, 0.1])

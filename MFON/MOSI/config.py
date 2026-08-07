@@ -93,6 +93,7 @@ class MOSI:
             alw_temperature = 1.0
             use_budgeted_aux = False
             budget_warmup_epoch = 10
+            budget_warmup_mode = 'scale'
             budget_epsilon = 1e-8
             use_interventional_reliability = False
             reliability_hidden_dim = 64

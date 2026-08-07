@@ -167,3 +167,13 @@ sentiment task inputs clean, set:
 The default is `1`, which preserves the original progressive task-corruption
 behavior. Values between `0` and `1` scale the final corruption strength
 without disabling reliability-head supervision.
+
+The original budget warmup scales the mean auxiliary budget from zero to its
+configured value. To keep the mean budget equal to the MFON baseline from the
+first epoch and warm only the sample-to-sample redistribution, use:
+
+```bash
+--budget-warmup-mode allocation
+```
+
+The default `scale` mode preserves all earlier experiment behavior.

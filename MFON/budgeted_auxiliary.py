@@ -53,7 +53,13 @@ def sample_quality_score(embed, target_embed=None, pred=None, q_type='align', te
     return quality.clamp(0.0, 1.0)
 
 
-def fixed_budget_weights(reliability, base_weight, progress=1.0, eps=1e-8):
+def fixed_budget_weights(
+    reliability,
+    base_weight,
+    progress=1.0,
+    eps=1e-8,
+    warmup_mode='scale',
+):
     """Redistribute a fixed mean weight across samples using reliability."""
     if reliability.ndim != 1:
         raise ValueError('reliability must be a one-dimensional batch vector.')
@@ -63,10 +69,16 @@ def fixed_budget_weights(reliability, base_weight, progress=1.0, eps=1e-8):
         raise ValueError('base_weight must be non-negative.')
     if not 0.0 <= float(progress) <= 1.0:
         raise ValueError('progress must be in [0, 1].')
+    if warmup_mode not in {'scale', 'allocation'}:
+        raise ValueError('warmup_mode must be scale or allocation.')
 
     scores = reliability.detach().clamp_min(0.0) + eps
-    budget = torch.as_tensor(base_weight * float(progress), dtype=scores.dtype, device=scores.device)
-    return budget * scores.numel() * scores / scores.sum()
+    normalized = scores.numel() * scores / scores.sum()
+    budget = torch.as_tensor(base_weight, dtype=scores.dtype, device=scores.device)
+    if warmup_mode == 'scale':
+        return budget * float(progress) * normalized
+    allocation = (1.0 - float(progress)) + float(progress) * normalized
+    return budget * allocation
 
 
 def apply_quality_control(quality, mode='learned', oracle_quality=None):
@@ -120,6 +132,7 @@ def build_budgeted_auxiliary(
     eps=1e-8,
     quality_v=None,
     quality_a=None,
+    budget_warmup_mode='scale',
 ):
     """Build the complete fixed-budget auxiliary objective and audit values."""
     q_v = (
@@ -136,10 +149,14 @@ def build_budgeted_auxiliary(
         raise ValueError('quality overrides must be one-dimensional.')
     if q_v.size(0) != x_v_embed.size(0) or q_a.size(0) != x_a_embed.size(0):
         raise ValueError('quality overrides must match the batch size.')
-    w_v = fixed_budget_weights(q_v, delta_va, progress, eps)
-    w_a = fixed_budget_weights(q_a, delta_va, progress, eps)
-    w_nce_v = fixed_budget_weights(q_v, delta_nce, progress, eps)
-    w_nce_a = fixed_budget_weights(q_a, delta_nce, progress, eps)
+    w_v = fixed_budget_weights(q_v, delta_va, progress, eps, budget_warmup_mode)
+    w_a = fixed_budget_weights(q_a, delta_va, progress, eps, budget_warmup_mode)
+    w_nce_v = fixed_budget_weights(
+        q_v, delta_nce, progress, eps, budget_warmup_mode
+    )
+    w_nce_a = fixed_budget_weights(
+        q_a, delta_nce, progress, eps, budget_warmup_mode
+    )
     weighted_v = weighted_batch_mean(loss_v_each, w_v)
     weighted_a = weighted_batch_mean(loss_a_each, w_a)
     weighted_nce = (

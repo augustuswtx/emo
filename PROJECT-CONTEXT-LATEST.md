@@ -115,6 +115,17 @@ Loss=1.0607。Constant相对Learned在MAE、Corr、Loss和Acc-5/7上更好，但
 但情感主任务始终使用干净音视频。本地27项测试全部通过。下一实验是
 seed 1112 Constant + clean task path，用于严格隔离主任务污染效应。
 
+P3 Constant + clean task path正式结果为：Has0 Acc-2=0.8134、Has0 F1=0.8139、
+Non0 Acc-2=0.8216、Non0 F1=0.8227、Acc-5=0.4752、Acc-7=0.4169、
+MAE=0.7708、Corr=0.7869、Loss=1.0607。该结果与P2 Constant几乎一致，
+说明主任务污染不是主要原因。
+
+旧“固定预算”warmup在前10轮将辅助权重均值从0.05递增到0.5，而
+repaired baseline从第1轮就使用0.5，因此并非真正的等预算对照。已新增
+`--budget-warmup-mode allocation`：总预算始终为0.5，只将样本间分配从均匀逐步过渡到
+可靠性感知。历史默认 `scale` 保持不变；本地29项测试通过。这是训练损失
+分配路线的最后一轮修复。
+
 Oracle两轮烟雾训练、checkpoint保存、重新加载和完整测试均已通过。第2轮真实日志为：
 
 ```text

@@ -80,6 +80,15 @@ def parse_args():
     )
     parser.add_argument('--q-type', choices=['align', 'norm', 'conf'], default='align')
     parser.add_argument('--warmup-epoch', type=int, default=10)
+    parser.add_argument(
+        '--budget-warmup-mode',
+        choices=['scale', 'allocation'],
+        default='scale',
+        help=(
+            'scale reproduces the original growing mean budget; allocation '
+            'keeps the mean budget fixed and warms only sample redistribution.'
+        ),
+    )
     parser.add_argument('--temperature', type=float, default=1.0)
     parser.add_argument(
         '--use-interventional-reliability',
@@ -134,6 +143,7 @@ def main():
     train_cfg.alw_q_type = args.q_type
     train_cfg.alw_warmup_epoch = args.warmup_epoch
     train_cfg.budget_warmup_epoch = args.warmup_epoch
+    train_cfg.budget_warmup_mode = args.budget_warmup_mode
     train_cfg.alw_temperature = args.temperature
     train_cfg.use_interventional_reliability = args.use_interventional_reliability
     train_cfg.reliability_hidden_dim = args.reliability_hidden_dim
@@ -190,6 +200,7 @@ def main():
         f'epochs={train_cfg.epoch} | '
         f'use_alw={args.use_alw} | use_budgeted_aux={args.use_budgeted_aux} | '
         f'q_type={args.q_type} | warmup={args.warmup_epoch} | '
+        f'budget_warmup_mode={args.budget_warmup_mode} | '
         f'interventional_reliability={args.use_interventional_reliability} | '
         f'task_corrupt_scale={args.reliability_task_corrupt_scale} | '
         f'allocation_control={args.reliability_allocation_control} | '

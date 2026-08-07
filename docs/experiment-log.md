@@ -454,6 +454,23 @@ one, preserving every completed experiment. Twenty-seven local unit tests pass.
 The next diagnostic is seed-1112 Constant with scale zero; Permuted and seed
 1113 expansion remain paused until this gate is resolved.
 
+The full seed-1112 P3 Constant clean-task diagnostic produced Has0 Acc-2=
+0.8134, Has0 F1=0.8139, Non0 Acc-2=0.8216, Non0 F1=0.8227, Acc-5=0.4752,
+Acc-7=0.4169, MAE=0.7708, Corr=0.7869, and Loss=1.0607. It is nearly
+identical to P2 Constant: task-path corruption is not the primary failure
+source. The negligible prediction response in the corruption audits is also
+consistent with strong text dominance.
+
+Code inspection identified a remaining mismatch: the legacy budget warmup
+scales the mean auxiliary budget from 0.05 at epoch 1 to 0.5 at epoch 10,
+whereas the repaired baseline uses 0.5 from the first epoch. A new
+`--budget-warmup-mode allocation` keeps each mean budget fixed at its baseline
+value while interpolating only the sample allocation from uniform to
+reliability-proportional. The historical `scale` behavior remains the default.
+Twenty-nine local tests pass. This P4 equal-budget schedule is the final planned
+repair of the training-loss allocation branch; failure on seed 1112 triggers a
+pivot away from that branch rather than further hyperparameter searching.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
