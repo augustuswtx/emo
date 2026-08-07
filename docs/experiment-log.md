@@ -471,6 +471,16 @@ Twenty-nine local tests pass. This P4 equal-budget schedule is the final planned
 repair of the training-loss allocation branch; failure on seed 1112 triggers a
 pivot away from that branch rather than further hyperparameter searching.
 
+The full seed-1112 P4 Constant true-budget run recovered baseline-level
+performance: Has0 Acc-2=0.8265, Has0 F1=0.8260, Non0 Acc-2=0.8476, Non0
+F1=0.8476, Acc-5=0.4985, Acc-7=0.4359, MAE=0.7295, Corr=0.7974, and
+Loss=0.9880. Relative to the repaired baseline, Has0 Acc-2 and Acc-5 match,
+both Non0 metrics and Corr are slightly higher, MAE is 0.0026 worse, and Acc-7
+is 0.0131 lower. The earlier seed-1112 collapse is therefore primarily
+attributable to scaling down the mean auxiliary budget during warmup. The next
+and decisive experiment is P4 Learned under the same true fixed budget and
+clean task path.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:

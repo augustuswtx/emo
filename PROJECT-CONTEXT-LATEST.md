@@ -126,6 +126,13 @@ repaired baseline从第1轮就使用0.5，因此并非真正的等预算对照�
 可靠性感知。历史默认 `scale` 保持不变；本地29项测试通过。这是训练损失
 分配路线的最后一轮修复。
 
+P4 Constant true-budget seed 1112已完成：Has0 Acc-2=0.8265、Has0 F1=0.8260、
+Non0 Acc-2=0.8476、Non0 F1=0.8476、Acc-5=0.4985、Acc-7=0.4359、
+MAE=0.7295、Corr=0.7974、Loss=0.9880。相对repaired baseline，Has0 Acc-2和Acc-5
+完全恢复，Non0两项和Corr略高，MAE仅差0.0026，Acc-7低0.0131。
+这证明旧预算warmup是seed 1112大幅下降的主要原因。当前启动同设置的
+P4 Learned seed 1112，这才是对可靠性样本分配核心主张的公平测试。
+
 Oracle两轮烟雾训练、checkpoint保存、重新加载和完整测试均已通过。第2轮真实日志为：
 
 ```text
