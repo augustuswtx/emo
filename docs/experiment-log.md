@@ -497,6 +497,16 @@ better on both binary metric pairs, Acc-5, MAE, and Corr, while Acc-7 is 0.0088
 lower. This is the first fair seed-1112 evidence supporting reliability-aware
 allocation; it does not yet establish a multi-seed or cross-dataset claim.
 
+The frozen P4 Learned configuration was then replicated on seed 1113. It
+produced Has0 Acc-2=0.8324, Has0 F1=0.8312, Non0 Acc-2=0.8521, Non0
+F1=0.8516, Acc-5=0.4942, Acc-7=0.4402, MAE=0.7161, Corr=0.7934, and
+Loss=0.9579. Relative to the repaired seed-1113 baseline, the deltas are
++0.0044 Has0 Acc-2, +0.0043 Has0 F1, +0.0030 Non0 Acc-2, +0.0029 Non0
+F1, -0.0233 Acc-5, -0.0234 Acc-7, -0.0065 MAE, and +0.0004 Corr. Thus,
+the binary/regression trend replicated, but fine-grained classification
+degraded. A matched seed-1113 P4 Constant run is required before attributing
+these changes to learned reliability allocation.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
@@ -741,7 +751,7 @@ not collected in this local handoff
 ## Current Experiment Queue
 
 1. Freeze P4 settings; do not tune further against the MOSI test split.
-2. Run P4 Learned on MOSI seed 1113. If it remains competitive, run the matched P4 Constant control.
+2. P4 Learned seed 1113 is complete; run the matched P4 Constant control.
 3. Complete the final frozen P4 replication on seed 1111 and compute three-seed mean/std.
 4. Use validation results for any later candidate selection; reserve test results for the frozen method.
 5. Extend the frozen method and matched baselines to MOSEI and SIMS, then add controlled-degradation robustness, ablation, efficiency, and significance evidence.

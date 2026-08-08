@@ -108,6 +108,13 @@ Acc-5、MAE和Corr上更好，Acc-7低0.0088；不能宣称所有指标全面提
 下一步只在seed 1113运行冻结后的P4 Learned；若继续保持baseline水平或更好，再补匹配的
 P4 Constant并最终复核seed 1111。不要继续调整P4超参数，也不要把test结果用于继续调参。
 
+P4 Learned seed 1113也已完成：Has0 Acc-2=0.8324、Has0 F1=0.8312、
+Non0 Acc-2=0.8521、Non0 F1=0.8516、Acc-5=0.4942、Acc-7=0.4402、
+MAE=0.7161、Corr=0.7934、Loss=0.9579。相对seed 1113 repaired baseline，
+两组二分类分别提高约0.0030--0.0044，MAE降低0.0065，Corr提高0.0004；
+但Acc-5和Acc-7分别下降0.0233和0.0234。主要回归/二分类趋势得到复现，
+细粒度分类存在稳定性代价。下一实验是匹配的seed 1113 P4 Constant。
+
 ### 历史诊断记录
 
 MOSI seed 1112的Learned正式实验已完成，结果未复现seed 1111的提升：
@@ -174,7 +181,7 @@ MAE=0.7164、Corr=0.7923、Loss=0.9769。
 ## 8. Oracle之后的决策
 
 1. seed 1111作用性证据呈现指标权衡，总体有利但不足以单独形成稳定结论。
-2. P4 Learned已在seed 1112上通过同预算Constant对照；下一步验证seed 1113并补匹配Constant。
+2. P4 Learned已在seeds 1112/1113完成；下一步补seed 1113同预算Constant，验证动态分配作用。
 3. 然后扩展MOSEI和SIMS，完成跨数据集、鲁棒性、消融、效率和统计显著性。
 4. 小论文当前不可宣称已达到CCF-B投稿证据要求。
 
