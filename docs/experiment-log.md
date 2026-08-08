@@ -481,6 +481,22 @@ attributable to scaling down the mean auxiliary budget during warmup. The next
 and decisive experiment is P4 Learned under the same true fixed budget and
 clean task path.
 
+The full seed-1112 P4 Learned true-budget run then produced Has0 Acc-2=0.8309,
+Has0 F1=0.8301, Non0 Acc-2=0.8506, Non0 F1=0.8505, Acc-5=0.5073,
+Acc-7=0.4402, MAE=0.7187, Corr=0.7992, and Loss=0.9724. Its epoch-25
+allocation means remained exactly 0.5 for vision KL, audio KL, and both
+InfoNCE components; non-zero allocation standard deviations (vision 0.030679,
+audio 0.063716) confirm sample-specific redistribution. The task corruption
+progress remained zero.
+
+Under the matched fixed-budget control, Learned improves all nine reported
+metrics over P4 Constant: +0.0044 Has0 Acc-2, +0.0041 Has0 F1, +0.0030 Non0
+Acc-2, +0.0029 Non0 F1, +0.0088 Acc-5, +0.0043 Acc-7, -0.0108 MAE,
++0.0018 Corr, and -0.0156 Loss. Relative to the repaired baseline, Learned is
+better on both binary metric pairs, Acc-5, MAE, and Corr, while Acc-7 is 0.0088
+lower. This is the first fair seed-1112 evidence supporting reliability-aware
+allocation; it does not yet establish a multi-seed or cross-dataset claim.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
@@ -724,8 +740,8 @@ not collected in this local handoff
 
 ## Current Experiment Queue
 
-1. Use `Q-DAMFON-light = ALW norm + CSS min05` as the current candidate for validation; keep DPG as an optional, seed-sensitive enhancement.
-2. Run the repaired baseline and Q-DAMFON-light on seeds 1114 and 1115, after checking that the corresponding unimodal encoder checkpoints exist.
-3. Recompute five-seed mean/std and, if appropriate, paired significance tests before choosing final main claims.
-4. Run the selected candidate and baseline on SIMS and MOSEI under the same repaired position-embedding implementation.
-5. Add noise/quality-degradation robustness, module ablation, and efficiency results before drafting the final experimental claims.
+1. Freeze P4 settings; do not tune further against the MOSI test split.
+2. Run P4 Learned on MOSI seed 1113. If it remains competitive, run the matched P4 Constant control.
+3. Complete the final frozen P4 replication on seed 1111 and compute three-seed mean/std.
+4. Use validation results for any later candidate selection; reserve test results for the frozen method.
+5. Extend the frozen method and matched baselines to MOSEI and SIMS, then add controlled-degradation robustness, ablation, efficiency, and significance evidence.
