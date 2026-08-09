@@ -516,6 +516,15 @@ unweighted two-seed mean favors Learned on every reported metric except
 Acc-7. The remaining gate is a final frozen P4 Learned/Constant comparison on
 seed 1111 before computing the formal three-seed summary.
 
+The final frozen P4 Learned run on seed 1111 produced Has0 Acc-2=0.8265,
+Has0 F1=0.8258, Non0 Acc-2=0.8460, Non0 F1=0.8459, Acc-5=0.4956,
+Acc-7=0.4286, MAE=0.7290, Corr=0.7929, and Loss=0.9821. Relative to the
+repaired seed-1111 baseline, Has0 Acc-2 is unchanged and Has0 F1 is 0.0005
+higher, while Non0 Acc-2/F1, Acc-5/7, MAE, and Corr are slightly worse. The
+baseline improvement therefore did not replicate uniformly across all three
+seeds. The matched seed-1111 P4 Constant control remains necessary to evaluate
+the allocation claim independently of baseline variance.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
@@ -761,6 +770,6 @@ not collected in this local handoff
 
 1. Freeze P4 settings; do not tune further against the MOSI test split.
 2. P4 Learned and Constant are complete on seeds 1112/1113.
-3. Complete the final frozen P4 Learned and Constant runs on seed 1111, then compute three-seed mean/std.
+3. P4 Learned is complete on all three seeds; run only seed-1111 P4 Constant, then compute three-seed mean/std.
 4. Use validation results for any later candidate selection; reserve test results for the frozen method.
 5. Extend the frozen method and matched baselines to MOSEI and SIMS, then add controlled-degradation robustness, ablation, efficiency, and significance evidence.

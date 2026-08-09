@@ -122,6 +122,13 @@ MAE、Corr和Loss，但Acc-5/7分别低0.0058/0.0059。综合seeds 1112/1113，
 Learned的两种子平均值除Acc-7外均优于Constant。下一步运行冻结P4 Learned seed 1111，
 随后补匹配Constant，形成最终三种子公平比较。
 
+冻结P4 Learned seed 1111结果为：Has0 Acc-2=0.8265、Has0 F1=0.8258、
+Non0 Acc-2=0.8460、Non0 F1=0.8459、Acc-5=0.4956、Acc-7=0.4286、
+MAE=0.7290、Corr=0.7929、Loss=0.9821。相对seed 1111 repaired baseline，
+Has0 Acc持平、Has0 F1提高0.0005，其余主要指标略低（MAE高0.0011、Corr低0.0030、
+Acc-7低0.0102）。该结果表明对baseline的提升尚未跨三种子稳定复现。
+必须完成seed 1111 P4 Constant后，才能判断动态分配相对等预算平均分配的三种子作用。
+
 ### 历史诊断记录
 
 MOSI seed 1112的Learned正式实验已完成，结果未复现seed 1111的提升：
@@ -188,7 +195,7 @@ MAE=0.7164、Corr=0.7923、Loss=0.9769。
 ## 8. Oracle之后的决策
 
 1. seed 1111作用性证据呈现指标权衡，总体有利但不足以单独形成稳定结论。
-2. P4 Learned与Constant已在seeds 1112/1113完成；下一步完成seed 1111最终公平复核。
+2. P4 Learned三种子已完成；下一步只补seed 1111 P4 Constant并计算最终统计。
 3. 然后扩展MOSEI和SIMS，完成跨数据集、鲁棒性、消融、效率和统计显著性。
 4. 小论文当前不可宣称已达到CCF-B投稿证据要求。
 
