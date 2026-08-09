@@ -115,6 +115,13 @@ MAE=0.7161、Corr=0.7934、Loss=0.9579。相对seed 1113 repaired baseline，
 但Acc-5和Acc-7分别下降0.0233和0.0234。主要回归/二分类趋势得到复现，
 细粒度分类存在稳定性代价。下一实验是匹配的seed 1113 P4 Constant。
 
+匹配的P4 Constant seed 1113结果为：Has0 Acc-2=0.8309、Has0 F1=0.8297、
+Non0 Acc-2=0.8506、Non0 F1=0.8500、Acc-5=0.5000、Acc-7=0.4461、
+MAE=0.7183、Corr=0.7924、Loss=0.9626。Learned相对Constant改善两组二分类、
+MAE、Corr和Loss，但Acc-5/7分别低0.0058/0.0059。综合seeds 1112/1113，
+Learned的两种子平均值除Acc-7外均优于Constant。下一步运行冻结P4 Learned seed 1111，
+随后补匹配Constant，形成最终三种子公平比较。
+
 ### 历史诊断记录
 
 MOSI seed 1112的Learned正式实验已完成，结果未复现seed 1111的提升：
@@ -181,7 +188,7 @@ MAE=0.7164、Corr=0.7923、Loss=0.9769。
 ## 8. Oracle之后的决策
 
 1. seed 1111作用性证据呈现指标权衡，总体有利但不足以单独形成稳定结论。
-2. P4 Learned已在seeds 1112/1113完成；下一步补seed 1113同预算Constant，验证动态分配作用。
+2. P4 Learned与Constant已在seeds 1112/1113完成；下一步完成seed 1111最终公平复核。
 3. 然后扩展MOSEI和SIMS，完成跨数据集、鲁棒性、消融、效率和统计显著性。
 4. 小论文当前不可宣称已达到CCF-B投稿证据要求。
 

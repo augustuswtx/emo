@@ -507,6 +507,15 @@ the binary/regression trend replicated, but fine-grained classification
 degraded. A matched seed-1113 P4 Constant run is required before attributing
 these changes to learned reliability allocation.
 
+The matched seed-1113 P4 Constant control produced Has0 Acc-2=0.8309,
+Has0 F1=0.8297, Non0 Acc-2=0.8506, Non0 F1=0.8500, Acc-5=0.5000,
+Acc-7=0.4461, MAE=0.7183, Corr=0.7924, and Loss=0.9626. Learned improves
+both binary metric pairs, MAE, Corr, and Loss over Constant, while Acc-5 and
+Acc-7 are lower by 0.0058 and 0.0059. Across seeds 1112 and 1113, the
+unweighted two-seed mean favors Learned on every reported metric except
+Acc-7. The remaining gate is a final frozen P4 Learned/Constant comparison on
+seed 1111 before computing the formal three-seed summary.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
@@ -751,7 +760,7 @@ not collected in this local handoff
 ## Current Experiment Queue
 
 1. Freeze P4 settings; do not tune further against the MOSI test split.
-2. P4 Learned seed 1113 is complete; run the matched P4 Constant control.
-3. Complete the final frozen P4 replication on seed 1111 and compute three-seed mean/std.
+2. P4 Learned and Constant are complete on seeds 1112/1113.
+3. Complete the final frozen P4 Learned and Constant runs on seed 1111, then compute three-seed mean/std.
 4. Use validation results for any later candidate selection; reserve test results for the frozen method.
 5. Extend the frozen method and matched baselines to MOSEI and SIMS, then add controlled-degradation robustness, ablation, efficiency, and significance evidence.
