@@ -73,6 +73,19 @@ corr(q_a, audio_energy)=-0.024787
 
 结论：视觉/音频可靠性均能稳定识别人工退化；能量捷径基本消失，但音频长度相关0.252需要跨数据集复核。
 
+最终P4 Learned seed 1113完整686样本审计也已通过：
+
+```text
+vision: Spearman=-0.958149, AUROC=0.989878,
+        highest_below_clean=0.998542
+audio:  Spearman=-0.828746, AUROC=0.949643,
+        highest_below_clean=0.997085
+```
+
+seed 1113混淆相关中，视觉能量为0.153522、音频长度为0.243383，后者仍需跨数据集复核。
+人工严重损坏音频或视觉时，任务预测变化很小，说明MOSI上的融合模型高度依赖文本；
+当前证据支持“可靠性感知的训练监督分配”，不支持“推理时动态抗噪融合”的夸大主张。
+
 ## 6. MOSI seed 1111正式结果
 
 | 预算分配 | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE↓ | Corr↑ | Loss↓ |

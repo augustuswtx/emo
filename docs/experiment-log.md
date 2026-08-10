@@ -548,6 +548,23 @@ and learned allocation versus uniform allocation; they do not support universal
 improvement over MFON. Three seeds alone do not establish statistical
 significance.
 
+The final seed-1113 P4 Learned checkpoint passed the full 686-sample quality
+audit. Vision achieved Spearman(severity,q)=-0.958149, clean/corrupt
+AUROC=0.989878, and 0.998542 of highest-severity samples below their clean
+scores. Audio achieved Spearman=-0.828746, AUROC=0.949643, and 0.997085 below
+clean. Clean-score confounds were vision length -0.087036, vision energy
+0.153522, audio length 0.243383, audio energy 0.002750, vision absolute label
+-0.060530, and audio absolute label -0.002204. The recurring audio-length
+association remains a cross-dataset risk.
+
+Task predictions changed negligibly under severe visual or acoustic Gaussian
+corruption. This is evidence of strong text dominance in the MOSI model, not
+evidence that reliability scores are ineffective. The current method uses
+reliability for training-time auxiliary allocation, so the defensible claim is
+about reliability estimation and supervision allocation; it must not be
+presented as inference-time noise-adaptive fusion without an additional gating
+mechanism and corresponding evidence.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
