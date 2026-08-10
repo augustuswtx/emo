@@ -525,6 +525,29 @@ baseline improvement therefore did not replicate uniformly across all three
 seeds. The matched seed-1111 P4 Constant control remains necessary to evaluate
 the allocation claim independently of baseline variance.
 
+The matched seed-1111 P4 Constant control produced Has0 Acc-2=0.8280,
+Has0 F1=0.8273, Non0 Acc-2=0.8476, Non0 F1=0.8475, Acc-5=0.4985,
+Acc-7=0.4315, MAE=0.7310, Corr=0.7913, and Loss=0.9921. This completes
+the three-seed matched P4 comparison.
+
+Using sample standard deviation across seeds 1111, 1112, and 1113:
+
+| Method | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Repaired MFON | 0.8270±0.0009 | 0.8260±0.0008 | 0.8476±0.0016 | 0.8472±0.0014 | 0.5063±0.0099 | 0.4505±0.0125 | 0.7258±0.0028 | 0.7943±0.0015 | TBD |
+| P4 Constant | 0.8285±0.0022 | 0.8277±0.0019 | 0.8486±0.0017 | 0.8484±0.0014 | 0.4990±0.0009 | 0.4378±0.0075 | 0.7263±0.0069 | 0.7937±0.0033 | 0.9809±0.0160 |
+| P4 Learned | 0.8299±0.0031 | 0.8290±0.0029 | 0.8496±0.0032 | 0.8493±0.0030 | 0.4990±0.0072 | 0.4363±0.0067 | 0.7213±0.0068 | 0.7952±0.0035 | 0.9708±0.0122 |
+
+Learned minus Constant mean deltas are +0.0015 Has0 Acc-2, +0.0014 Has0
+F1, +0.0010 Non0 Acc-2/F1, approximately zero Acc-5, -0.0015 Acc-7,
+-0.0050 MAE, +0.0015 Corr, and -0.0101 Loss. Learned minus repaired MFON
+mean deltas are +0.0029 Has0 Acc-2, +0.0030 Has0 F1, +0.0020 Non0 Acc-2,
++0.0021 Non0 F1, -0.0073 Acc-5, -0.0141 Acc-7, -0.0045 MAE, and +0.0008
+Corr. These results support a bounded claim about binary/regression performance
+and learned allocation versus uniform allocation; they do not support universal
+improvement over MFON. Three seeds alone do not establish statistical
+significance.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:
@@ -770,6 +793,6 @@ not collected in this local handoff
 
 1. Freeze P4 settings; do not tune further against the MOSI test split.
 2. P4 Learned and Constant are complete on seeds 1112/1113.
-3. P4 Learned is complete on all three seeds; run only seed-1111 P4 Constant, then compute three-seed mean/std.
+3. The MOSI three-seed matched comparison is complete; freeze it and stop tuning on the MOSI test split.
 4. Use validation results for any later candidate selection; reserve test results for the frozen method.
 5. Extend the frozen method and matched baselines to MOSEI and SIMS, then add controlled-degradation robustness, ablation, efficiency, and significance evidence.
