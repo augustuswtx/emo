@@ -576,6 +576,23 @@ sample mean±standard deviation is -0.962946±0.004189 vision Spearman,
 0.241182±0.012280, confirming a repeatable confounding risk that must be
 rechecked on MOSEI and SIMS.
 
+## 2026-08-10 MOSEI P5 Port
+
+The frozen P4 implementation was ported from MOSI to MOSEI without changing
+MOSEI's original feature dimensions, learning rates, or base auxiliary weights.
+The port adds the interventional reliability heads, clean task path, fixed-budget
+allocation warmup, allocation controls, optimizer parameters, and reliability
+logging. Four source-level cross-dataset consistency tests and Python syntax
+compilation passed locally. After installation on the GPU server, all 33 tests
+passed in 4.966 seconds and all changed files compiled successfully.
+
+Server preflight found the 13GB MOSEI dataset but no unimodal encoders for seeds
+1111--1113. Seventeen obsolete MOSI diagnostic checkpoints were removed while
+retaining repaired baseline, P4 Constant, and P4 Learned checkpoints for all
+three seeds. Available disk space increased from 1.2GB to 12GB. The next action
+is seed-1111 MOSEI audio and vision encoder training, followed by a two-epoch P4
+Learned fusion smoke test; no 25-epoch MOSEI fusion run is authorized yet.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:

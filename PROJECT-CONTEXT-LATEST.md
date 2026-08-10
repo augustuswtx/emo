@@ -128,6 +128,11 @@ SHA256 9cc49c6978290e5442ac55b460c74752c2ac3fceebeb06c0232776dd330d8994
 安装和两轮smoke步骤见 `docs/SERVER-P5-MOSEI-INSTRUCTIONS.md`。在上传前先确认
 `data/MOSEI/unaligned_50.pkl`、seed 1111单模态encoder和磁盘空间；不得直接开25轮训练。
 
+服务器预检确认MOSEI数据存在（13GB），但seeds 1111--1113均无单模态encoder。清理17个
+旧MOSI诊断checkpoint后，九个最终baseline/P4 checkpoint完整保留，可用空间从1.2GB恢复到
+12GB。P5包已安装；服务器33项测试全部通过，关键文件语法编译通过，MOSEI命令行限制已解除。
+下一步先独立训练MOSEI seed 1111 audio encoder，再训练vision encoder，最后才运行两轮融合smoke。
+
 P4 Learned true-budget seed 1112公平测试已经完成：
 
 | Method, seed 1112 | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE↓ | Corr↑ | Loss↓ |
