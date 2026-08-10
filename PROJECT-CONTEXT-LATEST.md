@@ -1,15 +1,16 @@
 # MFON多模态情感分析项目上下文
 
-> 最后更新：2026-08-08
+> 最后更新：2026-08-10
 >
 > 本文件是新Codex对话的首要入口。不要从零开始，不要把未完成实验写成已证明结论。
+> 当前MOSEI服务器任务请优先读取根目录 `MOSEI-HANDOFF-LATEST.md`。
 
 ## 1. 项目位置
 
 - 本地工作区：`/Users/augustus/projects/论文`
 - 本地代码：`/Users/augustus/projects/论文/MFON`
 - 服务器代码：`/home/jovyan/projects/MFON`
-- 当前数据集：CMU-MOSI
+- 已冻结数据集：CMU-MOSI；当前跨数据集阶段：CMU-MOSEI
 - 基础模型：MFON（COLING 2025）
 - 当前方法暂称：审计驱动的干预式可靠性预算学习
 - 旧名`Q-DAMFON`已停用；不把MFON基础结构宣称为原创。

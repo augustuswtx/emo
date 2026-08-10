@@ -1,0 +1,153 @@
+# MOSEI实验交接（2026-08-10）
+
+> 新Codex对话请先读本文件，再读 `PROJECT-CONTEXT-LATEST.md` 和
+> `docs/experiment-log.md`。不要从零开始，不要重复启动正在运行的任务。
+
+## 1. 项目位置
+
+- GitHub：`https://github.com/augustuswtx/emo`
+- 本地工作区：`/Users/augustus/projects/论文`
+- 服务器项目：`/home/jovyan/projects/MFON`
+- 当前跨数据集：CMU-MOSEI
+- 数据：`/home/jovyan/projects/MFON/data/MOSEI/unaligned_50.pkl`（13GB）
+- 基础模型：MFON（COLING 2025）
+- 冻结候选：P4干预式可靠性学习 + 固定预算逐样本辅助监督分配
+
+## 2. MOSI阶段已完成
+
+MOSI不再根据test结果调参。三种子均值±样本标准差：
+
+| Method | Has0 Acc-2 | Non0 Acc-2 | Acc-5 | Acc-7 | MAE↓ | Corr↑ |
+|---|---:|---:|---:|---:|---:|---:|
+| Repaired MFON | 0.8270±0.0009 | 0.8476±0.0016 | 0.5063±0.0099 | 0.4505±0.0125 | 0.7258±0.0028 | 0.7943±0.0015 |
+| P4 Constant | 0.8285±0.0022 | 0.8486±0.0017 | 0.4990±0.0009 | 0.4378±0.0075 | 0.7263±0.0069 | 0.7937±0.0033 |
+| P4 Learned | 0.8299±0.0031 | 0.8496±0.0032 | 0.4990±0.0072 | 0.4363±0.0067 | 0.7213±0.0068 | 0.7952±0.0035 |
+
+诚实结论：Learned相对Constant改善二分类、MAE、Corr和Loss，Acc-5几乎相同，
+Acc-7低0.0015；相对MFON改善二分类/MAE/Corr，但Acc-5/7下降。不能宣称全面提升。
+
+最终P4三种子可靠性审计：
+
+```text
+Vision Spearman=-0.962946±0.004189, AUROC=0.995197±0.004719
+Audio  Spearman=-0.819850±0.007717, AUROC=0.941968±0.009641
+Audio-length confound=0.241182±0.012280
+```
+
+MOSI任务预测对音视频人工噪声变化很小，说明文本主导。当前只主张训练时辅助监督分配，
+不主张已经实现推理时抗噪融合。
+
+## 3. MOSEI代码和验证
+
+P4已完整移植到MOSEI：可靠性头、ordered corruption、干净主任务通路、固定预算
+allocation warmup、Learned/Constant等控制、优化器参数和日志统计。
+
+- 代码提交：`5975209`
+- 服务器验证记录：`28955a7`
+- 服务器包：`mfon_mosei_p4_port_20260810.tar.gz`
+- SHA256：`9cc49c6978290e5442ac55b460c74752c2ac3fceebeb06c0232776dd330d8994`
+- 服务器33项测试通过（4.966秒）
+- `py_compile`通过
+- `run_experiment.py`已允许MOSI和MOSEI使用干预可靠性；SIMS仍未移植
+
+## 4. 磁盘和保留证据
+
+清理17个旧MOSI诊断checkpoint后：
+
+```text
+50GB总空间，39GB已用，12GB可用，77%占用
+MOSI/save_models共5.8GB
+```
+
+每个MOSI种子1111/1112/1113仅保留：
+
+- `baseline_pos_fixed`
+- `p4_constant_true_budget`
+- `p4_learned_true_budget`
+
+不要删除MOSEI数据、BERT、MOSI单模态encoder或上述九个checkpoint。
+
+## 5. 当前正在运行的任务
+
+MOSEI seed 1111 audio encoder已用`nohup`启动。用户报告第一轮耗时约53分钟，
+25轮估计约22小时。该任务在本交接时**尚未确认完成**。
+
+启动时使用的命令：
+
+```bash
+cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \
+python run_experiment.py --dataset MOSEI --stage train-audio --seed 1111 \
+  > mosei_audio_encoder_1111.log 2>&1 & echo $!
+```
+
+新对话第一步只能检查，不得直接重启：
+
+```bash
+cd /home/jovyan/projects/MFON
+ps -ef | grep "run_experiment.py" | grep "MOSEI" | grep "train-audio" | grep -v grep
+grep -a -o "Epoch:[0-9]*" mosei_audio_encoder_1111.log | tail -n 1
+tr '\r' '\n' < mosei_audio_encoder_1111.log | tail -n 15
+```
+
+完成后确认：
+
+```bash
+ls -lh \
+  MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_audio_encoder.pt \
+  MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_audio_decoder.pt
+```
+
+## 6. 后续严格顺序
+
+### A. 训练seed 1111视觉encoder
+
+只有audio完成后运行：
+
+```bash
+cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \
+python run_experiment.py --dataset MOSEI --stage train-vision --seed 1111 \
+  > mosei_vision_encoder_1111.log 2>&1 & echo $!
+```
+
+完成后确认`best_loss_vision_encoder.pt`和`best_loss_vision_decoder.pt`。
+
+### B. 两轮P4 Learned smoke
+
+只有audio/vision encoder都存在且33项测试仍通过后运行：
+
+```bash
+cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \
+python run_experiment.py --dataset MOSEI --stage train-fusion --seed 1111 \
+  --epochs 2 --use-budgeted-aux --use-interventional-reliability \
+  --warmup-epoch 10 --budget-warmup-mode allocation \
+  --reliability-task-warmup-epoch 10 --reliability-task-corrupt-scale 0 \
+  --reliability-allocation-control learned \
+  --exp-name p5_mosei_p4_learned_smoke \
+  > mosei_p5_p4_learned_smoke_1111.log 2>&1 & echo $!
+```
+
+MOSEI原始预算是`delta_va=0.3`、`delta_nce=0.001`。Epoch 2必须看到：
+
+```text
+w_v=w_a=0.3
+w_nce_v=w_nce_a=0.001
+Learned权重std非零
+q_gap_v/q_gap_a为正
+task_corruption_progress=0
+checkpoint保存成功
+```
+
+smoke checkpoint还必须重新加载并完成test。未经该门槛，不得启动25轮融合训练。
+
+### C. 正式MOSEI证据
+
+smoke通过后，先跑seed 1111：Repaired MFON baseline、P4 Constant、P4 Learned。
+只有seed 1111趋势合理，再扩展1112/1113。任何方法选择使用validation；不要依据MOSEI
+test继续调参。三种子完成后再做可靠性审计、均值/标准差和跨数据集结论。
+
+## 7. 完整性边界
+
+- 不上传13GB数据、BERT权重、checkpoint、密钥或个人附件到GitHub。
+- 不把未完成的MOSEI训练写成结果。
+- 不把MFON基础结构宣称为原创。
+- 不宣称SOTA、统计显著或CCF-B就绪，除非后续证据真实完成。

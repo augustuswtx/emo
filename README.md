@@ -4,17 +4,18 @@ This repository preserves the reproducible research context for an MFON-based mu
 
 ## Start Here
 
-Read [`PROJECT-CONTEXT-LATEST.md`](PROJECT-CONTEXT-LATEST.md) first. It records the current method, verified results, integrity boundaries, server paths, and exact next experiment.
+For the active MOSEI run, read [`MOSEI-HANDOFF-LATEST.md`](MOSEI-HANDOFF-LATEST.md) first. Then read [`PROJECT-CONTEXT-LATEST.md`](PROJECT-CONTEXT-LATEST.md) for the complete method and MOSI evidence history.
 
 ## Contents
 
 - `docs/`: experiment log, evidence plan, manuscript draft, references, literature notes, and server handoffs.
 - `MFON/`: current experiment source code and CPU contract tests.
 - `PROJECT-CONTEXT-LATEST.md`: single-file handoff for a new Codex conversation.
+- `MOSEI-HANDOFF-LATEST.md`: concise live handoff for the current MOSEI server experiments.
 
 ## Current Status
 
-The P2 stage evaluates whether learned modality-reliability scores improve fixed-budget auxiliary supervision compared with constant, reversed, permuted, and Oracle controls. MOSI seed 1111 results for learned, constant, reversed, and permuted are recorded. Oracle is the next experiment.
+The MOSI three-seed P4 comparison and final reliability audits are complete and frozen. P4 has been ported to MOSEI and passed 33 server tests. MOSEI seed 1111 unimodal encoder preparation is in progress; no MOSEI fusion result has been claimed yet.
 
 ## Data And Integrity
 
