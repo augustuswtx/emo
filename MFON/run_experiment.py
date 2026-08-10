@@ -158,8 +158,10 @@ def main():
     train_cfg.reliability_task_corrupt_scale = args.reliability_task_corrupt_scale
     train_cfg.reliability_allocation_control = args.reliability_allocation_control
     if args.use_interventional_reliability:
-        if args.dataset != 'MOSI':
-            raise ValueError('The interventional-reliability P1 pilot currently supports MOSI only.')
+        if args.dataset not in {'MOSI', 'MOSEI'}:
+            raise ValueError(
+                'Interventional reliability currently supports MOSI and MOSEI.'
+            )
         if not args.use_budgeted_aux:
             raise ValueError('--use-interventional-reliability requires --use-budgeted-aux.')
     elif args.reliability_allocation_control != 'learned':

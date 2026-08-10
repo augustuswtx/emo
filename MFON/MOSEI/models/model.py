@@ -5,9 +5,17 @@ import numpy as np
 import math
 
 from budgeted_auxiliary import (
+    apply_quality_control,
     build_budgeted_auxiliary,
     per_sample_infonce,
     per_sample_kl,
+)
+from interventional_reliability import (
+    ReliabilityHead,
+    TemporalReliabilityHead,
+    blend_corruption,
+    ordinal_reliability_pair,
+    scheduled_corruption_progress,
 )
 
 import os
@@ -136,7 +144,38 @@ class TVA_fusion(nn.Module):
         self.alw_temperature = getattr(train_cfg, 'alw_temperature', 1.0)
         self.use_budgeted_aux = getattr(train_cfg, 'use_budgeted_aux', False)
         self.budget_warmup_epoch = max(1, getattr(train_cfg, 'budget_warmup_epoch', 10))
+        self.budget_warmup_mode = getattr(train_cfg, 'budget_warmup_mode', 'scale')
+        if self.budget_warmup_mode not in {'scale', 'allocation'}:
+            raise ValueError('budget warmup mode must be scale or allocation.')
         self.budget_epsilon = getattr(train_cfg, 'budget_epsilon', 1e-8)
+        self.use_interventional_reliability = getattr(
+            train_cfg, 'use_interventional_reliability', False
+        )
+        if self.use_interventional_reliability and not self.use_budgeted_aux:
+            raise ValueError('interventional reliability requires budgeted auxiliary learning.')
+        self.reliability_max_severity = getattr(train_cfg, 'reliability_max_severity', 1.0)
+        self.reliability_corrupt_prob = getattr(train_cfg, 'reliability_corrupt_prob', 0.5)
+        self.reliability_margin = getattr(train_cfg, 'reliability_margin', 0.2)
+        self.reliability_loss_weight = getattr(train_cfg, 'reliability_loss_weight', 0.1)
+        self.reliability_invariance_weight = getattr(
+            train_cfg, 'reliability_invariance_weight', 0.1
+        )
+        self.reliability_task_warmup_epoch = max(
+            1, getattr(train_cfg, 'reliability_task_warmup_epoch', 10)
+        )
+        self.reliability_task_corrupt_scale = getattr(
+            train_cfg, 'reliability_task_corrupt_scale', 1.0
+        )
+        if not 0.0 <= float(self.reliability_task_corrupt_scale) <= 1.0:
+            raise ValueError('reliability task corruption scale must be in [0, 1].')
+        self.reliability_allocation_control = getattr(
+            train_cfg, 'reliability_allocation_control', 'learned'
+        )
+        reliability_hidden_dim = getattr(train_cfg, 'reliability_hidden_dim', 64)
+        self.vision_reliability = ReliabilityHead(vision_fea_dim, reliability_hidden_dim)
+        self.audio_reliability = TemporalReliabilityHead(
+            audio_fea_dim, reliability_hidden_dim
+        )
         if self.use_alw and self.use_budgeted_aux:
             raise ValueError('use_alw and use_budgeted_aux are mutually exclusive.')
         self.alpha_base_v = nn.Parameter(torch.tensor(inverse_softplus(train_cfg.delta_va)))
@@ -159,6 +198,44 @@ class TVA_fusion(nn.Module):
     def forward(self, text, vision, audio, mode='train', epoch=None):
         self.current_alw = None
         self.current_budgeted_aux = None
+        reliability_v = reliability_a = None
+        if mode == 'train' and self.use_interventional_reliability:
+            epoch_value = 1 if epoch is None else epoch
+            task_corruption_progress = scheduled_corruption_progress(
+                epoch_value,
+                self.reliability_task_warmup_epoch,
+                self.reliability_task_corrupt_scale,
+            )
+            reliability_v = ordinal_reliability_pair(
+                self.vision_reliability,
+                vision,
+                self.reliability_max_severity,
+                self.reliability_corrupt_prob,
+                self.reliability_margin,
+                self.reliability_invariance_weight,
+            )
+            reliability_a = ordinal_reliability_pair(
+                self.audio_reliability,
+                audio,
+                self.reliability_max_severity,
+                self.reliability_corrupt_prob,
+                self.reliability_margin,
+                self.reliability_invariance_weight,
+            )
+            vision = blend_corruption(
+                vision, reliability_v['corrupted'], task_corruption_progress
+            )
+            audio = blend_corruption(
+                audio, reliability_a['corrupted'], task_corruption_progress
+            )
+            reliability_v['q_task'] = self.vision_reliability(vision)
+            reliability_a['q_task'] = self.audio_reliability(audio)
+            reliability_v['task_corruption_progress'] = torch.as_tensor(
+                task_corruption_progress, device=vision.device, dtype=vision.dtype
+            )
+            reliability_a['task_corruption_progress'] = torch.as_tensor(
+                task_corruption_progress, device=audio.device, dtype=audio.dtype
+            )
         last_hidden_text  = self.text_encoder(text)   # [bs, seq, h] [bs, h]
         last_hidden_text = F.dropout(self.proj_t(last_hidden_text.permute(1, 0, 2)), 
             p=self.text_dropout, training=self.training
@@ -212,6 +289,8 @@ class TVA_fusion(nn.Module):
                     loss_a_each,
                     loss_nce_v_each,
                     loss_nce_a_each,
+                    reliability_v,
+                    reliability_a,
                 )
             else:
                 loss_v = self.get_KL_loss(x_v_embed, x_v_embed_froze)
@@ -221,7 +300,7 @@ class TVA_fusion(nn.Module):
                 epoch, x_v_embed, x_a_embed, x_v_embed_froze, x_a_embed_froze, pred
             )
         else:
-            return pred, None
+            return pred, (x_t_embed, x_v_embed, x_a_embed)
             
         return pred, (loss_v, loss_a, loss_nce)
         
@@ -243,7 +322,10 @@ class TVA_fusion(nn.Module):
         # self.load_state_dict(torch.load(mode_path, map_location=self.device))
         checkpoint = torch.load(mode_path, map_location=self.device)
         model_state_dict = self.state_dict()
-        filtered_checkpoint = {k: v for k, v in checkpoint.items() if k in model_state_dict}
+        filtered_checkpoint = {
+            k: v for k, v in checkpoint.items()
+            if k in model_state_dict and v.shape == model_state_dict[k].shape
+        }
         self.load_state_dict(filtered_checkpoint, strict=False)
 
     def get_distill_loss(self, input1, input2):
@@ -312,11 +394,35 @@ class TVA_fusion(nn.Module):
         loss_a_each,
         loss_nce_v_each,
         loss_nce_a_each,
+        reliability_v=None,
+        reliability_a=None,
     ):
         epoch = 1 if epoch is None else epoch
         progress = min(float(epoch) / float(self.budget_warmup_epoch), 1.0)
         train_cfg = self.config.MOSEI.downStream.TVAtrain
-        return build_budgeted_auxiliary(
+        quality_v = None if reliability_v is None else reliability_v['q_task']
+        quality_a = None if reliability_a is None else reliability_a['q_task']
+        if reliability_v is not None and reliability_a is not None:
+            severity_scale = max(float(self.reliability_max_severity), 1e-8)
+            oracle_v = (
+                1.0
+                - reliability_v['task_corruption_progress']
+                * reliability_v['severity_high']
+                / severity_scale
+            ).clamp(0.0, 1.0)
+            oracle_a = (
+                1.0
+                - reliability_a['task_corruption_progress']
+                * reliability_a['severity_high']
+                / severity_scale
+            ).clamp(0.0, 1.0)
+            quality_v = apply_quality_control(
+                quality_v, self.reliability_allocation_control, oracle_v
+            )
+            quality_a = apply_quality_control(
+                quality_a, self.reliability_allocation_control, oracle_a
+            )
+        result = build_budgeted_auxiliary(
             x_v_embed,
             x_a_embed,
             x_v_target,
@@ -332,4 +438,30 @@ class TVA_fusion(nn.Module):
             train_cfg.delta_nce,
             progress,
             self.budget_epsilon,
+            quality_v,
+            quality_a,
+            self.budget_warmup_mode,
         )
+        if reliability_v is not None and reliability_a is not None:
+            reliability_loss = reliability_v['loss'] + reliability_a['loss']
+            result['loss'] = (
+                result['loss'] + self.reliability_loss_weight * reliability_loss
+            )
+            result.update({
+                'loss_reliability': reliability_loss,
+                'loss_rank': reliability_v['rank_loss'] + reliability_a['rank_loss'],
+                'loss_invariance': (
+                    reliability_v['invariance_loss']
+                    + reliability_a['invariance_loss']
+                ),
+                'q_clean_v': reliability_v['q_clean'],
+                'q_clean_a': reliability_a['q_clean'],
+                'q_gap_v': reliability_v['q_clean'] - reliability_v['q_high'],
+                'q_gap_a': reliability_a['q_clean'] - reliability_a['q_high'],
+                'q_task_gap_v': reliability_v['q_clean'] - reliability_v['q_task'],
+                'q_task_gap_a': reliability_a['q_clean'] - reliability_a['q_task'],
+                'severity_v': reliability_v['severity_high'],
+                'severity_a': reliability_a['severity_high'],
+                'task_corruption_progress': reliability_v['task_corruption_progress'],
+            })
+        return result

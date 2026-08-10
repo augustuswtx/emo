@@ -86,6 +86,15 @@ seed 1113混淆相关中，视觉能量为0.153522、音频长度为0.243383，�
 人工严重损坏音频或视觉时，任务预测变化很小，说明MOSI上的融合模型高度依赖文本；
 当前证据支持“可靠性感知的训练监督分配”，不支持“推理时动态抗噪融合”的夸大主张。
 
+最终P4三种子完整审计汇总（均值±样本标准差）：
+
+| Modality | Spearman(severity,q)↓ | Clean/corrupt AUROC↑ |
+|---|---:|---:|
+| Vision | -0.962946±0.004189 | 0.995197±0.004719 |
+| Audio | -0.819850±0.007717 | 0.941968±0.009641 |
+
+三种子的音频长度相关均值为0.241182±0.012280，是目前最稳定的混淆风险。
+
 ## 6. MOSI seed 1111正式结果
 
 | 预算分配 | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE↓ | Corr↑ | Loss↓ |
@@ -105,6 +114,19 @@ seed 1113混淆相关中，视觉能量为0.153522、音频长度为0.243383，�
 - 单种子证据总体支持主要回归/二分类目标，但作用性证据呈现指标权衡，不支持“所有指标稳定提升”。
 
 ## 7. 当前立即任务
+
+MOSI三种子主结果和最终可靠性审计均已冻结。P4此前只完整支持MOSI；2026-08-10已将
+冻结P4按原逻辑移植到MOSEI，包括可靠性头、干预训练、干净主任务、allocation warmup、
+作用性控制和日志统计。静态跨数据集一致性测试4项与Python语法编译通过；本机无PyTorch，
+完整33项数值测试必须在服务器执行。服务器包：
+
+```text
+/Users/augustus/projects/论文/server-packages/mfon_mosei_p4_port_20260810.tar.gz
+SHA256 9cc49c6978290e5442ac55b460c74752c2ac3fceebeb06c0232776dd330d8994
+```
+
+安装和两轮smoke步骤见 `docs/SERVER-P5-MOSEI-INSTRUCTIONS.md`。在上传前先确认
+`data/MOSEI/unaligned_50.pkl`、seed 1111单模态encoder和磁盘空间；不得直接开25轮训练。
 
 P4 Learned true-budget seed 1112公平测试已经完成：
 

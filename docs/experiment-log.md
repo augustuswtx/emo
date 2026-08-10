@@ -565,6 +565,17 @@ about reliability estimation and supervision allocation; it must not be
 presented as inference-time noise-adaptive fusion without an additional gating
 mechanism and corresponding evidence.
 
+The final P4 Learned audits were also completed on seeds 1111 and 1112.
+Seed 1111 produced vision Spearman=-0.965883/AUROC=0.998882 and audio
+Spearman=-0.815835/AUROC=0.945113. Seed 1112 produced vision
+Spearman=-0.964805/AUROC=0.996831 and audio
+Spearman=-0.814968/AUROC=0.931147. Across the three final checkpoints, the
+sample mean±standard deviation is -0.962946±0.004189 vision Spearman,
+0.995197±0.004719 vision AUROC, -0.819850±0.007717 audio Spearman, and
+0.941968±0.009641 audio AUROC. Audio-length correlation is
+0.241182±0.012280, confirming a repeatable confounding risk that must be
+rechecked on MOSEI and SIMS.
+
 ## Current Evidence Summary
 
 The paper is being reframed from "MFON + three add-on modules" to a quality-guided multimodal fusion and optimization framework:

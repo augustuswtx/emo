@@ -72,7 +72,6 @@ def TVA_train_fusion(config, metrics, seed, train_data, valid_data):
         print('CSS enabled: %d samples, min_ratio=%s, curriculum_epoch=%s' % (
             len(css_scores), css_min_ratio, css_epoch
         ))
-    print(model)
     model.load_froze()
     
     text_params = list(model.proj_t.named_parameters()) + list(model.text_encoder.named_parameters())
@@ -83,7 +82,10 @@ def TVA_train_fusion(config, metrics, seed, train_data, valid_data):
     audio_params = list(model.proj_a.named_parameters()) +\
                 list(model.audio_with_text.named_parameters())
     audio_params = [p for _, p in audio_params] + [model.prompta_m]
-    model_params_other = [p for n, p in list(model.named_parameters()) if '_decoder' in n] 
+    model_params_other = [p for n, p in list(model.named_parameters()) if '_decoder' in n]
+    if getattr(model, 'use_interventional_reliability', False):
+        model_params_other += list(model.vision_reliability.parameters())
+        model_params_other += list(model.audio_reliability.parameters())
     alw_params = [
         model.alpha_base_v,
         model.alpha_base_a,
@@ -119,6 +121,11 @@ def TVA_train_fusion(config, metrics, seed, train_data, valid_data):
             'q_v_std': 0.0, 'q_a_std': 0.0, 'w_v_std': 0.0, 'w_a_std': 0.0,
             'w_nce_v': 0.0, 'w_nce_a': 0.0, 'loss_v': 0.0,
             'loss_a': 0.0, 'loss_nce': 0.0, 'progress': 0.0, 'count': 0,
+            'loss_reliability': 0.0, 'loss_rank': 0.0, 'loss_invariance': 0.0,
+            'q_clean_v': 0.0, 'q_clean_a': 0.0, 'q_gap_v': 0.0, 'q_gap_a': 0.0,
+            'severity_v': 0.0, 'severity_a': 0.0,
+            'q_task_gap_v': 0.0, 'q_task_gap_a': 0.0,
+            'task_corruption_progress': 0.0,
         }
         css_threshold, css_ratio = get_css_threshold(css_scores, epoch, css_epoch, css_min_ratio)
         if css_threshold is not None:
@@ -166,6 +173,14 @@ def TVA_train_fusion(config, metrics, seed, train_data, valid_data):
                     budget_epoch_stats[key + '_std'] += budget[key].detach().std(unbiased=False).item()
                 for key in ['loss_v', 'loss_a', 'loss_nce', 'progress']:
                     budget_epoch_stats[key] += budget[key].detach().item()
+                for key in [
+                    'loss_reliability', 'loss_rank', 'loss_invariance',
+                    'q_clean_v', 'q_clean_a', 'q_gap_v', 'q_gap_a',
+                    'q_task_gap_v', 'q_task_gap_a',
+                    'severity_v', 'severity_a', 'task_corruption_progress',
+                ]:
+                    if key in budget:
+                        budget_epoch_stats[key] += budget[key].detach().mean().item()
                 budget_epoch_stats['count'] += 1
             elif getattr(model, 'use_alw', False) and model.current_alw is not None:
                 weights = model.current_alw
@@ -185,7 +200,6 @@ def TVA_train_fusion(config, metrics, seed, train_data, valid_data):
         if not left_epochs:
             optimizer.step()
 
-        # print("EVAL valid")
         _, result_loss = eval(model, metrics, valid_data, device)
         if alw_epoch_stats['count'] > 0:
             alw_log = {
@@ -203,9 +217,20 @@ def TVA_train_fusion(config, metrics, seed, train_data, valid_data):
                 ]
             }
             print('Budgeted auxiliary epoch %d:' % epoch, budget_log)
+            if getattr(model, 'use_interventional_reliability', False):
+                reliability_log = {
+                    key: round(budget_epoch_stats[key] / budget_epoch_stats['count'], 6)
+                    for key in [
+                        'loss_reliability', 'loss_rank', 'loss_invariance',
+                        'q_clean_v', 'q_clean_a', 'q_gap_v', 'q_gap_a',
+                        'q_task_gap_v', 'q_task_gap_a',
+                        'severity_v', 'severity_a', 'task_corruption_progress',
+                    ]
+                }
+                print('Interventional reliability epoch %d:' % epoch, reliability_log)
         
         if result_loss < best_loss:
-            # best_epoch = epoch
+            best_epoch = epoch
             best_loss = result_loss
             model.save_model()
            

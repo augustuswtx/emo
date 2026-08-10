@@ -89,7 +89,18 @@ class MOSEI:
             alw_temperature = 1.0
             use_budgeted_aux = False
             budget_warmup_epoch = 10
+            budget_warmup_mode = 'scale'
             budget_epsilon = 1e-8
+            use_interventional_reliability = False
+            reliability_hidden_dim = 64
+            reliability_max_severity = 1.0
+            reliability_corrupt_prob = 0.5
+            reliability_margin = 0.2
+            reliability_loss_weight = 0.1
+            reliability_invariance_weight = 0.1
+            reliability_task_warmup_epoch = 10
+            reliability_task_corrupt_scale = 1.0
+            reliability_allocation_control = 'learned'
 
             use_dpg = False
             dpg_hidden_dim = 256
