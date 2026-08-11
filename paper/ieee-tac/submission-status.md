@@ -4,8 +4,9 @@ Updated: 2026-08-11
 
 ## Current state
 
-- Working venue: IEEE Transactions on Affective Computing (CCF-B in the current
-  CCF artificial-intelligence directory).
+- Backup venue: IEEE Transactions on Affective Computing (CCF-B in the current
+  CCF artificial-intelligence directory). Neural Computing and Applications is
+  now the working CCF-C primary target.
 - Format: standard `IEEEtran` journal working format; TAC-specific submission
   requirements still need a final official-policy check.
 - Manuscript: complete MOSI-based long-form draft with conservative claims.

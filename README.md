@@ -14,8 +14,9 @@ For the active MOSEI run, read [`MOSEI-HANDOFF-LATEST.md`](MOSEI-HANDOFF-LATEST.
 - `docs/reference-verification-20260811.md`: field-level citation verification ledger and remaining caveats.
 - `docs/literature-search-20260811-audited-multimodal-reliability/`: screened literature report, evidence table, and reproducible search notes.
 - `docs/small-paper-draft-v1.md`: preserved Chinese historical draft from the earlier method stage.
-- `paper/VENUE-STRATEGY.md`: current venue decision, with IEEE Transactions on Affective Computing as the working primary target.
-- `paper/ieee-tac/`: long-form IEEE TAC working draft and submission-readiness ledger.
+- `paper/VENUE-STRATEGY.md`: current venue decision, with Neural Computing and Applications as the working CCF-C primary target.
+- `paper/springer-nca/`: double-blind Springer Nature working draft and NCA submission-readiness ledger.
+- `paper/ieee-tac/`: preserved higher-risk IEEE TAC backup draft.
 - `paper/icassp2027/`: preserved compact ICASSP 2027 backup draft and venue-readiness checklist.
 - `docs/`: experiment log, evidence plan, references, literature notes, and server handoffs.
 - `MFON/`: current experiment source code and CPU contract tests.

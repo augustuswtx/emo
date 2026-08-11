@@ -1,7 +1,8 @@
 # IEEE Transactions on Affective Computing working draft
 
-This directory contains the long-form IEEE journal working draft for the
-current primary venue, IEEE Transactions on Affective Computing (TAC).
+This directory preserves the long-form IEEE Transactions on Affective
+Computing (TAC) backup draft. Neural Computing and Applications is now the
+working CCF-C primary target.
 
 ## Files
 
