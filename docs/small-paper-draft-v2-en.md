@@ -1,0 +1,352 @@
+# Are Modality Quality Scores Trustworthy? Audited, Fixed-Budget Auxiliary Learning for Multimodal Sentiment Analysis
+
+> **Manuscript status:** evidence-grounded English draft v2, 10 August 2026.  
+> **Scope:** CMU-MOSI results are frozen. CMU-MOSEI encoder training is ongoing and is not reported as a completed result. CH-SIMS, cross-backbone transfer, real-world corruptions, efficiency, and statistical-significance experiments remain incomplete.  
+> **Writing boundary:** MFON is the base architecture and is not claimed as an original contribution. The present evidence supports reliability estimation and training-time auxiliary-supervision allocation; it does not establish inference-time noise-adaptive fusion, state-of-the-art performance, or universal improvement over MFON.
+
+## Abstract
+
+Quality-aware multimodal learning assumes that a model can estimate how trustworthy each modality is and use that estimate to regulate fusion or optimization. This assumption is rarely audited: a quality score may collapse to a batch-level scalar, track sequence length or feature energy, or be logged without materially changing learning. We study this problem in multimodal sentiment analysis using MFON as the base model. We first introduce a five-part audit covering sample granularity, degradation monotonicity, confound sensitivity, actionability, and weight collapse. The audit exposes concrete failures in an earlier quality-aware prototype: its nominally sample-wise scores were batch-aggregated, its auxiliary losses were reduced before weighting, and a norm-based curriculum score correlated with effective sequence length and increased under stronger Gaussian corruption. We then learn visual and acoustic reliability from ordered clean--mild--strong feature triplets and use the learned scores only to redistribute per-sample distillation and contrastive losses. An allocation warmup keeps every batch's mean auxiliary budget fixed from the first epoch, isolating redistribution from changes in total supervision. On CMU-MOSI, three frozen seeds show that learned allocation improves the mean binary metrics, MAE, correlation, and test loss over an equal-budget constant allocation, while Acc-5 is essentially unchanged and Acc-7 is lower by 0.0015. The learned reliability scores strongly track synthetic degradation (vision Spearman $-0.9629\pm0.0042$, AUROC $0.9952\pm0.0047$; audio Spearman $-0.8199\pm0.0077$, AUROC $0.9420\pm0.0096$), although acoustic reliability remains moderately correlated with sequence length. These results support a bounded claim: audited reliability can guide training-time supervision allocation under an exactly matched budget, but the current evidence does not show uniform gains, statistical significance, or inference-time robustness.
+
+**Keywords:** multimodal sentiment analysis; modality reliability; quality-score audit; fixed-budget learning; auxiliary supervision
+
+## 1. Introduction
+
+Multimodal sentiment analysis (MSA) predicts affective polarity or intensity from language, acoustic behavior, and visual behavior. The task was established through in-the-wild opinion-video analysis and later scaled through CMU-MOSEI [@zadeh2016multimodal; @zadeh2018mosei]. Text often carries the dominant semantic signal, whereas voice and face provide complementary evidence about emphasis, timing, and non-verbal expression. This complementarity is valuable only when the contributing modalities are trustworthy. Background noise, occlusion, temporal misalignment, missing segments, and preprocessing artifacts can make the usefulness of a modality vary across samples even when the dataset provides all three streams.
+
+Quality-aware methods address this variability by estimating modality quality and using the resulting score to control fusion, attention, expert routing, or optimization. Dynamic fusion has been formulated through uncertainty-aware weighting and generalization analysis [@zhang2023qmf], predictive confidence calibration [@cao2024pdf], and continuous reliability-aware expert routing [@zhu2026qamoe]. Other approaches supervise attention with original and corrupted features [@mai2025samlml], construct proxy modalities for incomplete inputs [@zhu2025prmf], coordinate weak modalities through sample-level trust [@he2026ebmc], or calibrate representations and gradients [@jiang2026cpsc]. These methods differ substantially, but they share a latent premise: the intermediate score called *quality*, *confidence*, *trust*, or *reliability* represents the property that the downstream mechanism assumes it represents.
+
+Producing a score, however, does not establish this premise. A score can vary because sequence length or feature energy varies; it can be reduced across the batch and therefore cease to be sample-specific; or it can enter a computational graph whose downstream prediction is effectively insensitive to it. Robustness analysis has already shown that clean-set accuracy is insufficient for characterizing MSA under modality perturbations [@hazarika2022robustness]. More directly, leakage-safe score permutation can reveal that an apparently quality-aware fusion model barely depends on its quality scores [@moon2026quality]. These observations motivate a stricter question than whether a quality-aware model attains a favorable test score: **is the quality signal itself measurable, non-confounded, and causally connected to the claimed optimization mechanism?**
+
+We encountered this question while extending MFON, a prompt-based architecture that improves acoustic and visual representations through frozen unimodal teachers, knowledge distillation, and cross-modal contrastive learning [@zhang2025mfon]. An initial prototype added adaptive auxiliary weights, dynamic prompts, and norm-based curriculum selection. Three-seed evaluation did not show stable improvement over a repaired MFON baseline. Implementation and data audits then identified structural reasons not visible from the final metrics: sample scores had been averaged into batch scalars; distillation and contrastive losses had already been reduced before weighting; unconstrained non-negative auxiliary coefficients had a direct gradient incentive to shrink; and the norm-based curriculum score was dominated by effective sequence length and increased when noise was added.
+
+These failures changed the aim of the work. Instead of proposing another fusion module, we treat modality reliability as an auditable intermediate variable and ask how it can control training without changing the total amount of auxiliary supervision. The resulting pipeline has two components. First, lightweight visual and acoustic heads learn an ordered reliability relation from clean, mildly corrupted, and strongly corrupted features. Second, reliability redistributes per-sample KL and InfoNCE losses within each mini-batch while an exact finite-batch constraint preserves the original mean auxiliary weights. An allocation warmup interpolates from uniform to reliability-aware assignment without scaling down the total budget. This distinction is crucial: an improvement can otherwise arise simply because the training objective received less auxiliary supervision during early epochs.
+
+The current study makes four evidence-bounded contributions:
+
+1. We formulate a five-part audit for modality quality signals, covering sample granularity, monotonic response to controlled degradation, sensitivity to non-quality confounds, actionability, and collapse of dynamic weights.
+2. We provide a reproducible failure analysis of an MFON-based prototype, including a norm proxy that correlates with effective sequence length and assigns higher scores to more strongly corrupted features.
+3. We implement interventional reliability learning and exact finite-batch redistribution of per-sample distillation and contrastive losses. The final P4 schedule keeps the mean auxiliary budget identical to the repaired MFON baseline from the first epoch.
+4. We report a frozen three-seed CMU-MOSI comparison. Learned allocation is favorable to the equal-budget constant control on binary metrics, MAE, correlation, and test loss, but not on every fine-grained classification metric. Reliability audits are strong on synthetic degradation, while an acoustic length confound and text-dominant inference remain open limitations.
+
+## 2. Related Work
+
+### 2.1 Multimodal sentiment analysis and weak-modality optimization
+
+Early MSA architectures explicitly modeled cross-modal interactions through tensor fusion [@zadeh2017tensor], recurrent memory over multiple views [@zadeh2018memory], and low-rank factorization of modality-specific interactions [@liu2018efficient]. This line established that complementary cues can be modeled beyond direct concatenation, but it assumed relatively stable aligned inputs and did not make reliability an independently audited variable.
+
+Representation learning subsequently shifted toward cross-modal attention and more explicit separation of shared and modality-specific information. MulT uses directional cross-modal attention for unaligned language sequences [@tsai2019multimodal], MAG injects multimodal information into a pretrained language transformer [@rahman2020integrating], and MISA separates modality-invariant and modality-specific representations [@hazarika2020misa]. Self-supervised modality-specific objectives [@yu2021learning] and hierarchical mutual-information maximization [@han2021improving] further strengthen individual and shared representations. These methods improve how modalities are encoded, but their representation objectives do not by themselves verify whether a sample-wise quality score measures degradation.
+
+Recent models explore unified task learning [@hu2022unimse], MLP-based interaction [@sun2022cubemlp], language-guided hyper-modality representations [@zhang2023learning], text-enhanced transformer fusion [@wang2023tetfn], and multi-loss fusion [@wu2024multimodal]. MFON targets under-optimized acoustic and visual streams through modality prompts, unimodal-teacher distillation, and cross-modal contrastive objectives [@zhang2025mfon]. Sample-level modality valuation shows that modality contribution cannot be summarized adequately by a dataset-level average [@wei2024smv], while EBMC combines weak-modality enhancement, energy-guided coordination, and sample-level trust [@he2026ebmc]. These studies motivate per-sample treatment, but per-sample weighting alone is insufficient: the weighting signal and the amount of supervision it controls must both be verified.
+
+### 2.2 Quality-aware learning under degraded or incomplete modalities
+
+Robust MSA has been approached through feature reconstruction, decision-level uncertainty, confidence calibration, supervised corruption, proxy reconstruction, and expert routing. TFR-Net reconstructs modality features to improve prediction under imperfect inputs [@yuan2021transformer]. QMF derives dynamic fusion from modality quality and studies its generalization behavior [@zhang2023qmf], whereas predictive dynamic fusion distinguishes local and holistic confidence and applies relative calibration [@cao2024pdf]. SAM-LML uses original, corrupted, and noise-only features to supervise attention ordering [@mai2025samlml]. P-RMF handles incomplete inputs through probabilistic proxy modalities [@zhu2025prmf], and QA-MoE models a continuous reliability spectrum for expert routing [@zhu2026qamoe]. CPSC calibrates both representations and gradients through conformal prediction [@jiang2026cpsc]. Our method does not claim that corruption-based ranking or quality-aware weighting is itself new. Its narrower distinction is to audit the score as an intermediate variable and compare allocations under an exactly matched training-time auxiliary budget.
+
+### 2.3 Diagnosing quality signals
+
+Most robustness studies evaluate predictions after perturbing one or more modalities [@hazarika2022robustness]. This is necessary but does not establish what an internal quality score measures. A useful score must remain sample-specific, decrease under controlled degradation, avoid trivial dependence on sequence length or energy, and change the mechanism it purportedly controls. Score permutation offers one actionability test by holding the model and inputs fixed while breaking the score--sample correspondence [@moon2026quality]. We extend this diagnostic perspective to both representation and optimization: the audit examines tensor granularity, degradation ranking, confounds, prediction or gradient dependence, and whether learned auxiliary weights can reduce the objective by collapsing globally.
+
+## 3. Problem Formulation
+
+Consider a batch of $B$ samples. Sample $i$ contains text, visual, and acoustic features
+
+$$
+x_i=\{x_i^t,x_i^v,x_i^a\}, \qquad y_i\in\mathbb{R},
+$$
+
+and the base model predicts sentiment intensity
+
+$$
+\hat y_i=F(x_i^t,x_i^v,x_i^a).
+$$
+
+MFON additionally produces trainable visual and acoustic embeddings $z_i^v,z_i^a$, frozen unimodal-teacher embeddings $\bar z_i^v,\bar z_i^a$, and a text embedding $z_i^t$. Its auxiliary objectives contain modality-specific KL terms and text--modality InfoNCE terms. We denote their unreduced values by
+
+$$
+\ell^{\mathrm{KL}}_{v,i},\quad
+\ell^{\mathrm{KL}}_{a,i},\quad
+\ell^{\mathrm{NCE}}_{tv,i},\quad
+\ell^{\mathrm{NCE}}_{ta,i}.
+$$
+
+For each non-text modality $m\in\{v,a\}$, a reliability head produces $q_i^m\in[0,1]$. We use *input reliability* to mean whether a feature sequence preserves its structure under the degradation process modeled during training. This differs from *task utility*: a clean but emotionally neutral face may be reliable yet uninformative, while mildly noisy speech may still carry a strong sentiment cue. The present method estimates reliability for allocating training-time auxiliary supervision; it does not replace the main sentiment objective with a direct estimate of modality utility.
+
+## 4. Auditing Modality Quality Signals
+
+### 4.1 Sample granularity
+
+A sample-level score must be a vector $\mathbf q^m=[q_1^m,\ldots,q_B^m]$, not a scalar shared by the batch. We audit the shape at the point where the score is consumed and test whether a fixed sample retains its score when paired with different companion samples. The same requirement applies to the controlled loss: if an auxiliary loss has already been reduced across the batch, multiplying it by a sample-wise vector cannot recover sample-wise allocation.
+
+### 4.2 Degradation monotonicity
+
+Let $C_m(x;s)$ denote a modality-specific corruption with severity $s$, where $s=0$ is clean. A reliability score intended to measure degradation should satisfy an ordered relation in expectation:
+
+$$
+s_1<s_2 \quad\Rightarrow\quad
+\mathbb E[R_m(C_m(x;s_1))] > \mathbb E[R_m(C_m(x;s_2))].
+$$
+
+We quantify this relation with Spearman correlation between severity and score, clean-versus-corrupt AUROC, and the fraction of highest-severity samples whose score falls below the corresponding clean score.
+
+### 4.3 Confound sensitivity
+
+We measure the association between clean reliability scores and effective sequence length, padding ratio, feature energy, sentiment label, and absolute sentiment intensity. We also test transformations that preserve valid content while changing padding or positive feature scale. These checks do not prove that a head has learned a semantic notion of quality, but they can falsify simple shortcuts that would make the reliability interpretation untenable.
+
+### 4.4 Actionability
+
+Actionability asks whether changing the score while holding other factors constant changes predictions, gradients, or allocation-sensitive performance. We compare learned scores with constant, permuted, rank-reversed, and severity-derived controls when the corresponding experiment uses the same average auxiliary budget. A score that passes degradation detection but has no downstream effect remains a measurement signal, not evidence for a useful allocation mechanism.
+
+### 4.5 Non-collapse
+
+If non-negative auxiliary coefficients are learned freely in
+
+$$
+L=L_{\mathrm{task}}+\alpha_vL_v+\alpha_aL_a+\beta L_{\mathrm{NCE}},
+$$
+
+then $\partial L/\partial\alpha_v=L_v\ge0$ creates a direct incentive for gradient descent to reduce $\alpha_v$. Declining weights therefore cannot be interpreted automatically as learned task importance. A valid comparison requires a normalization, budget, simplex, compensating regularizer, or another mechanism that prevents the total auxiliary supervision from shrinking unnoticed.
+
+## 5. Audited, Fixed-Budget Auxiliary Learning
+
+### 5.1 Overview
+
+The proposed training path preserves MFON's text encoder, modality prompts, frozen unimodal teachers, KL distillation, InfoNCE alignment, and sentiment decoder [@zhang2025mfon]. Our changes occur only in the reliability and auxiliary-loss paths. For each visual and acoustic input, the method constructs ordered corruptions, trains a modality-specific reliability head, retains the four auxiliary losses at sample resolution, and uses reliability to redistribute their weights. The final P4 setting keeps the sentiment-task input clean and uses synthetic corruptions only for reliability supervision. Thus, the main comparison isolates training-time allocation from both inference-time gating and corruption of the sentiment path.
+
+### 5.2 Ordered interventional reliability learning
+
+For a clean feature sequence $x_i^m$, we sample two severities $0\le s_{i,l}^m\le s_{i,h}^m$ and generate mild and strong variants along a shared Gaussian direction:
+
+$$
+\tilde x_{i,l}^m=C_m(x_i^m;s_{i,l}^m),\qquad
+\tilde x_{i,h}^m=C_m(x_i^m;s_{i,h}^m).
+$$
+
+The shared direction reduces ordering noise caused by comparing two independent corruption realizations. Reliability is trained with severity-scaled hinge constraints:
+
+$$
+L_{\mathrm{rank}}^m=
+\frac{1}{B}\sum_i
+\left[
+\max\left(0,\gamma_{i,l}^m-(q_{i,c}^m-q_{i,l}^m)\right)
++
+\max\left(0,\gamma_{i,h}^m-(q_{i,l}^m-q_{i,h}^m)\right)
+\right],
+$$
+
+where the margins are proportional to the corresponding severity gaps. A scale-invariance term penalizes score changes when active, non-padding content is multiplied by a positive factor:
+
+$$
+L_{\mathrm{inv}}^m=
+\frac{1}{B}\sum_i
+\left|R_m(x_i^m)-R_m(\kappa_i x_i^m)\right|.
+$$
+
+The visual head summarizes layer-normalized temporal features through per-channel mean, standard deviation, and adjacent-step variation. Acoustic features are low-dimensional and temporally structured, so the acoustic head instead uses normalized absolute level, first-difference magnitude, first-difference energy, lag correlation, and clipped kurtosis. This specialized head was introduced after a generic acoustic head achieved approximately random clean/corrupt discrimination in the P1 pilot.
+
+### 5.3 Per-sample auxiliary objectives
+
+We preserve the batch dimension of MFON's auxiliary objectives. For KL distillation, `reduction='none'` is applied before summing over feature dimensions. For InfoNCE, each sample retains its positive similarity and its log-sum-exp over in-batch candidates:
+
+$$
+\ell^{\mathrm{NCE}}_i=
+\log\sum_j\exp(\operatorname{sim}(z_i,z_j'))
+-\operatorname{sim}(z_i,z_i').
+$$
+
+The mean of each unreduced objective matches the original MFON objective, which allows the repaired baseline and the allocation variants to share the same nominal auxiliary scale.
+
+### 5.4 Exact finite-batch budget and allocation warmup
+
+For modality $m$, define the normalized reliability allocation
+
+$$
+a_i^m=
+\frac{B(q_i^m+\epsilon)}{\sum_{j=1}^{B}(q_j^m+\epsilon)}.
+$$
+
+Let $\delta_m$ be the original MFON auxiliary coefficient and $p_t\in[0,1]$ the allocation-warmup progress. P4 uses
+
+$$
+w_i^m=\delta_m\left[(1-p_t)+p_t a_i^m\right].
+$$
+
+This construction satisfies
+
+$$
+\frac{1}{B}\sum_i w_i^m=\delta_m
+$$
+
+at every training epoch. Early training therefore receives the same mean auxiliary supervision as repaired MFON, while only the dispersion across samples grows from uniform to reliability-aware. The same construction is applied separately to visual KL, acoustic KL, text--visual InfoNCE, and text--acoustic InfoNCE. The auxiliary objective is
+
+$$
+L_{\mathrm{aux}}=
+\frac{1}{B}\sum_i\left(
+w_{v,i}^{\mathrm{KL}}\ell_{v,i}^{\mathrm{KL}}
++w_{a,i}^{\mathrm{KL}}\ell_{a,i}^{\mathrm{KL}}
++w_{v,i}^{\mathrm{NCE}}\ell_{tv,i}^{\mathrm{NCE}}
++w_{a,i}^{\mathrm{NCE}}\ell_{ta,i}^{\mathrm{NCE}}
+\right).
+$$
+
+The complete training objective combines sentiment regression, budgeted auxiliary learning, and reliability supervision:
+
+$$
+L=L_{\mathrm{task}}+L_{\mathrm{aux}}
++\lambda_r\sum_{m\in\{v,a\}}
+\left(L_{\mathrm{rank}}^m+\lambda_iL_{\mathrm{inv}}^m\right).
+$$
+
+### 5.5 Equal-budget controls
+
+P4 Learned uses the predicted reliability scores; P4 Constant replaces every score by one while preserving all other reliability-head training and the same mean budget. Earlier single-seed actionability experiments additionally permuted score--sample correspondence, reversed score ranks, and used severity-based oracle scores. Because those earlier controls were completed before the final P4 allocation-warmup schedule was frozen, we report them as diagnostic evidence rather than pooling them with the final three-seed P4 comparison.
+
+## 6. Experimental Protocol
+
+### 6.1 Datasets and current scope
+
+CMU-MOSI [@zadeh2016multimodal] is used for the frozen main comparison and reliability audit. CMU-MOSEI [@zadeh2018mosei] is the next cross-dataset evaluation; at the time of this draft, seed-1111 acoustic encoder training is running, so no MOSEI performance is reported. CH-SIMS and additional backbones remain planned. We do not use any unfinished experiment to choose or revise the frozen P4 hyperparameters.
+
+### 6.2 Compared methods
+
+The final MOSI comparison includes: (1) repaired MFON, which fixes a batch-size-one squeeze error and positional-index construction; (2) P4 Constant, which trains the reliability heads but allocates each auxiliary objective uniformly under the fixed budget; and (3) P4 Learned, which uses the learned reliability scores for allocation. All methods use the same data split, base architecture, training length, and seeds 1111, 1112, and 1113. Checkpoint selection uses validation loss. Test results are not used for further tuning.
+
+### 6.3 Metrics
+
+Task metrics are Has0 and Non0 binary accuracy/F1, five-class and seven-class accuracy, mean absolute error (MAE), Pearson correlation, and test loss when available. Reliability metrics are severity--score Spearman correlation, clean/corrupt AUROC, the fraction of strongest corruptions scoring below their clean counterparts, and correlations with sequence length and feature energy. We report the mean and sample standard deviation across three seeds. Three seeds are descriptive and do not support a claim of statistical significance.
+
+### 6.4 Implementation checks
+
+The MOSEI port and the shared reliability/allocation implementation pass 33 server-side tests and Python syntax compilation. These tests cover per-sample losses, exact budget conservation, score controls, corruption ordering, padding protection, reliability-head invariances, clean-task routing, and cross-dataset consistency. Tests establish implementation contracts, not empirical effectiveness.
+
+## 7. Results
+
+### 7.1 Proxy auditing exposes reversed quality behavior
+
+The original norm-based curriculum score correlated strongly with the average number of valid time steps on MOSI ($r=0.8694$) but weakly with the sentiment label ($r=-0.1549$) and absolute label magnitude ($r=-0.0540$). When increasing Gaussian corruption was added only to active visual and acoustic steps, the average score increased rather than decreased. The correlation between severity and score reached 0.9687, 0.9704, and 0.9691 on the train, validation, and test splits, respectively; at the highest severity, 99.85% of test samples scored above their clean version. This proxy therefore violates both the confound and monotonicity requirements and is excluded from the final method.
+
+### 7.2 Reliability heads detect ordered synthetic degradation
+
+The final P4 Learned checkpoints were audited on all 686 MOSI test samples for each seed. Table 1 reports the aggregate results.
+
+**Table 1. Reliability audit on the frozen P4 Learned MOSI checkpoints (mean $\pm$ sample standard deviation over three seeds). More negative Spearman and higher AUROC indicate better degradation tracking.**
+
+| Modality | Spearman(severity, score) $\downarrow$ | Clean/corrupt AUROC $\uparrow$ | Key residual confound |
+|---|---:|---:|---:|
+| Vision | $-0.962946\pm0.004189$ | $0.995197\pm0.004719$ | Vision energy reaches 0.1535 in seed 1113 |
+| Audio | $-0.819850\pm0.007717$ | $0.941968\pm0.009641$ | Audio length $0.241182\pm0.012280$ |
+
+Both heads strongly distinguish synthetic degradation, and the converged checkpoints largely remove the energy shortcut observed in earlier pilots. The recurring audio-length association remains a measurable confound rather than a resolved issue. It must be re-evaluated on MOSEI and under non-Gaussian corruptions.
+
+### 7.3 Frozen three-seed MOSI comparison
+
+Table 2 gives the final matched comparison. P4 Learned improves both binary metric pairs, MAE, correlation, and test loss over P4 Constant in the three-seed mean. Acc-5 is effectively tied, whereas Acc-7 is lower by 0.0015. Relative to repaired MFON, P4 Learned improves the binary metrics, MAE, and correlation but loses 0.0073 Acc-5 and 0.0141 Acc-7.
+
+**Table 2. Clean CMU-MOSI performance. Values are mean $\pm$ sample standard deviation over seeds 1111, 1112, and 1113. Best values between the two equal-budget P4 variants are bold.**
+
+| Method | Has0 Acc-2 $\uparrow$ | Has0 F1 $\uparrow$ | Non0 Acc-2 $\uparrow$ | Non0 F1 $\uparrow$ | Acc-5 $\uparrow$ | Acc-7 $\uparrow$ | MAE $\downarrow$ | Corr $\uparrow$ | Loss $\downarrow$ |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Repaired MFON | $0.8270\pm0.0009$ | $0.8260\pm0.0008$ | $0.8476\pm0.0016$ | $0.8472\pm0.0014$ | $0.5063\pm0.0099$ | $0.4505\pm0.0125$ | $0.7258\pm0.0028$ | $0.7943\pm0.0015$ | TBD |
+| P4 Constant | $0.8285\pm0.0022$ | $0.8277\pm0.0019$ | $0.8486\pm0.0017$ | $0.8484\pm0.0014$ | $0.4990\pm0.0009$ | **$0.4378\pm0.0075$** | $0.7263\pm0.0069$ | $0.7937\pm0.0033$ | $0.9809\pm0.0160$ |
+| P4 Learned | **$0.8299\pm0.0031$** | **$0.8290\pm0.0029$** | **$0.8496\pm0.0032$** | **$0.8493\pm0.0030$** | **$0.4990\pm0.0072$** | $0.4363\pm0.0067$ | **$0.7213\pm0.0068$** | **$0.7952\pm0.0035$** | **$0.9708\pm0.0122$** |
+
+The corresponding Learned-minus-Constant deltas are +0.0015 Has0 Acc-2, +0.0014 Has0 F1, +0.0010 Non0 Acc-2/F1, approximately zero Acc-5, $-0.0015$ Acc-7, $-0.0050$ MAE, +0.0015 correlation, and $-0.0101$ loss. The evidence therefore favors learned redistribution for the primary binary/regression view of MOSI, but it does not support the stronger statement that every classification resolution improves.
+
+### 7.4 Earlier actionability controls show metric-dependent effects
+
+Before the final P4 schedule was frozen, a matched seed-1111 study compared learned allocation with constant, reversed, permuted, and oracle controls. Learned allocation was favorable to Constant on the binary metrics, Acc-5, MAE, correlation, and loss, but lower on Acc-7. It was favorable to Reversed on all reported metrics except correlation, and favorable to Permuted on the binary metrics, MAE, correlation, and loss while Permuted obtained higher Acc-5/7. Oracle obtained better Acc-5/7 and MAE, whereas Learned obtained better binary metrics, correlation, and loss. These results show that score ordering and score--sample correspondence can matter, but their effect depends on the evaluation metric. Because this study used the earlier schedule, it is supporting diagnostic evidence rather than a substitute for multi-seed controls under the final P4 configuration.
+
+### 7.5 Severe audio/visual corruption barely changes predictions
+
+Across the completed MOSI reliability audits, severe corruption of the acoustic or visual feature stream produced only small changes in task predictions. This observation does not negate the reliability-head results: the heads are optimized to measure synthetic degradation, while reliability controls training-time auxiliary losses. It does, however, limit the inference-time interpretation. The current MFON checkpoints are strongly text-dominant, so the study cannot claim that the learned scores already provide dynamic, noise-adaptive fusion at inference.
+
+### 7.6 MOSEI transfer is an active experiment, not a result
+
+The frozen P4 implementation has been ported to MOSEI without changing the original feature dimensions, learning rates, or base auxiliary weights. Server-side tests pass, and the seed-1111 acoustic encoder is currently training. The required order is acoustic encoder, visual encoder, two-epoch P4 Learned smoke test with checkpoint reload, and only then a frozen seed-1111 comparison of repaired MFON, P4 Constant, and P4 Learned. No MOSEI number is included in this manuscript until those gates complete.
+
+## 8. Discussion
+
+### 8.1 What the current evidence establishes
+
+The strongest conclusion is methodological rather than leaderboard-oriented. A quality-aware mechanism should not be trusted merely because it contains a scalar named quality. The norm-proxy audit demonstrates how a plausible score can reverse the intended degradation ordering, and the implementation audit demonstrates how nominally sample-wise weighting can disappear through batch reduction. The final P4 design removes these two ambiguities: reliability remains a sample vector, losses remain unreduced until weighting, and every batch preserves the same mean auxiliary budget.
+
+Under these controls, P4 Learned has a modest but coherent advantage over P4 Constant on binary sentiment classification, MAE, correlation, and loss. Since the only intended difference is which samples receive the fixed auxiliary budget, this comparison supports the claim that reliability-guided redistribution is not equivalent to uniform allocation. The effect is nevertheless small and metric-dependent. Fine-grained classification does not improve consistently, and three seeds are insufficient for statistical-significance claims.
+
+### 8.2 Why reliability measurement does not imply robust fusion
+
+The reliability heads achieve high AUROC under the synthetic corruption family, but the sentiment predictor reacts weakly when only audio or vision is degraded. A likely explanation is text dominance in MOSI: auxiliary reliability can shape representation learning without causing a large inference-time change in the final prediction. Accordingly, the current method should be described as *reliability-aware auxiliary-supervision allocation*, not as a demonstrated inference-time robust fusion mechanism. Establishing the latter would require an explicit reliability-conditioned inference path and matched degradation experiments.
+
+### 8.3 Alternative explanations and open confounds
+
+The acoustic reliability score retains a repeatable correlation with effective length. This could reflect a residual shortcut, a genuine relation between temporal evidence and corruption detectability, or both. The present data do not distinguish these explanations. Cross-dataset evaluation on MOSEI, padding-preserving interventions, and non-Gaussian acoustic corruptions are needed before treating the acoustic head as a general reliability estimator.
+
+The synthetic Gaussian corruption family is another boundary. It offers ordered interventions and controlled severity, but it does not cover automatic-speech-recognition errors, real background mixtures, facial occlusion, dropped frames, temporal misalignment, or complete modality absence. High discrimination on this family therefore validates the training target under the tested intervention; it does not establish perceptual quality or deployment robustness.
+
+### 8.4 Relation to existing quality-aware methods
+
+The contribution is not the generic idea of reliability weighting, corruption ranking, or maintaining an expected weight. These ideas have close precedents in dynamic fusion and supervised low-quality learning [@zhang2023qmf; @mai2025samlml]. The narrower contribution is an audit-and-control package for training-time auxiliary learning: test the score, retain loss granularity, hold the finite-batch budget exactly constant, and compare sample assignments without changing total supervision. Whether this package transfers beyond MFON remains an empirical question rather than an established model-agnostic property.
+
+## 9. Limitations, Reproducibility, and Responsible Use
+
+This draft has four primary empirical limitations. First, the frozen main evidence comes from one dataset and three seeds. Second, the reliability intervention uses pre-extracted features and synthetic Gaussian corruption. Third, the final P4 multi-seed study currently includes only Learned and Constant; the complete permuted, reversed, and oracle suite has not yet been repeated under the final schedule. Fourth, baseline loss is unavailable, preventing a complete loss comparison with repaired MFON.
+
+Reproducibility controls include fixed seeds, validation-based checkpoint selection, unit tests for mathematical contracts, explicit logging of score and weight means and standard deviations, and a staged cross-dataset gate. The repository should release code and lightweight configuration files but must not redistribute dataset files, BERT weights, private checkpoints, credentials, or personal attachments.
+
+Sentiment prediction should not be interpreted as a direct measurement of a person's psychological state, intent, political position, or truthfulness. Any later deployment should use uncertain or low-reliability outputs as a prompt for human review rather than as an autonomous basis for sanctions, profiling, or other high-impact decisions.
+
+## 10. Conclusion
+
+This study reframes quality-aware multimodal sentiment analysis as an auditable optimization problem. We identify failures caused by batch-level score aggregation, premature loss reduction, unconstrained auxiliary weights, and a norm proxy that rewards stronger corruption. We then learn modality reliability from ordered interventions and use it to redistribute per-sample MFON auxiliary losses under an exact finite-batch budget. Frozen three-seed MOSI results suggest that learned redistribution is preferable to uniform redistribution for binary and regression-oriented metrics, while fine-grained classification remains mixed. The reliability heads strongly detect the tested synthetic degradation, but acoustic length dependence, text-dominant inference, incomplete MOSEI validation, and missing real-world stress tests bound the claim. The present evidence therefore supports audited training-time supervision allocation, not universal performance improvement or inference-time robust fusion.
+
+---
+
+## Author-facing drafting ledger
+
+### One-sentence argument
+
+In MFON-based multimodal sentiment analysis, audited reliability scores can redistribute per-sample auxiliary supervision under an exactly fixed batch budget, with MOSI evidence showing bounded binary/regression benefits and explicit fine-grained, confound, and inference-time limitations.
+
+### Terminology ledger
+
+| Canonical term | Definition and usage decision |
+|---|---|
+| MFON | Base architecture; never presented as an original component of this work |
+| modality reliability | Response of a visual or acoustic feature stream to the modeled degradation; distinct from task utility |
+| interventional reliability | Reliability learned from ordered clean--mild--strong corruption triplets |
+| fixed-budget allocation | Per-sample redistribution whose batch-mean auxiliary coefficient remains exactly equal to the base coefficient |
+| allocation warmup | Interpolation from uniform allocation to reliability-normalized allocation without changing the mean budget |
+| P4 Learned | Final frozen reliability-aware allocation configuration |
+| P4 Constant | Equal-budget uniform-allocation control with the remaining training machinery matched |
+| actionability | Sensitivity of allocation, gradients, or evaluated performance to the score--sample relation |
+
+### Claim--evidence map
+
+| Claim | Evidence | Status |
+|---|---|---|
+| The old norm proxy is not a valid reliability signal | Length correlation 0.8694; severity--score correlation 0.9691 on MOSI test; 99.85% of strongest corruptions score above clean | Supported for this proxy and dataset |
+| Final visual and acoustic heads detect synthetic degradation | Three-seed full-test Spearman/AUROC audits | Supported for the tested Gaussian feature corruption |
+| Learned allocation differs meaningfully from uniform allocation | P4 Learned versus P4 Constant across three frozen MOSI seeds | Supported descriptively; no significance claim |
+| The method improves every MOSI metric | Acc-5 is tied and Acc-7 is lower than Constant; Acc-5/7 are below repaired MFON | Rejected |
+| The method provides inference-time robust fusion | Predictions change little under isolated audio/visual corruption | Not supported |
+| The method generalizes across datasets | MOSEI training is ongoing; SIMS not ported | Needs evidence |
+| The reliability estimator is free of confounds | Audio-length correlation remains $0.2412\pm0.0123$ | Not supported |
+
+### Missing inputs before submission
+
+- Completed MOSEI results under the frozen gate and, if retained in scope, CH-SIMS results.
+- Final-schedule multi-seed permuted/reversed/oracle controls or a narrower actionability claim.
+- Realistic acoustic, visual, missing-modality, and temporal-misalignment stress tests.
+- Runtime, parameter, memory, and training-cost measurements.
+- A focused closest-work pass after MOSEI results stabilize; the bibliography now contains 27 verified entries, but citation coverage should still be rechecked against the final claim set.
+- Target venue, official template, page limit, and anonymity requirements.
+- A pipeline figure and a claim-aligned experiment figure/table plan.
+
+### Five-dimension self-review
+
+| Dimension | Reviewer-facing question | Current assessment | Required revision or evidence |
+|---|---|---|---|
+| Contribution | Is the contribution more than ordinary reliability weighting? | The audit + exact-budget control gives a distinct, bounded story, but novelty remains vulnerable without broader validation. | Lead with falsifiable audit/control principles; do not market the reliability head alone as novel. |
+| Writing clarity | Can a reader reconstruct the pipeline and distinguish reliability from task utility? | The distinction and equations are explicit; the absence of a pipeline figure increases reading cost. | Add one overview figure showing triplet generation, reliability heads, per-sample losses, and fixed-budget redistribution. |
+| Experimental strength | Does evidence extend beyond one small benchmark? | No. MOSI evidence is internally matched, but cross-dataset evidence is incomplete. | Complete the gated MOSEI comparison before strengthening the abstract or conclusion. |
+| Evaluation completeness | Are causality, robustness, and efficiency tested under the final schedule? | Only the final Learned/Constant multi-seed contrast is complete; broader controls and realistic corruptions remain missing. | Repeat key actionability controls under P4 or narrow the claim; add corruption, missing-modality, and cost results. |
+| Method soundness | Is allocating more auxiliary weight to higher-reliability samples theoretically and empirically justified? | Budget conservation is exact and the descriptive MOSI comparison is favorable, but the preferred allocation direction is not yet explained by a formal analysis. | Add gradient/allocation analysis and compare reliability-proportional allocation with at least one difficulty-aware alternative under the same budget. |
