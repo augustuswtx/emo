@@ -841,3 +841,23 @@ not collected in this local handoff
 3. The MOSI three-seed matched comparison is complete; freeze it and stop tuning on the MOSI test split.
 4. Use validation results for any later candidate selection; reserve test results for the frozen method.
 5. Extend the frozen method and matched baselines to MOSEI and SIMS, then add controlled-degradation robustness, ablation, efficiency, and significance evidence.
+
+## 2026-08-12 MOSEI Seed-1111 Unimodal Encoder Milestone
+
+The user confirmed that MOSEI seed-1111 acoustic encoder training completed and
+that both expected checkpoints exist:
+
+```text
+MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_audio_encoder.pt  28M
+MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_audio_decoder.pt  1.3M
+```
+
+The server reported both file modification times as Aug 11 00:17. No acoustic
+training process should be started again.
+
+After this checkpoint gate passed, the user started the frozen seed-1111 visual
+encoder command with `nohup`. The shell reported background PID 839 and the log
+target is `mosei_vision_encoder_1111.log`. This records only successful process
+launch, not training completion. The next action is read-only monitoring of the
+visual process and log. Do not start another visual encoder. Fusion smoke
+testing remains blocked until both visual checkpoint files exist.

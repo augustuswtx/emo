@@ -1,4 +1,4 @@
-# MOSEI实验交接（2026-08-10）
+# MOSEI实验交接（2026-08-12）
 
 > 新Codex对话请先读本文件，再读 `PROJECT-CONTEXT-LATEST.md` 和
 > `docs/experiment-log.md`。不要从零开始，不要重复启动正在运行的任务。
@@ -69,8 +69,40 @@ MOSI/save_models共5.8GB
 
 ## 5. 当前正在运行的任务
 
-MOSEI seed 1111 audio encoder已用`nohup`启动。用户报告第一轮耗时约53分钟，
-25轮估计约22小时。该任务在本交接时**尚未确认完成**。
+MOSEI seed 1111 audio encoder已经完成。用户于2026-08-12确认以下两个文件存在；
+服务器显示的文件修改时间为Aug 11 00:17：
+
+```text
+MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_audio_encoder.pt  28M
+MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_audio_decoder.pt  1.3M
+```
+
+seed 1111 vision encoder随后已用`nohup`启动，启动时shell报告PID `839`：
+
+```bash
+cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \
+python run_experiment.py --dataset MOSEI --stage train-vision --seed 1111 \
+  > mosei_vision_encoder_1111.log 2>&1 & echo $!
+```
+
+新对话第一步只能检查视觉进程和日志，不得重新启动audio或vision：
+
+```bash
+cd /home/jovyan/projects/MFON
+ps -eo pid,etimes,%cpu,%mem,stat,cmd | grep "[r]un_experiment.py.*MOSEI.*train-vision.*1111"
+grep -a -o "Epoch:[0-9]*" mosei_vision_encoder_1111.log | tail -n 1
+tr '\r' '\n' < mosei_vision_encoder_1111.log | tail -n 20
+```
+
+视觉完成后确认：
+
+```bash
+ls -lh \
+  MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_vision_encoder.pt \
+  MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_vision_decoder.pt
+```
+
+以下audio启动命令仅作为历史记录，不得重复执行：
 
 启动时使用的命令：
 
@@ -80,7 +112,7 @@ python run_experiment.py --dataset MOSEI --stage train-audio --seed 1111 \
   > mosei_audio_encoder_1111.log 2>&1 & echo $!
 ```
 
-新对话第一步只能检查，不得直接重启：
+历史audio检查命令：
 
 ```bash
 cd /home/jovyan/projects/MFON
@@ -99,9 +131,9 @@ ls -lh \
 
 ## 6. 后续严格顺序
 
-### A. 训练seed 1111视觉encoder
+### A. 训练seed 1111视觉encoder（进行中）
 
-只有audio完成后运行：
+audio已完成，vision已于2026-08-12启动；不要重复运行以下启动命令：
 
 ```bash
 cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \
