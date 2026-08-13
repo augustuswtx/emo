@@ -25,7 +25,7 @@ For the active MOSEI run, read [`MOSEI-HANDOFF-LATEST.md`](MOSEI-HANDOFF-LATEST.
 
 ## Current Status
 
-The MOSI three-seed P4 comparison and final reliability audits are complete and frozen. P4 has been ported to MOSEI and passed 33 server tests. The MOSEI seed-1111 acoustic encoder is complete and visual encoder training is in progress; no MOSEI fusion result has been claimed yet.
+The MOSI three-seed P4 comparison and final reliability audits are complete and frozen. P4 has been ported to MOSEI and passed 33 server tests. The MOSEI seed-1111 acoustic and visual encoders are complete; the two-epoch fusion smoke and checkpoint-reload test are the next gates, and no MOSEI fusion result has been claimed yet.
 
 ## Data And Integrity
 

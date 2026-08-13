@@ -132,10 +132,11 @@ SHA256 9cc49c6978290e5442ac55b460c74752c2ac3fceebeb06c0232776dd330d8994
 服务器预检确认MOSEI数据存在（13GB），但seeds 1111--1113均无单模态encoder。清理17个
 旧MOSI诊断checkpoint后，九个最终baseline/P4 checkpoint完整保留，可用空间从1.2GB恢复到
 12GB。P5包已安装；服务器33项测试全部通过，关键文件语法编译通过，MOSEI命令行限制已解除。
-MOSEI seed 1111 audio encoder已经完成并确认保存：encoder 28M、decoder 1.3M；
-服务器文件时间为Aug 11 00:17。seed 1111 vision encoder已于2026-08-12通过`nohup`
-启动，shell报告PID 839。当前只检查`mosei_vision_encoder_1111.log`和视觉进程，
-不得重复启动audio或vision；视觉完成并确认两个checkpoint后，才运行两轮融合smoke。
+MOSEI seed 1111 audio encoder已经完成并确认保存：encoder 28M、decoder 1.3M，
+文件时间为Aug 11 00:17。vision encoder也已完成并确认保存：encoder 55M、
+decoder 1.3M，文件时间为Aug 12 05:43。不得重复启动audio或vision。下一步先重新
+运行33项测试；通过后运行两轮P4 Learned smoke，确认checkpoint保存，再使用相同P4
+参数和`exp-name`执行`test-fusion`重载测试。两个门槛都通过前不得启动25轮融合训练。
 
 P4 Learned true-budget seed 1112公平测试已经完成：
 

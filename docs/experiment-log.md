@@ -861,3 +861,20 @@ target is `mosei_vision_encoder_1111.log`. This records only successful process
 launch, not training completion. The next action is read-only monitoring of the
 visual process and log. Do not start another visual encoder. Fusion smoke
 testing remains blocked until both visual checkpoint files exist.
+
+## 2026-08-13 MOSEI Seed-1111 Visual Encoder Completion
+
+The user confirmed that both expected MOSEI seed-1111 visual checkpoints
+exist:
+
+```text
+MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_vision_encoder.pt  55M
+MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_vision_decoder.pt  1.3M
+```
+
+The server reported both file modification times as Aug 12 05:43. The audio
+and visual unimodal checkpoint gates are therefore complete. No unimodal
+training process should be started again. The next gate is to rerun the 33
+server tests, then execute only the two-epoch P4 Learned fusion smoke. A formal
+25-epoch fusion run remains blocked until the smoke checkpoint is saved and
+successfully reloaded by `test-fusion` with the same P4 configuration.

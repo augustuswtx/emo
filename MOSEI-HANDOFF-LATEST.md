@@ -1,4 +1,4 @@
-# MOSEI实验交接（2026-08-12）
+# MOSEI实验交接（2026-08-13）
 
 > 新Codex对话请先读本文件，再读 `PROJECT-CONTEXT-LATEST.md` 和
 > `docs/experiment-log.md`。不要从零开始，不要重复启动正在运行的任务。
@@ -77,7 +77,15 @@ MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_audio_encoder.pt  28M
 MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_audio_decoder.pt  1.3M
 ```
 
-seed 1111 vision encoder随后已用`nohup`启动，启动时shell报告PID `839`：
+seed 1111 vision encoder随后已用`nohup`启动，启动时shell报告PID `839`，并已完成。
+用户于2026-08-13确认以下两个文件存在；服务器显示的文件修改时间为Aug 12 05:43：
+
+```text
+MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_vision_encoder.pt  55M
+MOSEI/save_models/uni_fea_encoder/MOSEI/1111/best_loss_vision_decoder.pt  1.3M
+```
+
+以下vision启动命令仅作为历史记录，不得重复执行：
 
 ```bash
 cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \
@@ -85,7 +93,8 @@ python run_experiment.py --dataset MOSEI --stage train-vision --seed 1111 \
   > mosei_vision_encoder_1111.log 2>&1 & echo $!
 ```
 
-新对话第一步只能检查视觉进程和日志，不得重新启动audio或vision：
+audio和vision前置训练均已完成，不得重新启动。下一步先重新执行33项测试；测试通过后
+才启动两轮P4 Learned smoke：
 
 ```bash
 cd /home/jovyan/projects/MFON
@@ -94,7 +103,7 @@ grep -a -o "Epoch:[0-9]*" mosei_vision_encoder_1111.log | tail -n 1
 tr '\r' '\n' < mosei_vision_encoder_1111.log | tail -n 20
 ```
 
-视觉完成后确认：
+视觉checkpoint历史确认命令：
 
 ```bash
 ls -lh \
@@ -131,9 +140,9 @@ ls -lh \
 
 ## 6. 后续严格顺序
 
-### A. 训练seed 1111视觉encoder（进行中）
+### A. 训练seed 1111视觉encoder（已完成）
 
-audio已完成，vision已于2026-08-12启动；不要重复运行以下启动命令：
+audio和vision均已完成；不要重复运行以下启动命令：
 
 ```bash
 cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \
@@ -169,7 +178,20 @@ task_corruption_progress=0
 checkpoint保存成功
 ```
 
-smoke checkpoint还必须重新加载并完成test。未经该门槛，不得启动25轮融合训练。
+smoke checkpoint保存后，必须使用同一配置重新加载并完成test：
+
+```bash
+cd /home/jovyan/projects/MFON
+python run_experiment.py --dataset MOSEI --stage test-fusion --seed 1111 \
+  --use-budgeted-aux --use-interventional-reliability \
+  --warmup-epoch 10 --budget-warmup-mode allocation \
+  --reliability-task-warmup-epoch 10 --reliability-task-corrupt-scale 0 \
+  --reliability-allocation-control learned \
+  --exp-name p5_mosei_p4_learned_smoke \
+  2>&1 | tee mosei_p5_p4_learned_smoke_test_1111.log
+```
+
+未经保存与重载测试两个门槛，不得启动25轮融合训练。
 
 ### C. 正式MOSEI证据
 
