@@ -878,3 +878,40 @@ training process should be started again. The next gate is to rerun the 33
 server tests, then execute only the two-epoch P4 Learned fusion smoke. A formal
 25-epoch fusion run remains blocked until the smoke checkpoint is saved and
 successfully reloaded by `test-fusion` with the same P4 configuration.
+
+## 2026-08-13 MOSEI P4 Learned Two-Epoch Smoke Training Gate
+
+The user supplied the epoch-2 training log for
+`p5_mosei_p4_learned_smoke`. The reported statistics were:
+
+```text
+q_v=0.719222, q_a=0.943149
+q_v_std=0.063758, q_a_std=0.008467
+w_v=0.300000, w_a=0.300000
+w_v_std=0.005322, w_a_std=0.000540
+w_nce_v=0.001000, w_nce_a=0.001000
+loss_v=0.126483, loss_a=0.022530, loss_nce=0.006446
+allocation_progress=0.2
+loss_reliability=0.004354
+loss_rank=0.004343, loss_invariance=0.000114
+q_gap_v=0.197342, q_gap_a=0.243674
+q_task_gap_v=0.0, q_task_gap_a=0.0
+severity_v=0.336377, severity_a=0.331287
+task_corruption_progress=0.0
+```
+
+The checkpoint was reported saved at:
+
+```text
+/home/jovyan/projects/MFON/MOSEI/save_models/all_model/MOSEI/1111/p5_mosei_p4_learned_smoke/TVA_fusion_model.pt
+```
+
+The training-side smoke gate passes: all four mean budgets exactly match the
+MOSEI baseline, both learned allocation standard deviations are non-zero, both
+clean-minus-corrupt reliability gaps are positive, the task path remains
+clean, and a checkpoint was saved. The audio allocation dispersion is much
+smaller than the visual dispersion but remains non-zero; this is a monitoring
+item rather than a smoke failure. No effectiveness claim is made from a
+two-epoch smoke. The only authorized next step is checkpoint reload and
+`test-fusion` with the same P4 flags and experiment name. A 25-epoch run remains
+blocked until that test completes successfully.

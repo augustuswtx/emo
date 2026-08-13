@@ -152,7 +152,7 @@ python run_experiment.py --dataset MOSEI --stage train-vision --seed 1111 \
 
 完成后确认`best_loss_vision_encoder.pt`和`best_loss_vision_decoder.pt`。
 
-### B. 两轮P4 Learned smoke
+### B. 两轮P4 Learned smoke（训练侧已通过）
 
 只有audio/vision encoder都存在且33项测试仍通过后运行：
 
@@ -191,7 +191,23 @@ python run_experiment.py --dataset MOSEI --stage test-fusion --seed 1111 \
   2>&1 | tee mosei_p5_p4_learned_smoke_test_1111.log
 ```
 
-未经保存与重载测试两个门槛，不得启动25轮融合训练。
+2026-08-13用户提供的Epoch 2日志确认训练侧门槛通过：
+
+```text
+q_v=0.719222, q_a=0.943149
+q_v_std=0.063758, q_a_std=0.008467
+w_v=w_a=0.3
+w_v_std=0.005322, w_a_std=0.000540
+w_nce_v=w_nce_a=0.001
+q_gap_v=0.197342, q_gap_a=0.243674
+task_corruption_progress=0.0
+checkpoint=/home/jovyan/projects/MFON/MOSEI/save_models/all_model/MOSEI/1111/p5_mosei_p4_learned_smoke/TVA_fusion_model.pt
+```
+
+四项均值预算匹配，Learned分配标准差非零，两个可靠性gap均为正，主任务路径保持
+干净，checkpoint已保存。音频权重标准差较小但非零，需要在正式训练中继续监控，
+目前不构成smoke失败。现在只允许执行上述`test-fusion`重载命令。未经重载测试门槛，
+不得启动25轮融合训练。
 
 ### C. 正式MOSEI证据
 

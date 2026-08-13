@@ -136,7 +136,10 @@ MOSEI seed 1111 audio encoder已经完成并确认保存：encoder 28M、decoder
 文件时间为Aug 11 00:17。vision encoder也已完成并确认保存：encoder 55M、
 decoder 1.3M，文件时间为Aug 12 05:43。不得重复启动audio或vision。下一步先重新
 运行33项测试；通过后运行两轮P4 Learned smoke，确认checkpoint保存，再使用相同P4
-参数和`exp-name`执行`test-fusion`重载测试。两个门槛都通过前不得启动25轮融合训练。
+参数和`exp-name`执行`test-fusion`重载测试。两轮smoke训练已于2026-08-13完成：
+四项平均预算分别精确为0.3、0.3、0.001、0.001，视觉/音频权重标准差分别为
+0.005322/0.000540，q_gap分别为0.197342/0.243674，主任务扰动进度为0，checkpoint
+已保存。当前只差`test-fusion`重载测试；通过前不得启动25轮融合训练。
 
 P4 Learned true-budget seed 1112公平测试已经完成：
 
