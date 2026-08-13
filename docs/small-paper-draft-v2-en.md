@@ -205,7 +205,7 @@ P4 Learned uses the predicted reliability scores; P4 Constant replaces every sco
 
 ### 6.1 Datasets and current scope
 
-CMU-MOSI [@zadeh2016multimodal] is used for the frozen main comparison and reliability audit. CMU-MOSEI [@zadeh2018mosei] is the next cross-dataset evaluation; at the time of this draft, the seed-1111 acoustic and visual encoders and two-epoch fusion smoke training are complete, while checkpoint reload testing remains pending, so no MOSEI performance is reported. CH-SIMS and additional backbones remain planned. We do not use any unfinished experiment to choose or revise the frozen P4 hyperparameters.
+CMU-MOSI [@zadeh2016multimodal] is used for the frozen main comparison and reliability audit. CMU-MOSEI [@zadeh2018mosei] is the next cross-dataset evaluation; at the time of this draft, the seed-1111 acoustic and visual encoders and the complete two-epoch fusion smoke gate are finished, while formal fusion experiments remain pending, so no MOSEI performance is reported. CH-SIMS and additional backbones remain planned. We do not use any unfinished experiment to choose or revise the frozen P4 hyperparameters.
 
 ### 6.2 Compared methods
 
@@ -262,7 +262,7 @@ Across the completed MOSI reliability audits, severe corruption of the acoustic 
 
 ### 7.6 MOSEI transfer is an active experiment, not a result
 
-The frozen P4 implementation has been ported to MOSEI without changing the original feature dimensions, learning rates, or base auxiliary weights. Server-side tests pass, the seed-1111 acoustic and visual encoders are complete, and the two-epoch P4 Learned smoke satisfies its training-side budget, reliability-gap, clean-task-path, and checkpoint-save gates. Checkpoint reload testing remains pending; only after it passes will we conduct a frozen seed-1111 comparison of repaired MFON, P4 Constant, and P4 Learned. No MOSEI number is included in this manuscript until those gates complete.
+The frozen P4 implementation has been ported to MOSEI without changing the original feature dimensions, learning rates, or base auxiliary weights. Server-side tests pass, the seed-1111 acoustic and visual encoders are complete, and the two-epoch P4 Learned smoke satisfies its budget, reliability-gap, clean-task-path, checkpoint-save, reload, and full-test gates. We next conduct a frozen seed-1111 comparison of repaired MFON, P4 Constant, and P4 Learned. No two-epoch smoke metric is treated as performance evidence, and no MOSEI number is included in this manuscript until the formal comparison completes.
 
 ## 8. Discussion
 

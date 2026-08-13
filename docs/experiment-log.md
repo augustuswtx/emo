@@ -915,3 +915,20 @@ item rather than a smoke failure. No effectiveness claim is made from a
 two-epoch smoke. The only authorized next step is checkpoint reload and
 `test-fusion` with the same P4 flags and experiment name. A 25-epoch run remains
 blocked until that test completes successfully.
+
+## 2026-08-13 MOSEI Smoke Checkpoint Reload Gate
+
+The user reported that `test-fusion` successfully reloaded the
+`p5_mosei_p4_learned_smoke` checkpoint and completed the full MOSEI test pass:
+
+| Setting | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| P5 P4 Learned smoke, 2 epochs | 0.8008 | 0.8075 | 0.8550 | 0.8552 | 0.5463 | 0.5302 | 0.5388 | 0.7742 | 0.49853695405478843 |
+
+This closes the engineering smoke gate for training, checkpoint saving,
+checkpoint reload, and complete inference. These two-epoch metrics are not
+formal performance evidence and must not enter the manuscript result tables or
+be compared with 25-epoch experiments. After a disk-space check, the next
+authorized experiment is only the frozen seed-1111 repaired MFON baseline,
+using experiment name `p5_mosei_repaired_baseline`. Constant and Learned must
+wait for that run to finish; no concurrent formal runs are authorized.

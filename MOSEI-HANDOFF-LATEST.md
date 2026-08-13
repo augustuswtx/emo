@@ -206,12 +206,23 @@ checkpoint=/home/jovyan/projects/MFON/MOSEI/save_models/all_model/MOSEI/1111/p5_
 
 四项均值预算匹配，Learned分配标准差非零，两个可靠性gap均为正，主任务路径保持
 干净，checkpoint已保存。音频权重标准差较小但非零，需要在正式训练中继续监控，
-目前不构成smoke失败。现在只允许执行上述`test-fusion`重载命令。未经重载测试门槛，
-不得启动25轮融合训练。
+目前不构成smoke失败。`test-fusion`重载已于2026-08-13完成，完整测试输出为：
+
+```text
+Has0 Acc-2=0.8008, Has0 F1=0.8075
+Non0 Acc-2=0.8550, Non0 F1=0.8552
+Acc-5=0.5463, Acc-7=0.5302
+MAE=0.5388, Corr=0.7742, Loss=0.49853695405478843
+```
+
+这些数值只证明checkpoint能够重载并完成完整测试，是两轮工程smoke，不得写入论文
+主结果或与25轮正式结果比较。训练、保存、重载和测试门槛现已全部通过。
 
 ### C. 正式MOSEI证据
 
-smoke通过后，先跑seed 1111：Repaired MFON baseline、P4 Constant、P4 Learned。
+smoke已通过。先检查磁盘，再按顺序跑seed 1111：Repaired MFON baseline、P4 Constant、
+P4 Learned；同一时间只启动一个。第一项正式实验名冻结为
+`p5_mosei_repaired_baseline`。
 只有seed 1111趋势合理，再扩展1112/1113。任何方法选择使用validation；不要依据MOSEI
 test继续调参。三种子完成后再做可靠性审计、均值/标准差和跨数据集结论。
 
