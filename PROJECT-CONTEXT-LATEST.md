@@ -142,8 +142,11 @@ decoder 1.3M，文件时间为Aug 12 05:43。不得重复启动audio或vision。
 已保存。`test-fusion`重载测试也已完成，得到Has0 Acc-2=0.8008、Has0 F1=0.8075、
 Non0 Acc-2=0.8550、Non0 F1=0.8552、Acc-5=0.5463、Acc-7=0.5302、MAE=0.5388、
 Corr=0.7742、Loss=0.49853695405478843。这些只是两轮工程smoke数值，不进入论文结果。
-训练、保存、重载和完整测试门槛均已通过。下一步检查磁盘后，只启动seed 1111
-修复版baseline正式实验，冻结实验名为`p5_mosei_repaired_baseline`。
+训练、保存、重载和完整测试门槛均已通过。seed 1111修复版baseline随后完成25轮训练
+和重载测试：Has0 Acc-2=0.8150、Has0 F1=0.8205、Non0 Acc-2=0.8635、Non0
+F1=0.8634、Acc-5=0.5426、Acc-7=0.5267、MAE=0.5372、Corr=0.7721、
+Loss=0.500200593969192；实验名为`p5_mosei_repaired_baseline`。下一步只运行seed 1111
+P4 Constant，冻结实验名为`p5_mosei_p4_constant_true_budget`，完成测试后再运行Learned。
 
 P4 Learned true-budget seed 1112公平测试已经完成：
 

@@ -262,7 +262,7 @@ Across the completed MOSI reliability audits, severe corruption of the acoustic 
 
 ### 7.6 MOSEI transfer is an active experiment, not a result
 
-The frozen P4 implementation has been ported to MOSEI without changing the original feature dimensions, learning rates, or base auxiliary weights. Server-side tests pass, the seed-1111 acoustic and visual encoders are complete, and the two-epoch P4 Learned smoke satisfies its budget, reliability-gap, clean-task-path, checkpoint-save, reload, and full-test gates. We next conduct a frozen seed-1111 comparison of repaired MFON, P4 Constant, and P4 Learned. No two-epoch smoke metric is treated as performance evidence, and no MOSEI number is included in this manuscript until the formal comparison completes.
+The frozen P4 implementation has been ported to MOSEI without changing the original feature dimensions, learning rates, or base auxiliary weights. Server-side tests pass, the seed-1111 acoustic and visual encoders are complete, and the two-epoch P4 Learned smoke satisfies its budget, reliability-gap, clean-task-path, checkpoint-save, reload, and full-test gates. The formal seed-1111 repaired MFON run has completed 25-epoch training and checkpoint-reloaded testing; its matched P4 Constant and P4 Learned runs remain pending. No two-epoch smoke metric is treated as performance evidence, and no comparative MOSEI claim is included until the matched comparison completes.
 
 ## 8. Discussion
 

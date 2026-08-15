@@ -220,9 +220,14 @@ MAE=0.5388, Corr=0.7742, Loss=0.49853695405478843
 
 ### C. 正式MOSEI证据
 
-smoke已通过。先检查磁盘，再按顺序跑seed 1111：Repaired MFON baseline、P4 Constant、
-P4 Learned；同一时间只启动一个。第一项正式实验名冻结为
-`p5_mosei_repaired_baseline`。
+smoke已通过。seed 1111 Repaired MFON baseline已经完成25轮训练、checkpoint重载和
+完整测试，正式结果为：Has0 Acc-2=0.8150、Has0 F1=0.8205、Non0 Acc-2=0.8635、
+Non0 F1=0.8634、Acc-5=0.5426、Acc-7=0.5267、MAE=0.5372、Corr=0.7721、
+Loss=0.500200593969192。实验名为`p5_mosei_repaired_baseline`。
+
+下一项只运行seed 1111 P4 Constant，冻结实验名为
+`p5_mosei_p4_constant_true_budget`；完成训练和重载测试后再运行P4 Learned。
+同一时间只启动一个。
 只有seed 1111趋势合理，再扩展1112/1113。任何方法选择使用validation；不要依据MOSEI
 test继续调参。三种子完成后再做可靠性审计、均值/标准差和跨数据集结论。
 

@@ -932,3 +932,18 @@ be compared with 25-epoch experiments. After a disk-space check, the next
 authorized experiment is only the frozen seed-1111 repaired MFON baseline,
 using experiment name `p5_mosei_repaired_baseline`. Constant and Learned must
 wait for that run to finish; no concurrent formal runs are authorized.
+
+## 2026-08-15 MOSEI Seed-1111 Repaired Baseline
+
+The user reported successful completion of the 25-epoch
+`p5_mosei_repaired_baseline` training run and checkpoint-reloaded full test:
+
+| Setting | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Repaired MFON, MOSEI seed 1111 | 0.8150 | 0.8205 | 0.8635 | 0.8634 | 0.5426 | 0.5267 | 0.5372 | 0.7721 | 0.500200593969192 |
+
+This is the first formal MOSEI comparison cell, not a complete comparative
+result. No method-level conclusion is permitted until the matched seed-1111
+P4 Constant and P4 Learned runs finish. The next authorized run is only P4
+Constant with experiment name `p5_mosei_p4_constant_true_budget`; P4 Learned
+must not run concurrently.
