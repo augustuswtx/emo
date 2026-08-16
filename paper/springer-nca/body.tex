@@ -158,8 +158,11 @@ handles incomplete inputs through probabilistic proxy modalities
 \cite{zhu2025prmf}, and QA-MoE models a continuous reliability spectrum
 for expert routing \cite{zhu2026qamoe}. CPSC calibrates both
 representations and gradients through conformal prediction
-\cite{jiang2026cpsc}. Our method does not claim that corruption-based
-ranking or quality-aware weighting is itself new. Its narrower
+\cite{jiang2026cpsc}. QMF and QA-MoE use quality or reliability to
+alter prediction-time fusion or routing, whereas P4 confines
+reliability to training-time auxiliary allocation and leaves the
+inference fusion graph unchanged. Our method does not claim that
+corruption-based ranking or quality-aware weighting is itself new. Its narrower
 distinction is to audit the score as an intermediate variable and
 compare allocations under an exactly matched training-time auxiliary
 budget.
@@ -428,6 +431,31 @@ L=L_{\mathrm{task}}+L_{\mathrm{aux}}
 \left(L_{\mathrm{rank}}^m+\lambda_iL_{\mathrm{inv}}^m\right).
 \]
 
+\subsection{Allocation-direction
+hypothesis}\label{allocation-direction-hypothesis}
+
+Assigning larger auxiliary weights to higher-reliability samples is a design
+hypothesis, not a consequence of budget conservation. Let (e_i^m) denote
+the unobserved error in the auxiliary target or positive-pair relation for
+modality (m). P4 assumes that, in expectation, larger reliability implies
+no larger auxiliary-target error:
+
+\[
+q_i^m>q_j^m
+\quad\Longrightarrow\quad
+\mathbb E[e_i^m\mid q_i^m]\le
+\mathbb E[e_j^m\mid q_j^m].
+\]
+
+Under this assumption, reliability-proportional allocation emphasizes samples
+for which frozen-teacher distillation and cross-modal alignment targets are
+more likely to be trustworthy, while the fixed-budget constraint prevents a
+reduction in total supervision. The assumption can fail: low-reliability
+samples may be useful hard examples, and degradation detectability need not
+equal auxiliary-target fidelity. We therefore treat the allocation direction
+as an empirical question rather than a theorem. An equal-budget inverse or
+difficulty-aware allocation is the decisive matched control.
+
 \subsection{Equal-budget controls}\label{equal-budget-controls}
 
 P4 Learned uses the predicted reliability scores; P4 Constant replaces
@@ -437,7 +465,10 @@ additionally permuted score--sample correspondence, reversed score
 ranks, and used severity-based oracle scores. Because those earlier
 controls were completed before the final P4 allocation-warmup schedule
 was frozen, we report them as diagnostic evidence rather than pooling
-them with the final three-seed P4 comparison.
+them with the final three-seed P4 comparison. The confirmatory experiment
+plan therefore precommits a final-schedule inverse/difficulty-aware control
+and a within-batch permuted control; neither is reported as completed
+evidence in this draft.
 
 \section{Experimental Protocol}\label{experimental-protocol}
 
@@ -477,12 +508,18 @@ frozen confirmatory evaluation.
 
 Task metrics are Has0 and Non0 binary accuracy/F1, five-class and
 seven-class accuracy, mean absolute error (MAE), Pearson correlation,
-and test loss when available. Reliability metrics are severity--score
-Spearman correlation, clean/corrupt AUROC, the fraction of strongest
-corruptions scoring below their clean counterparts, and correlations
-with sequence length and feature energy. We report the mean and sample
-standard deviation across three seeds. Three seeds are descriptive and
-do not support a claim of statistical significance.
+and test loss when available. For the frozen MOSEI comparison, MAE and
+correlation are the primary endpoints because the task is trained as
+sentiment regression. Has0/Non0 accuracy and F1 are secondary endpoints;
+Acc-5, Acc-7, and test loss are diagnostic outcomes. Reliability metrics
+are severity--score Spearman correlation, clean/corrupt AUROC, the fraction
+of strongest corruptions scoring below their clean counterparts, and
+correlations with sequence length and feature energy. We report every metric
+for every completed method, together with per-seed Learned-minus-Constant
+differences, the three-seed mean, and sample standard deviation. This
+hierarchy was fixed while seed-1111 P4 Constant was still training and before
+its formal test result was available. Three seeds remain descriptive and do
+not support a claim of statistical significance.
 
 \subsection{Implementation checks}\label{implementation-checks}
 
@@ -660,6 +697,14 @@ not improve consistently, and three seeds are insufficient for
 statistical-significance claims. The frozen MOSEI comparison is therefore
 the decision-relevant confirmation.
 
+The comparison with Constant does not by itself justify the direction of
+allocation. Reliability-proportional weighting and uniform weighting differ,
+but a difficulty-aware inverse allocation could also outperform Constant by
+concentrating gradients on hard samples. Until that matched control is
+completed under the final schedule, the defensible claim is that sample
+allocation can matter under a fixed budget---not that higher-reliability
+weighting is universally optimal.
+
 \subsection{Why reliability measurement does not imply robust
 fusion}\label{why-reliability-measurement-does-not-imply-robust-fusion}
 
@@ -709,15 +754,19 @@ empirical question rather than an established model-agnostic property.
 \section{Limitations, Reproducibility, and Responsible
 Use}\label{limitations-reproducibility-and-responsible-use}
 
-This draft has five primary empirical limitations. First, MOSI test-split
+This draft has six primary empirical limitations. First, MOSI test-split
 reliability diagnostics informed visual-head retention and acoustic-head
 redesign, so MOSI results are exploratory rather than an untouched
 confirmation. Second, the confirmatory MOSEI comparison is incomplete.
-Third, the reliability intervention uses pre-extracted features and synthetic
-Gaussian corruption. Fourth, the final P4 multi-seed study currently includes
-only Learned and Constant; the complete permuted, reversed, and oracle suite
-has not yet been repeated under the final schedule. Fifth, baseline loss is
-unavailable, preventing a complete loss comparison with repaired MFON.
+Third, reliability-proportional allocation assumes that higher input
+reliability implies more trustworthy auxiliary targets; the final-schedule
+inverse/difficulty-aware control needed to test this direction has not been
+completed. Fourth, the reliability intervention uses pre-extracted features
+and synthetic Gaussian corruption. Fifth, the final P4 multi-seed study
+currently includes only Learned and Constant; the complete permuted,
+reversed, and oracle suite has not yet been repeated under the final schedule.
+Sixth, baseline loss is unavailable, preventing a complete loss comparison
+with repaired MFON.
 
 Reproducibility controls include fixed seeds, validation-based
 checkpoint selection, unit tests for mathematical contracts, explicit

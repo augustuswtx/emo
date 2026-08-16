@@ -257,6 +257,10 @@ seed 1111 P4 Constant 已启动，冻结实验名为
 seed 1111 test 的好坏选择性取消。任何 checkpoint 选择使用 validation；MOSEI test
 输出只用于报告，不得继续调参。三种子完成后再做可靠性审计、均值/标准差和跨数据集结论。
 
+2026-08-16 第二轮审稿期间进一步预先固定：MOSEI 以 MAE/Corr 为主要终点，
+Has0/Non0 Acc-2/F1 为次要终点，Acc-5/7、Loss 与可靠性/混杂指标为诊断终点。
+所有指标必须完整报告。该决定记录于 P4 Constant 正式测试结果产生前，不得在看到结果后改换主指标。
+
 ## 7. 完整性边界
 
 - 不上传13GB数据、BERT权重、checkpoint、密钥或个人附件到GitHub。

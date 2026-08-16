@@ -19,6 +19,9 @@ Updated: 2026-08-16
   protocol is the confirmatory comparison.
 - Active experiment: MOSEI seed-1111 P4 Constant; repaired MFON is complete
   and P4 Learned is queued after Constant.
+- Confirmatory outcome hierarchy, fixed before the P4 Constant formal test:
+  MAE/Corr primary, Has0/Non0 accuracy/F1 secondary, and Acc-5/7, loss, and
+  reliability/confound measures diagnostic.
 
 ## Evidence gates
 
