@@ -484,9 +484,9 @@ reliability audit are exploratory rather than untouched confirmatory
 evidence. The P4 architecture, allocation direction, warmup, corruption
 scale, and auxiliary budgets were then frozen. CMU-MOSEI
 \cite{zadeh2018mosei} is the confirmatory cross-dataset evaluation under
-that protocol. The seed-1111 encoders, smoke gate, and repaired MFON run
-are complete; P4 Constant is the current formal run and P4 Learned remains
-pending. No MOSEI test result may be used to revise P4 or select an
+that protocol. The seed-1111 encoders, smoke gate, repaired MFON, and P4
+Constant runs are complete; P4 Learned remains pending. No MOSEI test
+result may be used to revise P4 or select an
 allocation variant.
 
 \subsection{Compared methods}\label{compared-methods}
@@ -664,12 +664,13 @@ allocation direction, or corruption schedule. Server-side tests pass, the
 seed-1111 acoustic and visual encoders are complete, and the two-epoch P4
 Learned smoke satisfies its budget, reliability-gap, clean-task-path,
 checkpoint-save, reload, and full-test gates. The formal seed-1111 repaired
-MFON run has completed 25-epoch training and checkpoint-reloaded testing.
-The matched P4 Constant run is currently in progress, and P4 Learned is
-queued only after Constant completes. No two-epoch smoke metric is treated
-as performance evidence, and no comparative MOSEI claim is included until
-the matched comparison completes. From this point onward, MOSEI test outputs
-are reporting-only; any method revision would require a new untouched
+MFON and matched P4 Constant runs have completed 25-epoch training and
+checkpoint-reloaded testing. Constant obtains MAE 0.5406 and correlation
+0.7735; the remaining task metrics are retained in the experiment ledger.
+P4 Learned remains queued under the unchanged frozen configuration. No
+two-epoch smoke metric is treated as performance evidence, and no comparative
+MOSEI claim is included until the matched Learned cell completes. MOSEI test
+outputs are reporting-only; any method revision would require a new untouched
 confirmation source.
 
 \section{Discussion}\label{discussion}

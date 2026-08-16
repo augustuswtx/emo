@@ -69,30 +69,42 @@ MOSI/save_models共5.8GB
 
 不要删除MOSEI数据、BERT、MOSI单模态encoder或上述九个checkpoint。
 
-## 5. 当前正在运行的任务
+## 5. 当前任务状态
 
-2026-08-16 当前唯一正式任务是 MOSEI seed 1111 P4 Constant，实验名：
-`p5_mosei_p4_constant_true_budget`。用户最后确认启动进程为 PID 239；由于服务器会话和
-网络可能变化，该 PID 只作历史记录。每次重连后必须先只读检查进程、日志和 checkpoint，
-不得因为看不到原终端而重复启动。日志位于项目目录
-`/home/jovyan/projects/MFON/mosei_p5_p4_constant_true_budget_1111.log`，此前从 `~` 直接
-执行 `tail` 找不到日志只是路径错误，不代表训练未启动。
+2026-08-16，MOSEI seed 1111 P4 Constant 已完成 25 轮训练、预算检查、586 MB checkpoint
+保存和同配置重载测试，实验名为 `p5_mosei_p4_constant_true_budget`。正式测试结果为：
+Has0 Acc-2=0.7995、Has0 F1=0.8064、Non0 Acc-2=0.8555、Non0 F1=0.8559、
+Acc-5=0.5467、Acc-7=0.5304、MAE=0.5406、Corr=0.7735、
+Loss=0.5008784563954897。该结果只是一个确认性控制单元，不能在 P4 Learned 完成前形成
+方法结论，也不得用于修改 Learned 配置或既定指标层级。
+
+下一项唯一正式任务是冻结配置的 MOSEI seed 1111 P4 Learned，正式实验名固定为
+`p5_mosei_p4_learned_true_budget`。启动前仍须只读确认没有遗留的训练或测试进程；同一
+时间只能运行一个正式任务。
 
 重连后的第一组命令只能检查，不启动训练：
 
 ```bash
 cd /home/jovyan/projects/MFON
-pgrep -af "run_experiment.py.*MOSEI.*train-fusion.*p5_mosei_p4_constant_true_budget"
-ls -lh mosei_p5_p4_constant_true_budget_1111.log
-tr '\r' '\n' < mosei_p5_p4_constant_true_budget_1111.log | tail -n 30
+pgrep -af "run_experiment.py.*MOSEI"
+ls -lh MOSEI/save_models/all_model/MOSEI/1111/p5_mosei_p4_constant_true_budget/TVA_fusion_model.pt
+tail -n 30 mosei_p5_p4_constant_true_budget_1111_test.log
 nvidia-smi
 ```
 
-若进程存在，使用以下命令查看实时日志：
+确认无遗留进程且磁盘空间充足后，下一条正式训练命令固定为：
 
 ```bash
-cd /home/jovyan/projects/MFON
-tail -n 30 -f mosei_p5_p4_constant_true_budget_1111.log
+cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \
+python run_experiment.py \
+  --dataset MOSEI --stage train-fusion --seed 1111 --epochs 25 \
+  --use-budgeted-aux --use-interventional-reliability \
+  --warmup-epoch 10 --budget-warmup-mode allocation \
+  --reliability-task-warmup-epoch 10 \
+  --reliability-task-corrupt-scale 0 \
+  --reliability-allocation-control learned \
+  --exp-name p5_mosei_p4_learned_true_budget \
+  > mosei_p5_p4_learned_true_budget_1111.log 2>&1 & echo $!
 ```
 
 MOSEI seed 1111 audio encoder已经完成。用户于2026-08-12确认以下两个文件存在；
@@ -119,8 +131,8 @@ python run_experiment.py --dataset MOSEI --stage train-vision --seed 1111 \
   > mosei_vision_encoder_1111.log 2>&1 & echo $!
 ```
 
-audio和vision前置训练均已完成，不得重新启动。下一步先重新执行33项测试；测试通过后
-才启动两轮P4 Learned smoke：
+audio和vision前置训练、33项测试及两轮 P4 Learned smoke 均已完成。以下检查仅作为
+历史记录，不得再次把 smoke 当作正式实验：
 
 ```bash
 cd /home/jovyan/projects/MFON

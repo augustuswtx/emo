@@ -6,7 +6,7 @@
 - 稿件定位：质量信号审计 + 精确固定预算的训练阶段辅助监督分配。
 - MOSI 角色：方法开发与探索性证据。测试集可靠性诊断曾影响视觉头保留和音频头重设计，必须披露。
 - MOSEI 角色：P4 冻结后的确认性跨数据集实验。测试输出仅用于报告，不得回调方法。
-- 当前服务器任务：MOSEI seed 1111 P4 Constant。只监控，不重复启动；P4 Learned 必须等待 Constant 完成。
+- 当前服务器状态：MOSEI seed 1111 P4 Constant 已完成训练、预算检查、保存与重载测试；下一项仅为冻结配置的 P4 Learned。
 
 ## 第二轮审稿新增修改
 
@@ -31,10 +31,9 @@
 
 ## 冻结的确认性执行顺序
 
-1. 只读确认 P4 Constant 进程、日志和 checkpoint 状态。
-2. Constant 完成后，用完全相同的参数执行 `test-fusion`，记录正式结果。
-3. 启动 seed 1111 P4 Learned；不得根据 Constant 的 test 结果改动任何设置。
-4. 完成 Learned 重载测试后形成 seed 1111 匹配表，但不据此修改或筛选方法。
+1. 启动前只读确认没有遗留的 MOSEI 训练或测试进程，并核对磁盘空间。
+2. 启动冻结配置的 seed 1111 P4 Learned；不得根据 Constant 的 test 结果改动任何设置。
+3. 完成 Learned 重载测试后形成 seed 1111 匹配表和 Learned-minus-Constant 差值，但不据此修改或筛选方法。
 5. 按同一协议完成 seeds 1112/1113 的 Repaired MFON、Constant 和 Learned。
 6. 汇总均值、样本标准差、配对差值和 bootstrap 置信区间。
 7. 对三个 Learned checkpoint 执行可靠性、长度/能量混杂和特征级压力测试。

@@ -947,3 +947,25 @@ result. No method-level conclusion is permitted until the matched seed-1111
 P4 Constant and P4 Learned runs finish. The next authorized run is only P4
 Constant with experiment name `p5_mosei_p4_constant_true_budget`; P4 Learned
 must not run concurrently.
+
+## 2026-08-16 MOSEI Seed-1111 P4 Constant
+
+The user reported successful completion of the frozen 25-epoch
+`p5_mosei_p4_constant_true_budget` run. The epoch-25 audit preserved the exact
+uniform allocation contract (`q_v=q_a=1`, zero allocation standard deviations,
+`w_v=w_a=0.3`, and `w_nce_v=w_nce_a=0.001`). Both clean-minus-corrupt
+reliability gaps remained positive (`q_gap_v=0.132521`, `q_gap_a=0.219541`),
+while the clean task path remained uncorrupted as precommitted. The 586 MB
+checkpoint was then reloaded with the same Constant flags and completed the
+full MOSEI test pass:
+
+| Setting | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| P4 Constant, MOSEI seed 1111 | 0.7995 | 0.8064 | 0.8555 | 0.8559 | 0.5467 | 0.5304 | 0.5406 | 0.7735 | 0.5008784563954897 |
+
+Relative to the repaired MFON seed-1111 cell, Constant is lower on the binary
+metrics, higher on Acc-5/7 and correlation, and worse on MAE and loss. This is
+one control cell, not a method conclusion. The protocol and endpoint hierarchy
+remain unchanged. The next authorized experiment is the frozen seed-1111 P4
+Learned run; its formal experiment name is
+`p5_mosei_p4_learned_true_budget`.
