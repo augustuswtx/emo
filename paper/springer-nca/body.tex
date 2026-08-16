@@ -92,12 +92,11 @@ The current study makes four evidence-bounded contributions:
   losses. The final P4 schedule keeps the mean auxiliary budget
   identical to the repaired MFON baseline from the first epoch.
 \item
-  We report a frozen three-seed CMU-MOSI comparison. Learned allocation
-  is favorable to the equal-budget constant control on binary metrics,
-  MAE, correlation, and test loss, but not on every fine-grained
-  classification metric. Reliability audits are strong on synthetic
-  degradation, while an acoustic length confound and text-dominant
-  inference remain open limitations.
+  We report an exploratory three-seed CMU-MOSI comparison with explicit
+  development-history disclosure. Learned allocation is favorable to the
+  equal-budget constant control on binary metrics, MAE, correlation, and
+  test loss, but not on every fine-grained classification metric. The
+  subsequently frozen CMU-MOSEI protocol provides the confirmatory test.
 \end{enumerate}
 
 \section{Related Work}\label{related-work}
@@ -302,6 +301,21 @@ synthetic corruptions only for reliability supervision. Thus, the main
 comparison isolates training-time allocation from both inference-time
 gating and corruption of the sentiment path.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/f1_method_overview_en.pdf}
+\caption{Audited fixed-budget auxiliary learning with a clean inference
+path. Clean text, visual, and acoustic features follow the unchanged MFON
+task path to the sentiment decoder. During training only, ordered
+clean--mild--strong interventions supervise visual and acoustic reliability
+heads. Clean, sample-wise scores redistribute unreduced KL-distillation and
+InfoNCE losses through an exact finite-batch budget, while frozen unimodal
+teachers provide auxiliary targets. The reliability and auxiliary branches do
+not feed the fusion module and are not used for dynamic weighting at
+inference.}
+\label{fig:method-overview}
+\end{figure*}
+
 \subsection{Ordered interventional reliability
 learning}\label{ordered-interventional-reliability-learning}
 
@@ -430,15 +444,19 @@ them with the final three-seed P4 comparison.
 \subsection{Datasets and current
 scope}\label{datasets-and-current-scope}
 
-CMU-MOSI \cite{zadeh2016multimodal} is used for the frozen main
-comparison and reliability audit. CMU-MOSEI \cite{zadeh2018mosei} is
-the next cross-dataset evaluation; at the time of this draft, the
-seed-1111 acoustic and visual encoders and the complete two-epoch fusion
-smoke gate are finished, while formal fusion experiments remain pending,
-so no MOSEI performance is reported.
-CH-SIMS and additional backbones remain planned. We do not use
-any unfinished experiment to choose or revise the frozen P4
-hyperparameters.
+CMU-MOSI \cite{zadeh2016multimodal} served as the development dataset.
+Five-batch and full-test reliability diagnostics were inspected during
+development: the early visual result supported retaining the visual head,
+whereas the near-random acoustic result motivated the temporal-descriptor
+acoustic head. Consequently, the matched three-seed MOSI comparison and
+reliability audit are exploratory rather than untouched confirmatory
+evidence. The P4 architecture, allocation direction, warmup, corruption
+scale, and auxiliary budgets were then frozen. CMU-MOSEI
+\cite{zadeh2018mosei} is the confirmatory cross-dataset evaluation under
+that protocol. The seed-1111 encoders, smoke gate, and repaired MFON run
+are complete; P4 Constant is the current formal run and P4 Learned remains
+pending. No MOSEI test result may be used to revise P4 or select an
+allocation variant.
 
 \subsection{Compared methods}\label{compared-methods}
 
@@ -449,7 +467,11 @@ auxiliary objective uniformly under the fixed budget; and (3) P4
 Learned, which uses the learned reliability scores for allocation. All
 methods use the same data split, base architecture, training length, and
 seeds 1111, 1112, and 1113. Checkpoint selection uses validation loss.
-Test results are not used for further tuning.
+Because MOSI test diagnostics influenced earlier head and schedule
+decisions, these comparisons quantify development-stage behavior and are
+not presented as an untouched holdout. Tuning on MOSI stopped once P4 was
+frozen; subsequent selection is validation-only, and MOSEI is reserved for
+frozen confirmatory evaluation.
 
 \subsection{Metrics}\label{metrics}
 
@@ -520,8 +542,8 @@ pilots. The recurring audio-length association remains a measurable
 confound rather than a resolved issue. It must be re-evaluated on MOSEI
 and under non-Gaussian corruptions.
 
-\subsection{Frozen three-seed MOSI
-comparison}\label{frozen-three-seed-mosi-comparison}
+\subsection{Exploratory three-seed MOSI
+comparison}\label{exploratory-three-seed-mosi-comparison}
 
 Table~\ref{tab:mosi-results} gives the final matched comparison. P4 Learned improves both
 binary metric pairs, MAE, correlation, and test loss over P4 Constant in
@@ -562,9 +584,10 @@ P4 Learned & $\mathbf{0.8299\pm0.0031}$ & $\mathbf{0.8290\pm0.0029}$
 The corresponding Learned-minus-Constant deltas are +0.0015 Has0 Acc-2,
 +0.0014 Has0 F1, +0.0010 Non0 Acc-2/F1, approximately zero Acc-5,
 \(-0.0015\) Acc-7, \(-0.0050\) MAE, +0.0015 correlation, and \(-0.0101\)
-loss. The evidence therefore favors learned redistribution for the
-primary binary/regression view of MOSI, but it does not support the
-stronger statement that every classification resolution improves.
+loss. These exploratory results motivate learned redistribution for the
+primary binary/regression view of MOSI, but the effects are small,
+test-informed development limits their confirmatory value, and not every
+classification resolution improves.
 
 \subsection{Earlier actionability controls show metric-dependent
 effects}\label{earlier-actionability-controls-show-metric-dependent-effects}
@@ -595,19 +618,22 @@ limit the inference-time interpretation. The current MFON checkpoints
 are strongly text-dominant, so the study cannot claim that the learned
 scores already provide dynamic, noise-adaptive fusion at inference.
 
-\subsection{MOSEI transfer is an active experiment, not a
-result}\label{mosei-transfer-is-an-active-experiment-not-a-result}
+\subsection{MOSEI is the frozen confirmatory
+experiment}\label{mosei-is-the-frozen-confirmatory-experiment}
 
 The frozen P4 implementation has been ported to MOSEI without changing
-the original feature dimensions, learning rates, or base auxiliary
-weights. Server-side tests pass, the seed-1111 acoustic and visual
-encoders are complete, and the two-epoch P4 Learned smoke satisfies its
-budget, reliability-gap, clean-task-path, checkpoint-save, reload, and
-full-test gates. The formal seed-1111 repaired MFON run has completed
-25-epoch training and checkpoint-reloaded testing; its matched P4
-Constant and P4 Learned runs remain pending. No two-epoch smoke metric
-is treated as performance evidence, and no comparative MOSEI claim is
-included until the matched comparison completes.
+the original feature dimensions, learning rates, base auxiliary weights,
+allocation direction, or corruption schedule. Server-side tests pass, the
+seed-1111 acoustic and visual encoders are complete, and the two-epoch P4
+Learned smoke satisfies its budget, reliability-gap, clean-task-path,
+checkpoint-save, reload, and full-test gates. The formal seed-1111 repaired
+MFON run has completed 25-epoch training and checkpoint-reloaded testing.
+The matched P4 Constant run is currently in progress, and P4 Learned is
+queued only after Constant completes. No two-epoch smoke metric is treated
+as performance evidence, and no comparative MOSEI claim is included until
+the matched comparison completes. From this point onward, MOSEI test outputs
+are reporting-only; any method revision would require a new untouched
+confirmation source.
 
 \section{Discussion}\label{discussion}
 
@@ -624,14 +650,15 @@ P4 design removes these two ambiguities: reliability remains a sample
 vector, losses remain unreduced until weighting, and every batch
 preserves the same mean auxiliary budget.
 
-Under these controls, P4 Learned has a modest but coherent advantage
-over P4 Constant on binary sentiment classification, MAE, correlation,
-and loss. Since the only intended difference is which samples receive
-the fixed auxiliary budget, this comparison supports the claim that
-reliability-guided redistribution is not equivalent to uniform
-allocation. The effect is nevertheless small and metric-dependent.
-Fine-grained classification does not improve consistently, and three
-seeds are insufficient for statistical-significance claims.
+Under these controls, P4 Learned has a modest and metric-dependent mean
+advantage over P4 Constant on binary sentiment classification, MAE,
+correlation, and loss. Since the intended difference is which samples
+receive the fixed auxiliary budget, this comparison is consistent with the
+allocation having an effect. It is not yet decisive causal or generalization
+evidence: MOSI participated in development, fine-grained classification does
+not improve consistently, and three seeds are insufficient for
+statistical-significance claims. The frozen MOSEI comparison is therefore
+the decision-relevant confirmation.
 
 \subsection{Why reliability measurement does not imply robust
 fusion}\label{why-reliability-measurement-does-not-imply-robust-fusion}
@@ -682,14 +709,15 @@ empirical question rather than an established model-agnostic property.
 \section{Limitations, Reproducibility, and Responsible
 Use}\label{limitations-reproducibility-and-responsible-use}
 
-This draft has four primary empirical limitations. First, the frozen
-main evidence comes from one dataset and three seeds. Second, the
-reliability intervention uses pre-extracted features and synthetic
-Gaussian corruption. Third, the final P4 multi-seed study currently
-includes only Learned and Constant; the complete permuted, reversed, and
-oracle suite has not yet been repeated under the final schedule. Fourth,
-baseline loss is unavailable, preventing a complete loss comparison with
-repaired MFON.
+This draft has five primary empirical limitations. First, MOSI test-split
+reliability diagnostics informed visual-head retention and acoustic-head
+redesign, so MOSI results are exploratory rather than an untouched
+confirmation. Second, the confirmatory MOSEI comparison is incomplete.
+Third, the reliability intervention uses pre-extracted features and synthetic
+Gaussian corruption. Fourth, the final P4 multi-seed study currently includes
+only Learned and Constant; the complete permuted, reversed, and oracle suite
+has not yet been repeated under the final schedule. Fifth, baseline loss is
+unavailable, preventing a complete loss comparison with repaired MFON.
 
 Reproducibility controls include fixed seeds, validation-based
 checkpoint selection, unit tests for mathematical contracts, explicit
@@ -713,12 +741,12 @@ batch-level score aggregation, premature loss reduction, unconstrained
 auxiliary weights, and a norm proxy that rewards stronger corruption. We
 then learn modality reliability from ordered interventions and use it to
 redistribute per-sample MFON auxiliary losses under an exact
-finite-batch budget. Frozen three-seed MOSI results suggest that learned
-redistribution is preferable to uniform redistribution for binary and
-regression-oriented metrics, while fine-grained classification remains
-mixed. The reliability heads strongly detect the tested synthetic
-degradation, but acoustic length dependence, text-dominant inference,
-incomplete MOSEI validation, and missing real-world stress tests bound
-the claim. The present evidence therefore supports audited training-time
-supervision allocation, not universal performance improvement or
-inference-time robust fusion.
+finite-batch budget. Exploratory three-seed MOSI results motivate learned
+redistribution for binary and regression-oriented metrics, while fine-grained
+classification remains mixed. Because MOSI diagnostics participated in method
+development, the frozen MOSEI comparison is required before making a
+cross-dataset effectiveness claim. Acoustic length dependence, text-dominant
+inference, and missing realistic stress tests further bound the scope. The
+present evidence establishes the audit and budget-control mechanism;
+empirical effectiveness remains provisional until confirmatory evaluation is
+complete.

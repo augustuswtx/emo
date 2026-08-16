@@ -1,6 +1,6 @@
 # NCA submission-status ledger
 
-Updated: 2026-08-11
+Updated: 2026-08-16
 
 ## Current state
 
@@ -14,14 +14,23 @@ Updated: 2026-08-11
 - Keywords: five, within the requested 4--6 range.
 - Compilation: not compiled because the local template and TeX engine are
   unavailable.
+- Evidence designation: MOSI is exploratory/development evidence because
+  test-split reliability diagnostics informed head design. The frozen MOSEI
+  protocol is the confirmatory comparison.
+- Active experiment: MOSEI seed-1111 P4 Constant; repaired MFON is complete
+  and P4 Learned is queued after Constant.
 
 ## Evidence gates
 
-- Complete the frozen CMU-MOSEI comparison without test-guided tuning.
+- Complete the frozen CMU-MOSEI comparison without test-guided tuning; do not
+  use the seed-1111 test direction to decide whether seeds 1112/1113 are run or
+  reported.
+- Preserve the explicit MOSI development-history disclosure in the Abstract,
+  Experimental Protocol, Limitations, and Conclusion.
 - Recheck the acoustic length confound on MOSEI.
 - Add realistic acoustic and visual corruptions beyond Gaussian feature noise.
-- Repeat key allocation controls under the final P4 schedule, or narrow the
-  actionability claim.
+- Repeat at least Constant, Inverse/Difficulty-aware, and Permuted allocation
+  controls under the final P4 schedule, or narrow the actionability claim.
 - Report parameter count, training/inference time, and memory.
 - Add the method, audit, and claim-aligned ablation figures/tables.
 
@@ -46,3 +55,4 @@ Updated: 2026-08-11
 - Real-world or inference-time robustness.
 - General reliability estimation beyond the tested synthetic corruption
   family.
+- Untouched-holdout confirmation from MOSI.

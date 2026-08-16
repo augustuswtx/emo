@@ -32,15 +32,18 @@ and a norm-based curriculum score that increases under stronger corruption. We
 then learn visual and acoustic reliability from ordered clean--mild--strong
 feature triplets and use the scores only to redistribute per-sample
 distillation and contrastive losses. An allocation warmup preserves every
-batch's mean auxiliary budget from the first epoch. Across three frozen
-CMU-MOSI seeds, learned allocation improves the mean binary metrics, mean
-absolute error, correlation, and test loss over an equal-budget constant
-allocation; Acc-5 is tied and Acc-7 is lower by 0.0015. Reliability strongly
-tracks synthetic degradation for vision (Spearman $-0.9629$, AUROC $0.9952$)
-and audio (Spearman $-0.8199$, AUROC $0.9420$), although acoustic reliability
-remains moderately correlated with sequence length. The evidence supports
-audited training-time supervision allocation under a matched budget, but not
-uniform gains, statistical significance, or inference-time robustness.}
+batch's mean auxiliary budget from the first epoch. Development-stage
+CMU-MOSI experiments across three seeds show modest, metric-dependent
+differences from an equal-budget constant allocation: the mean binary metrics,
+mean absolute error, correlation, and test loss are favorable, Acc-5 is tied,
+and Acc-7 is lower by 0.0015. These results are exploratory because MOSI
+test-split reliability diagnostics informed head development. Reliability
+strongly tracks the tested synthetic degradation, although acoustic
+reliability remains moderately correlated with sequence length. A frozen
+CMU-MOSEI comparison is in progress as the confirmatory evaluation. The
+current evidence establishes the audit and budget-control mechanism but not
+cross-dataset effectiveness, uniform gains, statistical significance, or
+inference-time robustness.}
 
 \keywords{multimodal sentiment analysis, modality reliability,
 quality-score audit, fixed-budget learning, auxiliary supervision}

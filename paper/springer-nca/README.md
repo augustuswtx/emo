@@ -35,5 +35,7 @@ acknowledgments, funding details, repository identities, or identifying links.
 Prepare those items in a separate title page. The current placeholders are not
 submission-ready and must be handled during final packaging.
 
-CMU-MOSI results are frozen. CMU-MOSEI remains an active experiment and must
-not be reported as complete until its experiment gates have passed.
+CMU-MOSI is development-stage exploratory evidence because test-split
+reliability diagnostics informed reliability-head design. The P4 protocol was
+then frozen for CMU-MOSEI, which remains the active confirmatory experiment and
+must not be reported as complete until its matched gates have passed.

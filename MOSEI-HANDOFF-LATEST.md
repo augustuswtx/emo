@@ -1,4 +1,4 @@
-# MOSEI实验交接（2026-08-13）
+# MOSEI实验交接（2026-08-16）
 
 > 新Codex对话请先读本文件，再读 `PROJECT-CONTEXT-LATEST.md` 和
 > `docs/experiment-log.md`。不要从零开始，不要重复启动正在运行的任务。
@@ -13,9 +13,11 @@
 - 基础模型：MFON（COLING 2025）
 - 冻结候选：P4干预式可靠性学习 + 固定预算逐样本辅助监督分配
 
-## 2. MOSI阶段已完成
+## 2. MOSI阶段已完成（探索性证据）
 
-MOSI不再根据test结果调参。三种子均值±样本标准差：
+完整性审计确认：早期 MOSI test 可靠性诊断曾用于保留视觉头并重设计音频头。因此，
+MOSI 不是未触碰的确认数据集，论文必须把其结果写成开发阶段的探索性证据。P4 冻结后
+不再根据 MOSI test 调参。三种子均值±样本标准差：
 
 | Method | Has0 Acc-2 | Non0 Acc-2 | Acc-5 | Acc-7 | MAE↓ | Corr↑ |
 |---|---:|---:|---:|---:|---:|---:|
@@ -68,6 +70,30 @@ MOSI/save_models共5.8GB
 不要删除MOSEI数据、BERT、MOSI单模态encoder或上述九个checkpoint。
 
 ## 5. 当前正在运行的任务
+
+2026-08-16 当前唯一正式任务是 MOSEI seed 1111 P4 Constant，实验名：
+`p5_mosei_p4_constant_true_budget`。用户最后确认启动进程为 PID 239；由于服务器会话和
+网络可能变化，该 PID 只作历史记录。每次重连后必须先只读检查进程、日志和 checkpoint，
+不得因为看不到原终端而重复启动。日志位于项目目录
+`/home/jovyan/projects/MFON/mosei_p5_p4_constant_true_budget_1111.log`，此前从 `~` 直接
+执行 `tail` 找不到日志只是路径错误，不代表训练未启动。
+
+重连后的第一组命令只能检查，不启动训练：
+
+```bash
+cd /home/jovyan/projects/MFON
+pgrep -af "run_experiment.py.*MOSEI.*train-fusion.*p5_mosei_p4_constant_true_budget"
+ls -lh mosei_p5_p4_constant_true_budget_1111.log
+tr '\r' '\n' < mosei_p5_p4_constant_true_budget_1111.log | tail -n 30
+nvidia-smi
+```
+
+若进程存在，使用以下命令查看实时日志：
+
+```bash
+cd /home/jovyan/projects/MFON
+tail -n 30 -f mosei_p5_p4_constant_true_budget_1111.log
+```
 
 MOSEI seed 1111 audio encoder已经完成。用户于2026-08-12确认以下两个文件存在；
 服务器显示的文件修改时间为Aug 11 00:17：
@@ -225,15 +251,15 @@ smoke已通过。seed 1111 Repaired MFON baseline已经完成25轮训练、check
 Non0 F1=0.8634、Acc-5=0.5426、Acc-7=0.5267、MAE=0.5372、Corr=0.7721、
 Loss=0.500200593969192。实验名为`p5_mosei_repaired_baseline`。
 
-下一项只运行seed 1111 P4 Constant，冻结实验名为
-`p5_mosei_p4_constant_true_budget`；完成训练和重载测试后再运行P4 Learned。
-同一时间只启动一个。
-只有seed 1111趋势合理，再扩展1112/1113。任何方法选择使用validation；不要依据MOSEI
-test继续调参。三种子完成后再做可靠性审计、均值/标准差和跨数据集结论。
+seed 1111 P4 Constant 已启动，冻结实验名为
+`p5_mosei_p4_constant_true_budget`；完成训练和同配置重载测试后再运行 P4 Learned。
+同一时间只启动一个。seeds 1112/1113 的匹配复现已经预先列入确认性计划，不得根据
+seed 1111 test 的好坏选择性取消。任何 checkpoint 选择使用 validation；MOSEI test
+输出只用于报告，不得继续调参。三种子完成后再做可靠性审计、均值/标准差和跨数据集结论。
 
 ## 7. 完整性边界
 
 - 不上传13GB数据、BERT权重、checkpoint、密钥或个人附件到GitHub。
 - 不把未完成的MOSEI训练写成结果。
 - 不把MFON基础结构宣称为原创。
-- 不宣称SOTA、统计显著或CCF-B就绪，除非后续证据真实完成。
+- 不宣称SOTA、统计显著或CCF-C投稿就绪，除非后续证据真实完成。
