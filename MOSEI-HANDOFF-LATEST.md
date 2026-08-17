@@ -71,28 +71,37 @@ MOSI/save_models共5.8GB
 
 ## 5. 当前任务状态
 
-2026-08-16，MOSEI seed 1111 P4 Constant 已完成 25 轮训练、预算检查、586 MB checkpoint
-保存和同配置重载测试，实验名为 `p5_mosei_p4_constant_true_budget`。正式测试结果为：
+2026-08-17，MOSEI seed 1111 的 Repaired MFON、P4 Constant 与 P4 Learned 均已完成
+25 轮训练、checkpoint 保存和同配置重载测试。Constant 实验名为
+`p5_mosei_p4_constant_true_budget`，正式测试结果为：
 Has0 Acc-2=0.7995、Has0 F1=0.8064、Non0 Acc-2=0.8555、Non0 F1=0.8559、
 Acc-5=0.5467、Acc-7=0.5304、MAE=0.5406、Corr=0.7735、
-Loss=0.5008784563954897。该结果只是一个确认性控制单元，不能在 P4 Learned 完成前形成
-方法结论，也不得用于修改 Learned 配置或既定指标层级。
+Loss=0.5008784563954897。
 
-下一项唯一正式任务是冻结配置的 MOSEI seed 1111 P4 Learned，正式实验名固定为
-`p5_mosei_p4_learned_true_budget`。启动前仍须只读确认没有遗留的训练或测试进程；同一
-时间只能运行一个正式任务。
+Learned 实验名为 `p5_mosei_p4_learned_true_budget`，正式测试结果为：Has0 Acc-2=0.8008、
+Has0 F1=0.8075、Non0 Acc-2=0.8550、Non0 F1=0.8552、Acc-5=0.5463、
+Acc-7=0.5302、MAE=0.5388、Corr=0.7742、Loss=0.49853695405478843。
+Learned 的验证最优 checkpoint 仅在 epochs 1、2 保存，最终按冻结的验证损失规则选择
+epoch 2。正式 checkpoint SHA256 为
+`88f778d2d42d195d478af916d9be2400d9e2edce208d221598358d8a48d3b868`，与 smoke 的
+`3a0fef1cbf039c48642678fe3625a94b0ae3fe7253b97ca4d55d8ad75006d4a6` 不同，排除误加载。
+
+相对 Constant，Learned 的 MAE 改善 0.0018、Corr 提高 0.0007、Loss 降低约 0.002342；
+二分类和细粒度分类指标有升有降。这只是 seed 1111 匹配确认性 pilot，不能形成稳定跨种子
+结论。下一阶段是相同冻结协议下的 seeds 1112/1113；启动前先清点单模态 encoder、进程和
+磁盘，不得根据 seed 1111 结果改变配置、25 轮训练长度或验证选模规则。
 
 重连后的第一组命令只能检查，不启动训练：
 
 ```bash
 cd /home/jovyan/projects/MFON
 pgrep -af "run_experiment.py.*MOSEI"
-ls -lh MOSEI/save_models/all_model/MOSEI/1111/p5_mosei_p4_constant_true_budget/TVA_fusion_model.pt
-tail -n 30 mosei_p5_p4_constant_true_budget_1111_test.log
+ls -lh MOSEI/save_models/uni_fea_encoder/MOSEI/{1112,1113}/best_loss_{audio,vision}_encoder.pt 2>/dev/null
+du -sh MOSEI/save_models/all_model/MOSEI/1111
 nvidia-smi
 ```
 
-确认无遗留进程且磁盘空间充足后，下一条正式训练命令固定为：
+以下 seed 1111 P4 Learned 命令已经执行完毕，仅作为可复现历史记录，不得重复启动：
 
 ```bash
 cd /home/jovyan/projects/MFON && nohup env PYTHONUNBUFFERED=1 \

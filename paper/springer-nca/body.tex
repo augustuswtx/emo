@@ -484,9 +484,9 @@ reliability audit are exploratory rather than untouched confirmatory
 evidence. The P4 architecture, allocation direction, warmup, corruption
 scale, and auxiliary budgets were then frozen. CMU-MOSEI
 \cite{zadeh2018mosei} is the confirmatory cross-dataset evaluation under
-that protocol. The seed-1111 encoders, smoke gate, repaired MFON, and P4
-Constant runs are complete; P4 Learned remains pending. No MOSEI test
-result may be used to revise P4 or select an
+that protocol. The complete seed-1111 repaired MFON/Constant/Learned pilot
+is available; seeds 1112 and 1113 remain pending. No MOSEI test result may
+be used to revise P4 or select an
 allocation variant.
 
 \subsection{Compared methods}\label{compared-methods}
@@ -660,18 +660,45 @@ experiment}\label{mosei-is-the-frozen-confirmatory-experiment}
 
 The frozen P4 implementation has been ported to MOSEI without changing
 the original feature dimensions, learning rates, base auxiliary weights,
-allocation direction, or corruption schedule. Server-side tests pass, the
-seed-1111 acoustic and visual encoders are complete, and the two-epoch P4
-Learned smoke satisfies its budget, reliability-gap, clean-task-path,
-checkpoint-save, reload, and full-test gates. The formal seed-1111 repaired
-MFON and matched P4 Constant runs have completed 25-epoch training and
-checkpoint-reloaded testing. Constant obtains MAE 0.5406 and correlation
-0.7735; the remaining task metrics are retained in the experiment ledger.
-P4 Learned remains queued under the unchanged frozen configuration. No
-two-epoch smoke metric is treated as performance evidence, and no comparative
-MOSEI claim is included until the matched Learned cell completes. MOSEI test
-outputs are reporting-only; any method revision would require a new untouched
-confirmation source.
+allocation direction, or corruption schedule. Server-side tests pass, and
+the seed-1111 repaired MFON, P4 Constant, and P4 Learned cells have completed
+25-epoch training and checkpoint-reloaded testing. Table~\ref{tab:mosei-pilot}
+reports every task endpoint. Learned improves both frozen primary endpoints
+over Constant (MAE by 0.0018 and correlation by 0.0007) and lowers test loss,
+while the secondary and fine-grained classification metrics are mixed.
+Relative to repaired MFON, Learned has worse MAE by 0.0016 but better
+correlation by 0.0021 and lower loss by approximately 0.0017.
+
+\begin{table*}[t]
+\caption{Frozen CMU-MOSEI seed-1111 matched pilot. MAE and Loss are
+lower-is-better; all other metrics are higher-is-better.}
+\label{tab:mosei-pilot}
+\centering
+\setlength{\tabcolsep}{3.2pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccccccc}
+\toprule
+Method & Has0 Acc-2 & Has0 F1 & Non0 Acc-2 & Non0 F1
+& Acc-5 & Acc-7 & MAE & Corr & Loss \\
+\midrule
+Repaired MFON & 0.8150 & 0.8205 & 0.8635 & 0.8634
+& 0.5426 & 0.5267 & 0.5372 & 0.7721 & 0.500201 \\
+P4 Constant & 0.7995 & 0.8064 & 0.8555 & 0.8559
+& 0.5467 & 0.5304 & 0.5406 & 0.7735 & 0.500878 \\
+P4 Learned & 0.8008 & 0.8075 & 0.8550 & 0.8552
+& 0.5463 & 0.5302 & 0.5388 & 0.7742 & 0.498537 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+The formal Learned checkpoint was selected at epoch 2 by the precommitted
+validation-loss rule. Its SHA256 differs from the two-epoch smoke file despite
+identical aggregate test metrics, ruling out accidental smoke-checkpoint
+loading. This is a matched single-seed confirmatory pilot, not stable
+cross-seed evidence. Seeds 1112 and 1113 remain pending under the unchanged
+protocol. MOSEI test outputs are reporting-only; any method revision would
+require a new untouched confirmation source.
 
 \section{Discussion}\label{discussion}
 
@@ -758,7 +785,8 @@ Use}\label{limitations-reproducibility-and-responsible-use}
 This draft has six primary empirical limitations. First, MOSI test-split
 reliability diagnostics informed visual-head retention and acoustic-head
 redesign, so MOSI results are exploratory rather than an untouched
-confirmation. Second, the confirmatory MOSEI comparison is incomplete.
+confirmation. Second, only the first matched MOSEI seed is complete; two
+frozen replications remain pending.
 Third, reliability-proportional allocation assumes that higher input
 reliability implies more trustworthy auxiliary targets; the final-schedule
 inverse/difficulty-aware control needed to test this direction has not been
@@ -766,8 +794,8 @@ completed. Fourth, the reliability intervention uses pre-extracted features
 and synthetic Gaussian corruption. Fifth, the final P4 multi-seed study
 currently includes only Learned and Constant; the complete permuted,
 reversed, and oracle suite has not yet been repeated under the final schedule.
-Sixth, baseline loss is unavailable, preventing a complete loss comparison
-with repaired MFON.
+Sixth, MOSI repaired-MFON loss is unavailable, preventing a complete MOSI
+loss comparison.
 
 Reproducibility controls include fixed seeds, validation-based
 checkpoint selection, unit tests for mathematical contracts, explicit
@@ -793,10 +821,10 @@ then learn modality reliability from ordered interventions and use it to
 redistribute per-sample MFON auxiliary losses under an exact
 finite-batch budget. Exploratory three-seed MOSI results motivate learned
 redistribution for binary and regression-oriented metrics, while fine-grained
-classification remains mixed. Because MOSI diagnostics participated in method
-development, the frozen MOSEI comparison is required before making a
-cross-dataset effectiveness claim. Acoustic length dependence, text-dominant
-inference, and missing realistic stress tests further bound the scope. The
-present evidence establishes the audit and budget-control mechanism;
-empirical effectiveness remains provisional until confirmatory evaluation is
-complete.
+classification remains mixed. The first frozen MOSEI pilot seed shows the
+same favorable direction on MAE and correlation relative to Constant, but
+secondary metrics are mixed and two replications remain pending. Acoustic
+length dependence, text-dominant inference, and missing realistic stress tests
+further bound the scope. The present evidence establishes the audit and
+budget-control mechanism; stable cross-dataset effectiveness remains
+provisional until the frozen replication is complete.

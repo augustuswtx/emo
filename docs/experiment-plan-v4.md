@@ -1,6 +1,6 @@
 # 诊断驱动可靠多模态情感分析：实验设计 v4
 
-> **2026-08-16 审稿后协议调整：** MOSI 测试集可靠性诊断曾影响视觉头保留与音频头重设计，因此 MOSI 统一定位为方法开发与探索性证据。P4 已在 MOSEI 正式比较前冻结；MOSEI 从现在起承担确认性验证，测试输出只用于报告，不得用于修改方法、超参数、分配方向或决定是否选择性扩展随机种子。seed 1111 P4 Constant 已完成训练、预算检查、检查点保存与同配置重载测试；下一项仅为冻结配置的 seed 1111 P4 Learned。
+> **2026-08-17 状态：** MOSI 测试集可靠性诊断曾影响视觉头保留与音频头重设计，因此 MOSI 统一定位为方法开发与探索性证据。P4 已在 MOSEI 正式比较前冻结；MOSEI 测试输出只用于报告，不得用于修改方法、超参数、分配方向或决定是否选择性扩展随机种子。seed 1111 Repaired MFON、P4 Constant 与 P4 Learned 均已完成训练和同配置重载测试；下一阶段为按相同协议完成 seeds 1112/1113。
 
 ## 当前确认性实验队列（覆盖旧的“看 seed 1111 趋势再扩展”规则）
 
@@ -8,8 +8,8 @@
 |---:|---|---|---|---|
 | 1 | MOSEI seed 1111 Repaired MFON | done | 25 轮、重载、完整测试均完成 | 不重跑，不依据测试修改 P4 |
 | 2 | MOSEI seed 1111 P4 Constant | done | 25 轮、预算日志、checkpoint 与同配置重载测试均完成 | 不重跑，不依据测试修改 Learned |
-| 3 | MOSEI seed 1111 P4 Learned | next / queued | 冻结配置下完成 25 轮与同配置重载测试 | 不依据 Constant test 改配置 |
-| 4 | MOSEI seeds 1112/1113 三方法匹配复现 | precommitted | 相同配置、轮数、checkpoint 规则；报告均值±样本标准差 | 不因 seed 1111 test 方向不理想而取消或选择性报告 |
+| 3 | MOSEI seed 1111 P4 Learned | done | 25 轮、预算日志、epoch-2 验证最优 checkpoint 与同配置重载测试均完成 | 不因最佳 epoch 较早而改变后续选模规则 |
+| 4 | MOSEI seeds 1112/1113 三方法匹配复现 | next / precommitted | 相同配置、轮数、checkpoint 规则；报告均值±样本标准差 | 不因 seed 1111 test 方向不理想而取消或选择性报告 |
 | 5 | MOSEI 可靠性与混杂审计 | planned | 三个 Learned checkpoint；Spearman、AUROC、长度/能量相关 | 不用审计结果回调已报告模型 |
 
 若资源不足以完成 seeds 1112/1113，seed 1111 必须明确标为确认性 pilot，而不能包装成稳定跨数据集结论；后续应另设未触碰的数据来源或预注册复现实验。

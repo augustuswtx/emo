@@ -39,11 +39,12 @@ mean absolute error, correlation, and test loss are favorable, Acc-5 is tied,
 and Acc-7 is lower by 0.0015. These results are exploratory because MOSI
 test-split reliability diagnostics informed head development. Reliability
 strongly tracks the tested synthetic degradation, although acoustic
-reliability remains moderately correlated with sequence length. A frozen
-CMU-MOSEI comparison is in progress as the confirmatory evaluation. The
-current evidence establishes the audit and budget-control mechanism but not
-cross-dataset effectiveness, uniform gains, statistical significance, or
-inference-time robustness.}
+reliability remains moderately correlated with sequence length. In the first
+frozen CMU-MOSEI matched seed, Learned lowers MAE by 0.0018 and raises
+correlation by 0.0007 over Constant, while secondary metrics are mixed; two
+replications remain pending. The current evidence establishes the audit and
+budget-control mechanism but not stable cross-dataset effectiveness, uniform
+gains, statistical significance, or inference-time robustness.}
 
 \keywords{multimodal sentiment analysis, modality reliability,
 quality-score audit, fixed-budget learning, auxiliary supervision}

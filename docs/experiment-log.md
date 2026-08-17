@@ -969,3 +969,33 @@ one control cell, not a method conclusion. The protocol and endpoint hierarchy
 remain unchanged. The next authorized experiment is the frozen seed-1111 P4
 Learned run; its formal experiment name is
 `p5_mosei_p4_learned_true_budget`.
+
+## 2026-08-17 MOSEI Seed-1111 P4 Learned
+
+The user reported successful completion of the frozen 25-epoch
+`p5_mosei_p4_learned_true_budget` run and its same-configuration checkpoint
+reload test. The final epoch preserved the exact mean auxiliary budget while
+producing non-zero sample-allocation dispersion (`w_v_std=0.016007`,
+`w_a_std=0.002859`). Both reliability gaps remained positive. Validation-loss
+selection saved checkpoints only after epochs 1 and 2, so the formal best
+checkpoint is the epoch-2 checkpoint rather than the epoch-25 state.
+
+| Setting | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| P4 Learned, MOSEI seed 1111 | 0.8008 | 0.8075 | 0.8550 | 0.8552 | 0.5463 | 0.5302 | 0.5388 | 0.7742 | 0.49853695405478843 |
+
+The test loaded the formal `p5_mosei_p4_learned_true_budget` path. Its SHA256
+was `88f778d2d42d195d478af916d9be2400d9e2edce208d221598358d8a48d3b868`,
+which differs from the two-epoch smoke checkpoint SHA256
+`3a0fef1cbf039c48642678fe3625a94b0ae3fe7253b97ca4d55d8ad75006d4a6`.
+This rules out accidental loading of the smoke file even though the aggregate
+test metrics, including loss, are identical.
+
+Relative to P4 Constant, Learned changes Has0 Acc/F1 by +0.0013/+0.0011,
+Non0 Acc/F1 by -0.0005/-0.0007, Acc-5/7 by -0.0004/-0.0002, MAE by
+-0.0018, correlation by +0.0007, and loss by -0.00234150234070127.
+Thus both precommitted primary endpoints favor Learned over Constant for this
+seed, while the secondary and diagnostic metrics are mixed. This is a matched
+single-seed confirmatory pilot, not stable cross-seed evidence. The method,
+endpoint hierarchy, 25-epoch schedule, and validation-selection rule remain
+frozen for seeds 1112 and 1113.
