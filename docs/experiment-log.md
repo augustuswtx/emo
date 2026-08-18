@@ -999,3 +999,20 @@ seed, while the secondary and diagnostic metrics are mixed. This is a matched
 single-seed confirmatory pilot, not stable cross-seed evidence. The method,
 endpoint hierarchy, 25-epoch schedule, and validation-selection rule remain
 frozen for seeds 1112 and 1113.
+
+## 2026-08-18 MOSEI Seed-1112 Repaired Baseline
+
+The user reported successful completion of the 25-epoch
+`p5_mosei_repaired_baseline` training run and checkpoint-reloaded full test
+for seed 1112:
+
+| Setting | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Repaired MFON, MOSEI seed 1112 | 0.7929 | 0.7996 | 0.8487 | 0.8485 | 0.5559 | 0.5398 | 0.5290 | 0.7730 | 0.49642193281591696 |
+
+Relative to the seed-1111 repaired baseline, seed 1112 has lower MAE by
+0.0082 and higher Acc-5/7, but lower binary metrics and correlation by 0.0009.
+This seed variation reinforces the precommitted matched multi-seed design; it
+does not support a method comparison until seed-1112 Constant and Learned are
+complete. The next authorized run is seed-1112 P4 Constant under the unchanged
+true-budget protocol.

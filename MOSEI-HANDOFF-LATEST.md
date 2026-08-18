@@ -88,16 +88,22 @@ epoch 2。正式 checkpoint SHA256 为
 
 相对 Constant，Learned 的 MAE 改善 0.0018、Corr 提高 0.0007、Loss 降低约 0.002342；
 二分类和细粒度分类指标有升有降。这只是 seed 1111 匹配确认性 pilot，不能形成稳定跨种子
-结论。下一阶段是相同冻结协议下的 seeds 1112/1113；启动前先清点单模态 encoder、进程和
-磁盘，不得根据 seed 1111 结果改变配置、25 轮训练长度或验证选模规则。
+结论。seed 1112 的音频/视觉 encoder 与 Repaired MFON 已完成。其正式 baseline 结果为：
+Has0 Acc-2=0.7929、Has0 F1=0.7996、Non0 Acc-2=0.8487、Non0 F1=0.8485、
+Acc-5=0.5559、Acc-7=0.5398、MAE=0.5290、Corr=0.7730、
+Loss=0.49642193281591696。该单元只建立 seed 1112 参照，不形成方法结论。
+
+下一项唯一正式任务是 seed 1112 P4 Constant；随后才是 seed 1112 P4 Learned，再进入
+seed 1113。不得根据已见测试结果改变配置、25 轮训练长度或验证选模规则。
 
 重连后的第一组命令只能检查，不启动训练：
 
 ```bash
 cd /home/jovyan/projects/MFON
 pgrep -af "run_experiment.py.*MOSEI"
-ls -lh MOSEI/save_models/uni_fea_encoder/MOSEI/{1112,1113}/best_loss_{audio,vision}_encoder.pt 2>/dev/null
-du -sh MOSEI/save_models/all_model/MOSEI/1111
+ls -lh MOSEI/save_models/uni_fea_encoder/MOSEI/1112/best_loss_{audio,vision}_encoder.pt
+ls -lh MOSEI/save_models/all_model/MOSEI/1112/p5_mosei_repaired_baseline/TVA_fusion_model.pt
+df -h /home/jovyan
 nvidia-smi
 ```
 
