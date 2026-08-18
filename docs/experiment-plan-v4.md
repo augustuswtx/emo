@@ -10,8 +10,8 @@
 | 2 | MOSEI seed 1111 P4 Constant | done | 25 轮、预算日志、checkpoint 与同配置重载测试均完成 | 不重跑，不依据测试修改 Learned |
 | 3 | MOSEI seed 1111 P4 Learned | done | 25 轮、预算日志、epoch-2 验证最优 checkpoint 与同配置重载测试均完成 | 不因最佳 epoch 较早而改变后续选模规则 |
 | 4 | MOSEI seed 1112 Repaired MFON | done | 单模态 encoder、25 轮融合训练、重载与完整测试均完成 | 不与尚未完成的 P4 单元作方法结论 |
-| 5 | MOSEI seed 1112 P4 Constant | next / queued | 相同固定预算配置、25 轮、重载与完整测试 | 不改变 seed 1111 已冻结配置 |
-| 6 | MOSEI seed 1112 P4 Learned | queued | Constant 后运行；相同配置、轮数与选模规则 | 不依据 Constant 测试调参 |
+| 5 | MOSEI seed 1112 P4 Constant | done | 固定预算配置、25 轮、预算合同、重载与完整测试均完成 | 不把 Constant 对 baseline 的差异归因于学习式分配 |
+| 6 | MOSEI seed 1112 P4 Learned | next / queued | 相同配置、轮数与选模规则 | 不依据 Constant 测试调参 |
 | 7 | MOSEI seed 1113 三方法匹配复现 | precommitted | 相同配置、轮数、checkpoint 规则 | 不因前两种子方向取消或选择性报告 |
 | 8 | MOSEI 可靠性与混杂审计 | planned | 三个 Learned checkpoint；Spearman、AUROC、长度/能量相关 | 不用审计结果回调已报告模型 |
 

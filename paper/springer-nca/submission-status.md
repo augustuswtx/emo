@@ -17,9 +17,9 @@ Updated: 2026-08-16
 - Evidence designation: MOSI is exploratory/development evidence because
   test-split reliability diagnostics informed head design. The frozen MOSEI
   protocol is the confirmatory comparison.
-- Active queue: the complete seed-1111 pilot and seed-1112 repaired baseline
-  are available; seed-1112 Constant/Learned and all seed-1113 cells remain
-  pending.
+- Active queue: the complete seed-1111 pilot and seed-1112 repaired
+  baseline/Constant cells are available; seed-1112 Learned and all seed-1113
+  cells remain pending.
 - Confirmatory outcome hierarchy, fixed before the P4 Constant formal test:
   MAE/Corr primary, Has0/Non0 accuracy/F1 secondary, and Acc-5/7, loss, and
   reliability/confound measures diagnostic.

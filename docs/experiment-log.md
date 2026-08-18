@@ -1016,3 +1016,23 @@ This seed variation reinforces the precommitted matched multi-seed design; it
 does not support a method comparison until seed-1112 Constant and Learned are
 complete. The next authorized run is seed-1112 P4 Constant under the unchanged
 true-budget protocol.
+
+## 2026-08-18 MOSEI Seed-1112 P4 Constant
+
+The user reported successful completion of the frozen 25-epoch
+`p5_mosei_p4_constant_true_budget` run and checkpoint-reloaded full test for
+seed 1112. The final epoch preserved the exact uniform-allocation contract
+(`q_v=q_a=1`, zero allocation standard deviations, `w_v=w_a=0.3`, and
+`w_nce_v=w_nce_a=0.001`), with positive reliability gaps
+(`q_gap_v=0.131460`, `q_gap_a=0.221136`).
+
+| Setting | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| P4 Constant, MOSEI seed 1112 | 0.8403 | 0.8386 | 0.8506 | 0.8460 | 0.5645 | 0.5478 | 0.5274 | 0.7757 | 0.49592633410108067 |
+
+Relative to the seed-1112 repaired MFON cell, Constant changes Has0 Acc/F1 by
++0.0474/+0.0390, Non0 Acc/F1 by +0.0019/-0.0025, Acc-5/7 by
++0.0086/+0.0080, MAE by -0.0016, correlation by +0.0027, and loss by
+-0.00049559871483629. This comparison includes the P4 reliability-training
+machinery and therefore does not isolate learned sample allocation. The next
+decisive cell is seed-1112 P4 Learned under the unchanged protocol.

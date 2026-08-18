@@ -6,7 +6,7 @@
 - 稿件定位：质量信号审计 + 精确固定预算的训练阶段辅助监督分配。
 - MOSI 角色：方法开发与探索性证据。测试集可靠性诊断曾影响视觉头保留和音频头重设计，必须披露。
 - MOSEI 角色：P4 冻结后的确认性跨数据集实验。测试输出仅用于报告，不得回调方法。
-- 当前服务器状态：MOSEI seed 1111 三方法均完成；seed 1112 单模态 encoder 与 Repaired MFON 已完成，下一项为 P4 Constant。
+- 当前服务器状态：MOSEI seed 1111 三方法均完成；seed 1112 Repaired MFON 与 P4 Constant 已完成，下一项为 P4 Learned。
 
 ## 第二轮审稿新增修改
 

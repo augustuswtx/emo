@@ -93,8 +93,14 @@ Has0 Acc-2=0.7929、Has0 F1=0.7996、Non0 Acc-2=0.8487、Non0 F1=0.8485、
 Acc-5=0.5559、Acc-7=0.5398、MAE=0.5290、Corr=0.7730、
 Loss=0.49642193281591696。该单元只建立 seed 1112 参照，不形成方法结论。
 
-下一项唯一正式任务是 seed 1112 P4 Constant；随后才是 seed 1112 P4 Learned，再进入
-seed 1113。不得根据已见测试结果改变配置、25 轮训练长度或验证选模规则。
+seed 1112 P4 Constant 也已完成，正式结果为：Has0 Acc-2=0.8403、Has0 F1=0.8386、
+Non0 Acc-2=0.8506、Non0 F1=0.8460、Acc-5=0.5645、Acc-7=0.5478、
+MAE=0.5274、Corr=0.7757、Loss=0.49592633410108067。其预算合同满足
+`q_v=q_a=1`、分配标准差为 0、平均辅助预算为 0.3/0.3/0.001/0.001。
+
+下一项唯一正式任务是 seed 1112 P4 Learned；随后才进入 seed 1113。不得根据已见测试
+结果改变配置、25 轮训练长度或验证选模规则。只有 Learned-minus-Constant 才隔离学习式
+样本分配的贡献；Constant 与 baseline 的差异还包含可靠性训练机制。
 
 重连后的第一组命令只能检查，不启动训练：
 
@@ -102,7 +108,7 @@ seed 1113。不得根据已见测试结果改变配置、25 轮训练长度或�
 cd /home/jovyan/projects/MFON
 pgrep -af "run_experiment.py.*MOSEI"
 ls -lh MOSEI/save_models/uni_fea_encoder/MOSEI/1112/best_loss_{audio,vision}_encoder.pt
-ls -lh MOSEI/save_models/all_model/MOSEI/1112/p5_mosei_repaired_baseline/TVA_fusion_model.pt
+ls -lh MOSEI/save_models/all_model/MOSEI/1112/{p5_mosei_repaired_baseline,p5_mosei_p4_constant_true_budget}/TVA_fusion_model.pt
 df -h /home/jovyan
 nvidia-smi
 ```
