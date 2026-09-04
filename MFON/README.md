@@ -107,6 +107,20 @@ test-split audit. A credible reliability proxy should generally have a negative
 `fraction(highest_below_clean)`. These are diagnostic gates, not performance
 claims.
 
+The same audit supports deterministic, padding-preserving non-Gaussian
+corruptions. Use `--corruption timestep-dropout`, `contiguous-mask`, or
+`temporal-shift` with severities in `[0, 1]`. Whole-modality removal uses
+`--corruption modality-missing --severities 0,1`. The default remains
+`gaussian`, so earlier commands and logs are reproducible without changes.
+
+```bash
+python audit_model_quality.py \
+  --dataset MOSEI --seed 1111 \
+  --exp-name p5_mosei_p4_learned_true_budget --q-type learned \
+  --split test --corruption timestep-dropout \
+  --severities 0,0.25,0.5,0.75 --max-batches 5
+```
+
 The P1.1 interventional-reliability pilot is currently limited to MOSI. It
 learns a visual reliability head and an audio-specific temporal reliability
 head from clean, mild-corruption, and strong-corruption triplets. The learned

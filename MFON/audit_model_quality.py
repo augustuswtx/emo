@@ -12,6 +12,15 @@ from sklearn.metrics import roc_auc_score
 from run_experiment import DATASETS, load_dataset_modules, require_files, resolve_repo_path
 
 
+CORRUPTIONS = (
+    'gaussian',
+    'timestep-dropout',
+    'contiguous-mask',
+    'temporal-shift',
+    'modality-missing',
+)
+
+
 def pearson(left, right):
     left = np.asarray(left, dtype=np.float64).reshape(-1)
     right = np.asarray(right, dtype=np.float64).reshape(-1)
@@ -72,6 +81,88 @@ def add_active_gaussian_noise(features, severity, generator):
     return features + noise * scale * float(severity) * mask
 
 
+def drop_active_timesteps(features, severity, generator):
+    if not 0.0 <= severity <= 1.0:
+        raise ValueError('timestep-dropout severity must be in [0, 1].')
+    if severity == 0:
+        return features.clone()
+    active = active_step_mask(features)
+    draws = torch.rand(
+        active.shape,
+        dtype=features.dtype,
+        device=features.device,
+        generator=generator,
+    )
+    dropped = active & (draws < float(severity))
+    return features.masked_fill(dropped.expand_as(features), 0.0)
+
+
+def mask_active_contiguous_block(features, severity, generator):
+    if not 0.0 <= severity <= 1.0:
+        raise ValueError('contiguous-mask severity must be in [0, 1].')
+    output = features.clone()
+    if severity == 0:
+        return output
+    active = active_step_mask(features).squeeze(-1)
+    for sample_index in range(features.shape[0]):
+        positions = torch.nonzero(active[sample_index], as_tuple=False).reshape(-1)
+        active_count = positions.numel()
+        if active_count == 0:
+            continue
+        block_count = min(active_count, max(1, int(np.ceil(active_count * severity))))
+        max_start = active_count - block_count
+        start = 0
+        if max_start > 0:
+            start = int(
+                torch.randint(0, max_start + 1, (1,), generator=generator).item()
+            )
+        output[sample_index, positions[start : start + block_count]] = 0.0
+    return output
+
+
+def shift_active_timesteps(features, severity, generator=None):
+    del generator
+    if not 0.0 <= severity <= 1.0:
+        raise ValueError('temporal-shift severity must be in [0, 1].')
+    output = features.clone()
+    if severity == 0:
+        return output
+    active = active_step_mask(features).squeeze(-1)
+    for sample_index in range(features.shape[0]):
+        positions = torch.nonzero(active[sample_index], as_tuple=False).reshape(-1)
+        active_count = positions.numel()
+        if active_count < 2:
+            continue
+        max_shift = max(1, active_count // 2)
+        shift = min(active_count - 1, max(1, int(round(max_shift * severity))))
+        output[sample_index, positions] = torch.roll(
+            features[sample_index, positions], shifts=shift, dims=0
+        )
+    return output
+
+
+def remove_active_modality(features, severity, generator=None):
+    del generator
+    if severity not in (0.0, 1.0):
+        raise ValueError('modality-missing severities must be exactly 0 and 1.')
+    if severity == 0:
+        return features.clone()
+    return features.masked_fill(active_step_mask(features).expand_as(features), 0.0)
+
+
+def corrupt_features(features, corruption, severity, generator):
+    functions = {
+        'gaussian': add_active_gaussian_noise,
+        'timestep-dropout': drop_active_timesteps,
+        'contiguous-mask': mask_active_contiguous_block,
+        'temporal-shift': shift_active_timesteps,
+        'modality-missing': remove_active_modality,
+    }
+    if corruption not in functions:
+        raise ValueError('Unknown corruption: %s' % corruption)
+    return functions[corruption](features, severity, generator)
+
+
 def parse_severities(raw):
     values = [float(value) for value in raw.split(',')]
     if not values or values[0] != 0.0:
@@ -85,7 +176,7 @@ def parse_severities(raw):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Audit align/conf/norm quality under modality-specific Gaussian noise.'
+        description='Audit modality quality under controlled feature corruption.'
     )
     parser.add_argument('--dataset', choices=DATASETS.keys(), default='MOSI')
     parser.add_argument('--seed', type=int, default=1111)
@@ -94,6 +185,7 @@ def parse_args():
         '--q-type', choices=['align', 'norm', 'conf', 'learned'], default='align'
     )
     parser.add_argument('--split', choices=['train', 'valid', 'test'], default='test')
+    parser.add_argument('--corruption', choices=CORRUPTIONS, default='gaussian')
     parser.add_argument('--severities', default='0,0.25,0.5,1.0')
     parser.add_argument('--max-batches', type=int, default=None)
     parser.add_argument('--noise-seed', type=int, default=20260729)
@@ -133,6 +225,10 @@ def summarize_condition(name, severity, quality, clean_quality, predictions, lab
 def main():
     args = parse_args()
     severities = parse_severities(args.severities)
+    if args.corruption != 'gaussian' and any(value > 1.0 for value in severities):
+        raise ValueError('%s severities must be in [0, 1].' % args.corruption)
+    if args.corruption == 'modality-missing' and severities != [0.0, 1.0]:
+        raise ValueError('modality-missing requires --severities 0,1.')
     if args.max_batches is not None and args.max_batches < 1:
         raise ValueError('--max-batches must be positive.')
 
@@ -218,8 +314,8 @@ def main():
             condition_data[('clean', 0.0)]['pred'].append(pred.cpu())
 
             for severity in severities[1:]:
-                noisy_vision = add_active_gaussian_noise(
-                    vision_cpu, severity, generator
+                noisy_vision = corrupt_features(
+                    vision_cpu, args.corruption, severity, generator
                 ).to(config.DEVICE)
                 pred, q_v, q_a = evaluate_condition(
                     model, text, noisy_vision, audio, args.q_type == 'learned'
@@ -228,8 +324,8 @@ def main():
                 condition_data[('vision', severity)]['q_a'].append(q_a.cpu())
                 condition_data[('vision', severity)]['pred'].append(pred.cpu())
 
-                noisy_audio = add_active_gaussian_noise(
-                    audio_cpu, severity, generator
+                noisy_audio = corrupt_features(
+                    audio_cpu, args.corruption, severity, generator
                 ).to(config.DEVICE)
                 pred, q_v, q_a = evaluate_condition(
                     model, text, vision, noisy_audio, args.q_type == 'learned'
@@ -249,8 +345,16 @@ def main():
     )
 
     print(
-        'Audit %s split=%s seed=%d exp=%s q_type=%s n=%d'
-        % (args.dataset, args.split, args.seed, args.exp_name, args.q_type, labels_np.size)
+        'Audit %s split=%s seed=%d exp=%s q_type=%s corruption=%s n=%d'
+        % (
+            args.dataset,
+            args.split,
+            args.seed,
+            args.exp_name,
+            args.q_type,
+            args.corruption,
+            labels_np.size,
+        )
     )
     clean_metrics = metric_fn(
         torch.from_numpy(labels_np), torch.from_numpy(clean_pred)
