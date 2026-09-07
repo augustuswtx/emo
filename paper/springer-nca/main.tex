@@ -21,30 +21,27 @@ Sentiment Analysis}
 \affil*[1]{\orgdiv{Affiliation withheld for double-blind review}}
 
 \abstract{Quality-aware multimodal learning assumes that a model can estimate
-how trustworthy each modality is and use that estimate to regulate fusion or
-optimization. This assumption is rarely audited: a quality score may collapse
-to a batch-level scalar, track sequence length or feature energy, or be logged
-without materially changing learning. Using MFON as the base model, we
-introduce a five-part audit of sample granularity, degradation monotonicity,
-confound sensitivity, actionability, and weight collapse. The audit exposes
-concrete failures in an earlier prototype, including premature batch reduction
-and a norm-based curriculum score that increases under stronger corruption. We
-then learn visual and acoustic reliability from ordered clean--mild--strong
-feature triplets and use the scores only to redistribute per-sample
-distillation and contrastive losses. An allocation warmup preserves every
-batch's mean auxiliary budget from the first epoch. Development-stage
-CMU-MOSI experiments across three seeds show modest, metric-dependent
-differences from an equal-budget constant allocation: the mean binary metrics,
-mean absolute error, correlation, and test loss are favorable, Acc-5 is tied,
-and Acc-7 is lower by 0.0015. These results are exploratory because MOSI
-test-split reliability diagnostics informed head development. Reliability
-strongly tracks the tested synthetic degradation, although acoustic
-reliability remains moderately correlated with sequence length. In the first
-frozen CMU-MOSEI matched seed, Learned lowers MAE by 0.0018 and raises
-correlation by 0.0007 over Constant, while secondary metrics are mixed; two
-replications remain pending. The current evidence establishes the audit and
-budget-control mechanism but not stable cross-dataset effectiveness, uniform
-gains, statistical significance, or inference-time robustness.}
+modality trustworthiness and use it to regulate fusion or optimization, yet
+the score itself is rarely audited. Using MFON as the base model, we introduce
+a five-part audit of sample granularity, degradation monotonicity, confound
+sensitivity, actionability, and weight collapse. It exposes batch aggregation
+of sample scores, auxiliary losses reduced before weighting, and a norm proxy
+that increases under stronger Gaussian corruption. We then learn visual and
+acoustic reliability from ordered clean--mild--strong feature triplets and use
+the scores only to redistribute per-sample distillation and contrastive losses.
+An allocation warmup preserves every batch's mean auxiliary budget from the
+first epoch. Three-seed CMU-MOSI development experiments favor Learned over an
+equal-budget Constant allocation on mean binary metrics, MAE, correlation, and
+test loss, but not every fine-grained metric; these results are exploratory
+because MOSI test diagnostics informed head development. In the frozen
+three-seed CMU-MOSEI confirmation, Learned lowers mean MAE by 0.0025, raises
+correlation by 0.0007, and lowers test loss by 0.0040 relative to Constant, but
+does not improve MAE or loss over repaired MFON. Gaussian visual/acoustic
+AUROC reaches 0.9722/1.0000, whereas detection weakens under unseen timestep
+dropout, contiguous masking, and temporal shifts; complete visual absence is
+unstable. The evidence supports audited training-time fixed-budget allocation,
+but not a general quality estimator, uniform gains over MFON, statistical
+significance, or inference-time robustness.}
 
 \keywords{multimodal sentiment analysis, modality reliability,
 quality-score audit, fixed-budget learning, auxiliary supervision}

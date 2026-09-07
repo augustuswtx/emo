@@ -4,7 +4,7 @@ This repository preserves the reproducible research context for an MFON-based mu
 
 ## Start Here
 
-For the active MOSEI run, read [`MOSEI-HANDOFF-LATEST.md`](MOSEI-HANDOFF-LATEST.md) first. Then read [`PROJECT-CONTEXT-LATEST.md`](PROJECT-CONTEXT-LATEST.md) for the complete method and MOSI evidence history.
+For the completed MOSEI matrix and the remaining experiment gates, read [`MOSEI-HANDOFF-LATEST.md`](MOSEI-HANDOFF-LATEST.md) first. Then read [`PROJECT-CONTEXT-LATEST.md`](PROJECT-CONTEXT-LATEST.md) for the complete method and MOSI evidence history.
 
 ## Contents
 
@@ -25,7 +25,7 @@ For the active MOSEI run, read [`MOSEI-HANDOFF-LATEST.md`](MOSEI-HANDOFF-LATEST.
 
 ## Current Status
 
-The MOSI three-seed P4 comparison and final reliability audits are complete and frozen. P4 has been ported to MOSEI and passed 33 server tests. The MOSEI seed-1111 acoustic and visual encoders and the complete two-epoch P4 Learned smoke gate are finished. The formal seed-1111 repaired baseline has also completed 25-epoch training and checkpoint-reloaded testing; P4 Constant and P4 Learned remain pending, so no comparative MOSEI claim is made yet.
+The MOSI three-seed study is complete and explicitly exploratory. The frozen MOSEI confirmation is also complete for repaired MFON, P4 Constant, and P4 Learned across seeds 1111--1113. Learned improves mean MAE by 0.0025 and correlation by 0.0007 over the equal-budget Constant control, while secondary metrics are mixed and repaired MFON is not uniformly surpassed. Full-test Gaussian and four held-out-corruption reliability audits are complete; the extended server suite passes 37 tests. See `MOSEI-HANDOFF-LATEST.md` for the frozen numbers, limitations, and the remaining efficiency/actionability gates.
 
 ## Data And Integrity
 

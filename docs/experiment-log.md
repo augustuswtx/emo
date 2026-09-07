@@ -1036,3 +1036,42 @@ Relative to the seed-1112 repaired MFON cell, Constant changes Has0 Acc/F1 by
 -0.00049559871483629. This comparison includes the P4 reliability-training
 machinery and therefore does not isolate learned sample allocation. The next
 decisive cell is seed-1112 P4 Learned under the unchanged protocol.
+
+## 2026-09-08 MOSEI Frozen Matrix and Reliability Audits Complete
+
+The prespecified MOSEI matrix is closed: repaired MFON, P4 Constant, and P4
+Learned completed training, validation-loss checkpoint selection, and
+checkpoint-reloaded testing for seeds 1111, 1112, and 1113. No MOSEI test
+output was used to revise the method or decide which cells to report.
+
+| Setting | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE | Corr | Loss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Repaired MFON | 0.8131±0.0194 | 0.8183±0.0177 | 0.8579±0.0081 | 0.8576±0.0080 | 0.5513±0.0075 | 0.5347±0.0070 | 0.5312±0.0053 | 0.7746±0.0035 | 0.495199±0.005712 |
+| P4 Constant | 0.8193±0.0204 | 0.8228±0.0161 | 0.8549±0.0040 | 0.8536±0.0067 | 0.5556±0.0089 | 0.5383±0.0088 | 0.5341±0.0066 | 0.7747±0.0011 | 0.500237±0.004028 |
+| P4 Learned | 0.8258±0.0218 | 0.8280±0.0178 | 0.8553±0.0065 | 0.8531±0.0083 | 0.5543±0.0082 | 0.5375±0.0078 | 0.5316±0.0062 | 0.7754±0.0011 | 0.496244±0.002190 |
+
+Learned minus Constant is -0.0025 MAE, +0.0007 correlation, and -0.0040
+loss in the three-seed mean, with mixed classification deltas. Learned does
+not uniformly outperform repaired MFON.
+
+Full-test (`n=4659`) Gaussian audits on the three frozen Learned checkpoints
+give visual Spearman/AUROC of `-0.931602±0.007408 / 0.972161±0.009176` and
+acoustic Spearman/AUROC of `-0.830330±0.005901 / 0.999982±0.000014`.
+
+Four padding-preserving held-out corruption audits were then completed on all
+three seeds. Clean/corrupt AUROC is:
+
+| Corruption | Vision | Audio |
+|---|---:|---:|
+| timestep-dropout 0.75 | 0.498965±0.003535 | 0.593710±0.022123 |
+| contiguous-mask 0.75 | 0.541152±0.011892 | 0.754388±0.009935 |
+| temporal-shift 1.00 | 0.509639±0.002927 | 0.511274±0.002509 |
+| modality-missing 1.00 | 0.407169±0.227165 | 0.999857±0.000248 |
+
+The audit falsifies a general cross-corruption reliability claim. Visual
+missingness is unstable and below chance on average; acoustic missingness is
+detected almost perfectly, but acoustic task predictions barely change. The
+paper must distinguish degradation detectability from task utility and retain
+these negative findings. The extended server suite passes 37/37 tests. The
+next low-cost gate is a uniform parameter/runtime/peak-memory audit; no
+completed 25-epoch model should be retrained for it.

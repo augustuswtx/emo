@@ -37,5 +37,7 @@ submission-ready and must be handled during final packaging.
 
 CMU-MOSI is development-stage exploratory evidence because test-split
 reliability diagnostics informed reliability-head design. The P4 protocol was
-then frozen for CMU-MOSEI, which remains the active confirmatory experiment and
-must not be reported as complete until its matched gates have passed.
+then frozen for CMU-MOSEI. Its three-seed matched comparison, full-test Gaussian
+audit, and four held-out-corruption stress audits are now complete. The remaining
+empirical gates are uniform efficiency measurement and, if resources permit,
+final-schedule inverse/difficulty-aware and permutation controls.
