@@ -191,3 +191,32 @@ first epoch and warm only the sample-to-sample redistribution, use:
 ```
 
 The default `scale` mode preserves all earlier experiment behavior.
+
+### Checkpoint-only efficiency audit
+
+`audit_efficiency.py` compares existing MOSEI Baseline, Constant, and Learned
+checkpoints on one shared real batch. It reports stored, inference-path,
+optimizer, reliability-head, and frozen-teacher parameter counts; end-to-end
+inference latency; training forward/backward latency; throughput; checkpoint
+size; and CUDA peak memory. It does not call `optimizer.step`, save a model, or
+start an epoch loop.
+
+Run a one-repeat smoke before the measured audit:
+
+```bash
+python audit_efficiency.py --dataset MOSEI --seed 1111 \
+  --warmup 0 --repeats 1 --skip-training-step
+```
+
+After the smoke succeeds, run all three variants in the same process and save
+machine-readable evidence:
+
+```bash
+python audit_efficiency.py --dataset MOSEI --seed 1111 \
+  --warmup 3 --repeats 20 \
+  --output-json mosei_efficiency_1111.json
+```
+
+Use the same idle GPU and batch size for every variant. The inference graph
+does not execute reliability heads; the training forward/backward benchmark
+captures their additional training-time cost without changing checkpoints.
