@@ -15,7 +15,7 @@
 | 7 | MOSEI seed 1113 三方法匹配复现 | done | 相同配置、轮数、checkpoint 规则 | 三方法全部报告 |
 | 8 | MOSEI 高斯可靠性与混杂审计 | done | 三个 Learned checkpoint；full test n=4659 | 不用审计结果回调已报告模型 |
 | 9 | MOSEI 四类跨扰动压力审计 | done | timestep-dropout、contiguous-mask、temporal-shift、modality-missing；三种子 full test | 负结果完整报告 |
-| 10 | 参数/时间/显存效率审计 | next | 统一脚本和硬件环境；先 smoke | 不重训已有 25 轮模型 |
+| 10 | 参数/时间/显存效率审计 | tool ready / server smoke next | `audit_efficiency.py` 提交 `78a8ede`；统一硬件环境；先单次推理 smoke | 不重训已有 25 轮模型，不调用 optimizer step |
 
 三种子已完整闭合，但只提供描述性重复证据，不能包装成统计显著。Learned 相对 Constant 的 MAE/Corr/Loss 均值方向有利；相对 repaired MFON 并非全面改善。
 

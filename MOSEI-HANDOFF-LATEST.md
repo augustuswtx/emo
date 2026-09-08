@@ -53,12 +53,19 @@ Audio  Spearman=-0.830330±0.005901, AUROC=0.999982±0.000014
 
 ### 下一步严格顺序
 
-1. 只做低成本效率审计：参数量、单 batch 推理时间、峰值显存，以及 Baseline/Constant/
-   Learned 的训练时间汇总；先写审计脚本和 smoke，不启动长训练。
+1. 只做低成本效率审计：参数量、单 batch 推理时间、训练前向/反向时间和峰值显存。
+   `audit_efficiency.py` 与 5 项契约测试已在提交 `78a8ede` 中完成并推送；本地语法编译
+   通过，因本机无 PyTorch，服务器测试与单次推理 smoke 尚待执行。该工具没有 epoch
+   循环、`optimizer.step()` 或 checkpoint 写入，不会重新训练模型。
 2. 若投稿前 GPU 预算允许，再做最终日程的 inverse/difficulty-aware 和 batch-permuted
    作用性控制；这是检验“高可靠性正向分配”而非继续刷分。
 3. 更新图表、统一中英文数字、编译 NCA 双盲稿并做引用/格式完整性检查。
-4. 非高斯审计代码提交为 `f341865`；本地分支当时领先远端，需用 GitHub Desktop 推送。
+4. 非高斯审计代码提交为 `f341865`，效率审计提交为 `78a8ede`；两者均已推送。
+
+效率工具的本地上传包为
+`/Users/augustus/projects/论文/mfon_efficiency_audit_20260908.tar.gz`，SHA256：
+`c51063bc0b202d47905bf5a38a65479f4db7016deebf68feb7110eb957bf9bbb`。
+提交 `78a8ede` 已通过 GitHub Desktop 推送，当前本地 `main` 与 `origin/main` 一致。
 
 ## 以下为历史交接记录
 
