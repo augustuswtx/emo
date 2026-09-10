@@ -1,10 +1,11 @@
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 import torch
 from torch import nn
 
-from audit_efficiency import count_unique_parameters, parse_variants
+from audit_efficiency import count_unique_parameters, inference_context, parse_variants
 
 
 class EfficiencyAuditTest(unittest.TestCase):
@@ -43,6 +44,11 @@ class EfficiencyAuditTest(unittest.TestCase):
         source = (Path(__file__).parents[1] / 'audit_efficiency.py').read_text()
         self.assertNotIn('optimizer.step(', source)
         self.assertNotIn('.save_model(', source)
+
+    def test_inference_context_falls_back_to_no_grad_on_old_torch(self):
+        with patch.object(torch, 'inference_mode', None, create=True):
+            with inference_context():
+                self.assertFalse(torch.is_grad_enabled())
 
 
 if __name__ == '__main__':

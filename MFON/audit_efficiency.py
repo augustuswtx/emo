@@ -91,6 +91,14 @@ def cuda_memory_snapshot(device):
     return int(torch.cuda.memory_allocated(device))
 
 
+def inference_context():
+    """Use the newer inference mode when available, with an old-PyTorch fallback."""
+    mode = getattr(torch, 'inference_mode', None)
+    if mode is not None:
+        return mode()
+    return torch.no_grad()
+
+
 def benchmark_step(step, device, warmup, repeats, after_warmup=None):
     for _ in range(warmup):
         step()
@@ -195,7 +203,7 @@ def benchmark_variant(
     model.eval()
 
     def inference_step():
-        with torch.inference_mode():
+        with inference_context():
             model(text, vision, audio, mode='test')
 
     inference = benchmark_step(inference_step, device, warmup, repeats)
