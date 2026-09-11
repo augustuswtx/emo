@@ -1075,3 +1075,27 @@ paper must distinguish degradation detectability from task utility and retain
 these negative findings. The extended server suite passes 37/37 tests. The
 next low-cost gate is a uniform parameter/runtime/peak-memory audit; no
 completed 25-epoch model should be retrained for it.
+
+## 2026-09-11 MOSEI Efficiency Audit Complete
+
+The checkpoint-only efficiency tool passed its five server-side safety tests
+and completed a smoke run after adding an old-PyTorch fallback from
+`torch.inference_mode()` to `torch.no_grad()`. No optimizer step, epoch loop,
+or checkpoint write was executed. The formal audit used one NVIDIA GeForce RTX
+4090 D, the same seed-1111 MOSEI test batch of 32 samples for all variants,
+three warmup iterations, and 20 timed repetitions.
+
+| Variant | Optimized parameters | Checkpoint MiB | Inference ms/batch | Samples/s | Inference peak GiB | Forward+backward ms/batch | Forward+backward peak GiB |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Repaired MFON | 130,764,865 | 585.14 | 1040.20 | 30.76 | 1.136 | 1112.09 | 4.791 |
+| P4 Constant | 130,795,779 | 585.14 | 1009.84 | 31.69 | 1.136 | 1135.09 | 4.805 |
+| P4 Learned | 130,795,779 | 585.14 | 1024.97 | 31.22 | 1.136 | 1120.03 | 4.805 |
+
+P4 adds 30,914 optimized reliability parameters (0.02364% relative to the
+baseline optimizer scope). Learned versus repaired MFON shows +0.71%
+forward/backward latency and +0.29% peak training memory in this session;
+inference peak memory and checkpoint size are unchanged. The observed -1.46%
+inference-latency difference is not interpreted as a speedup because the audit
+is a single sequential hardware session. Efficiency evidence is now complete
+for the paper's bounded overhead claim; full-epoch and cross-device timing were
+not measured.

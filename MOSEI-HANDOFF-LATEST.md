@@ -1,9 +1,9 @@
-# MOSEI实验交接（2026-09-08）
+# MOSEI实验交接（2026-09-11）
 
 > 新Codex对话请先读本文件，再读 `PROJECT-CONTEXT-LATEST.md` 和
 > `docs/experiment-log.md`。不要从零开始，不要重复启动正在运行的任务。
 
-## 0. 2026-09-08 当前唯一有效状态
+## 0. 2026-09-11 当前唯一有效状态
 
 MOSEI 冻结实验已经完成，不再训练 seeds 1111/1112/1113 的 encoder、Baseline、P4
 Constant 或 P4 Learned。三个种子的正式 checkpoint 均存在，干净测试、完整高斯可靠性
@@ -51,16 +51,31 @@ Audio  Spearman=-0.830330±0.005901, AUROC=0.999982±0.000014
 平均低于随机；音频缺失可检测，但音频扰动几乎不改变任务预测。可靠性检测与任务效用
 必须分开解释。扩展审计套件已在服务器通过 37/37 项测试。
 
+### 效率审计（已完成）
+
+2026-09-11 在单块 NVIDIA GeForce RTX 4090 D 上完成统一效率微基准。协议为 MOSEI
+test 的同一 32 样本批次、seed 1111 冻结检查点、3 次预热和 20 次重复；前向+反向测量
+不含数据加载、优化器更新或 checkpoint 写入。
+
+| Method | Optimized params | Checkpoint MiB | Inference ms/batch | Samples/s | Inference peak GiB | F+B ms/batch | F+B peak GiB |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Repaired MFON | 130,764,865 | 585.14 | 1040.20 | 30.76 | 1.136 | 1112.09 | 4.791 |
+| P4 Constant | 130,795,779 | 585.14 | 1009.84 | 31.69 | 1.136 | 1135.09 | 4.805 |
+| P4 Learned | 130,795,779 | 585.14 | 1024.97 | 31.22 | 1.136 | 1120.03 | 4.805 |
+
+P4 新增 30,914 个参与优化的可靠性参数（相对 baseline 为 0.02364%）。Learned 相对
+baseline 的前向+反向延迟高 0.71%，峰值训练显存高 0.29%；推理峰值与 checkpoint 大小
+不变。一次顺序微基准中观测到的推理延迟降低 1.46% 不得写成速度提升。效率低成本门槛
+已经关闭，不要为效率重复训练或重复跑 seeds 1112/1113。
+
 ### 下一步严格顺序
 
-1. 只做低成本效率审计：参数量、单 batch 推理时间、训练前向/反向时间和峰值显存。
-   `audit_efficiency.py` 与 5 项契约测试已在提交 `78a8ede` 中完成并推送；本地语法编译
-   通过，因本机无 PyTorch，服务器测试与单次推理 smoke 尚待执行。该工具没有 epoch
-   循环、`optimizer.step()` 或 checkpoint 写入，不会重新训练模型。
+1. 效率审计已经完成，不再重复运行。
 2. 若投稿前 GPU 预算允许，再做最终日程的 inverse/difficulty-aware 和 batch-permuted
    作用性控制；这是检验“高可靠性正向分配”而非继续刷分。
 3. 更新图表、统一中英文数字、编译 NCA 双盲稿并做引用/格式完整性检查。
-4. 非高斯审计代码提交为 `f341865`，效率审计提交为 `78a8ede`；两者均已推送。
+4. 非高斯审计代码提交为 `f341865`，效率审计工具为 `78a8ede`，旧 PyTorch 兼容修复为
+   `918c41e`。
 
 效率工具的本地上传包为
 `/Users/augustus/projects/论文/mfon_efficiency_audit_20260908.tar.gz`，SHA256：

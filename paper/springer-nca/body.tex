@@ -787,6 +787,52 @@ reliability under the Gaussian training intervention and fixed-budget
 auxiliary allocation, rather than cross-corruption quality estimation or
 missing-modality robustness.
 
+\subsection{Efficiency and resource cost}\label{efficiency-audit}
+
+We ran a uniform microbenchmark on one NVIDIA GeForce RTX 4090 D using the
+same 32-sample MOSEI test batch and frozen seed-1111 checkpoint for every
+variant. Each method used three warmup iterations and 20 timed repetitions.
+Inference covers the end-to-end forward pass; the training measurement covers
+forward and backward computation but excludes data loading, the optimizer
+update, and checkpoint writing. Latency is therefore a within-session mean,
+not a cross-device or cross-seed statistic.
+
+\begin{table*}[t]
+\caption{Single-batch MOSEI efficiency audit under identical hardware,
+inputs, and timing protocol. Reliability branches execute only during P4
+training.}
+\label{tab:efficiency-audit}
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Method & Opt. params (M) & Added rel. params & Ckpt. (MiB)
+& Inf. (ms/batch) $\downarrow$ & Samples/s $\uparrow$
+& Inf. peak (GiB) $\downarrow$ & F+B (ms/batch) $\downarrow$
+& F+B peak (GiB) $\downarrow$ \\
+\midrule
+Repaired MFON & 130.765 & 0 & 585.14 & 1040.20 & 30.76 & 1.136
+& 1112.09 & 4.791 \\
+P4 Constant & 130.796 & 30,914 & 585.14 & 1009.84 & 31.69 & 1.136
+& 1135.09 & 4.805 \\
+P4 Learned & 130.796 & 30,914 & 585.14 & 1024.97 & 31.22 & 1.136
+& 1120.03 & 4.805 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+P4 adds 30,914 optimized reliability parameters, approximately 0.024\% of
+the repaired-MFON optimizer parameter count. All variants instantiate the
+same model class, so stored parameters (153.347M) and checkpoint size are
+identical; reliability branches are inactive at inference, and inference peak
+memory is also identical. Relative to repaired MFON, Learned shows 1.46\%
+lower observed inference latency, 0.71\% higher forward-plus-backward latency,
+and 0.29\% higher peak training memory. Because these small timing differences
+come from one sequential session, we do not interpret them as speedups. The
+supported conclusion is small additional parameter and training-memory cost
+without an expanded deployed inference graph.
+
 \section{Discussion}\label{discussion}
 
 \subsection{What the current evidence
@@ -884,8 +930,9 @@ features, and the new non-Gaussian audits reveal substantial cross-corruption
 failure rather than replacing real-media noise, occlusion, and misalignment
 experiments. Fifth, evidence covers only MFON and does not establish model
 independence or missing-modality robustness. Sixth, MOSI repaired-MFON test
-loss is unavailable, and parameter, training-time, inference-time, and memory
-costs have not yet been measured uniformly.
+loss is unavailable; the efficiency audit also covers only one GPU, one batch
+shape, and a microbenchmark without data loading or optimizer updates, so it
+does not establish cross-hardware or full-training-cycle cost.
 
 Reproducibility controls include fixed seeds, validation-based
 checkpoint selection, unit tests for mathematical contracts, explicit
@@ -916,7 +963,11 @@ results both favor Learned over equal-budget Constant on mean MAE,
 correlation, and test loss, but repaired MFON is not uniformly surpassed.
 Cross-corruption audits further show that Gaussian degradation detection does
 not transfer automatically to timestep dropout, temporal shift, or complete
-visual absence. Acoustic length dependence, text-dominant inference,
+visual absence. A uniform microbenchmark finds that P4 adds approximately
+0.024\% optimized parameters; Learned increases forward-plus-backward latency
+and peak training memory by 0.71\% and 0.29\% relative to MFON without
+expanding the deployed inference graph. Acoustic length dependence,
+text-dominant inference,
 incomplete final-schedule actionability controls, and the lack of real-media
 stress tests bound the scope. The evidence establishes a transparent and
 falsifiable audit-and-budget-control mechanism, not a general quality

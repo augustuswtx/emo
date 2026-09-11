@@ -1,6 +1,6 @@
 # NCA submission-status ledger
 
-Updated: 2026-09-08
+Updated: 2026-09-11
 
 ## Current state
 
@@ -19,7 +19,8 @@ Updated: 2026-09-08
   protocol is the confirmatory comparison.
 - Evidence complete: all three prespecified MOSEI seeds for repaired MFON,
   P4 Constant, and P4 Learned; full-test Gaussian reliability audits; and four
-  held-out corruption audits. The extended implementation suite passes 37 tests.
+  held-out corruption audits; plus a matched single-GPU efficiency audit. The
+  extended implementation suite passes 37 tests.
 - Confirmatory outcome hierarchy, fixed before the P4 Constant formal test:
   MAE/Corr primary, Has0/Non0 accuracy/F1 secondary, and Acc-5/7, loss, and
   reliability/confound measures diagnostic.
@@ -37,7 +38,8 @@ Updated: 2026-09-08
   Gaussian/non-Gaussian stress tests if deployment robustness is claimed.
 - Repeat at least Constant, Inverse/Difficulty-aware, and Permuted allocation
   controls under the final P4 schedule, or narrow the actionability claim.
-- Report parameter count, training/inference time, and memory.
+- Preserve the measured parameter, latency, throughput, and memory table, while
+  labeling it as a single-GPU microbenchmark rather than a speedup claim.
 - Add the method, audit, and claim-aligned ablation figures/tables.
 
 ## Submission-package gates
