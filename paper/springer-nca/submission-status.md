@@ -21,6 +21,10 @@ Updated: 2026-09-11
   P4 Constant, and P4 Learned; full-test Gaussian reliability audits; and four
   held-out corruption audits; plus a matched single-GPU efficiency audit. The
   extended implementation suite passes 37 tests.
+- Figure package complete: bilingual method overview, frozen MOSEI task
+  comparison, Gaussian reliability/confound audit, held-out corruption audit,
+  and efficiency audit; each quantitative figure has standalone CSV source
+  data and editable SVG/PDF exports.
 - Confirmatory outcome hierarchy, fixed before the P4 Constant formal test:
   MAE/Corr primary, Has0/Non0 accuracy/F1 secondary, and Acc-5/7, loss, and
   reliability/confound measures diagnostic.
@@ -40,7 +44,9 @@ Updated: 2026-09-11
   controls under the final P4 schedule, or narrow the actionability claim.
 - Preserve the measured parameter, latency, throughput, and memory table, while
   labeling it as a single-GPU microbenchmark rather than a speedup claim.
-- Add the method, audit, and claim-aligned ablation figures/tables.
+- Preserve the method, main-result, reliability, cross-corruption, and
+  efficiency figures together with their claim-boundary captions and source
+  CSV files.
 
 ## Submission-package gates
 

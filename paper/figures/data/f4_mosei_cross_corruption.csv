@@ -1,0 +1,9 @@
+corruption,severity,modality,auroc,auroc_sd,delta_mae,delta_mae_sd
+Timestep dropout,0.75,Vision,0.498965,0.003535,0.000933,0.000153
+Timestep dropout,0.75,Audio,0.593710,0.022123,0.000067,0.000058
+Contiguous mask,0.75,Vision,0.541152,0.011892,0.001700,0.000721
+Contiguous mask,0.75,Audio,0.754388,0.009935,0.000067,0.000058
+Temporal shift,1.00,Vision,0.509639,0.002927,-0.000133,0.000058
+Temporal shift,1.00,Audio,0.511274,0.002509,0.000000,0.000000
+Modality missing,1.00,Vision,0.407169,0.227165,0.012700,0.003110
+Modality missing,1.00,Audio,0.999857,0.000248,0.003600,0.003195

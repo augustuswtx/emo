@@ -294,6 +294,10 @@ Relative to the equal-budget Constant control, Learned moves both frozen primary
 
 The Learned-minus-Constant mean deltas are +0.0065 Has0 Acc-2, +0.0052 Has0 F1, +0.0004 Non0 Acc-2, -0.0004 Non0 F1, -0.0013 Acc-5, -0.0007 Acc-7, -0.0025 MAE, +0.0007 correlation, and -0.0040 loss. MOSEI test outputs were used only for reporting; no method or allocation variant was selected from them.
 
+![Frozen MOSEI task comparison under an equal auxiliary budget.](../paper/figures/f2_mosei_main_results_en.png)
+
+**Fig. 2 | Frozen MOSEI task comparison under an equal auxiliary budget.** a--c Mean MAE, correlation, and test loss for repaired MFON, P4 Constant, and P4 Learned; error bars denote sample standard deviation over seeds 1111, 1112, and 1113 ($n=3$ seeds). d Favourable-direction difference between Learned and Constant across all reported endpoints; MAE and loss are sign-reversed so that bars to the right consistently favor Learned. The panel shows favorable regression directions but mixed classification effects and does not constitute a significance test. Source data are provided with the figure files.
+
 ### 7.7 Cross-corruption reliability stress audit
 
 To test whether the heads recognize only the Gaussian pattern used in training, we audited all 4,659 MOSEI test samples for every frozen Learned checkpoint. Gaussian audits use multiple severities. Timestep dropout and contiguous masking use severity 0.75, temporal shift circularly moves active steps by up to half the valid sequence, and modality missing zeros all active features. Every transformation preserves padding. Table 4 summarizes the Gaussian audit, and Table 5 reports held-out corruption families.
@@ -307,6 +311,10 @@ To test whether the heads recognize only the Gaussian pattern used in training, 
 
 The Gaussian response is stable across seeds, but clean scores retain correlations with simple statistics: visual length $0.1008\pm0.0400$, visual energy $-0.1358\pm0.0791$, acoustic length $0.2194\pm0.0384$, and acoustic energy $-0.2705\pm0.1630$. Correlations with absolute sentiment labels are small (visual $0.0185\pm0.0200$; acoustic $0.0261\pm0.0115$), although these checks cannot exclude other confounds.
 
+![In-family Gaussian reliability and residual confound audit.](../paper/figures/f3_mosei_gaussian_audit_en.png)
+
+**Fig. 3 | In-family Gaussian reliability and residual confound audit.** a Clean/corrupt AUROC. b Negative Spearman correlation between corruption severity and reliability score, plotted so that larger values indicate stronger monotonic decrease. c Fraction of highest-severity scores below the paired clean score. d Pearson correlations between clean reliability scores and feature length, feature energy, or absolute sentiment label. Bars and error bars show mean $\pm$ sample standard deviation over the three frozen seeds; each seed audits all 4,659 MOSEI test samples. The heads detect the Gaussian corruption used in training, while the correlations in d motivate a bounded rather than universal reliability claim. Source data are provided with the figure files.
+
 **Table 5. MOSEI cross-corruption stress audit. AUROC measures clean/corrupt separation; $\Delta$MAE is corrupt minus clean. Values are mean $\pm$ sample standard deviation over three seeds.**
 
 | Corruption | Vision AUROC ↑ | Audio AUROC ↑ | Vision $\Delta$MAE | Audio $\Delta$MAE |
@@ -315,6 +323,10 @@ The Gaussian response is stable across seeds, but clean scores retain correlatio
 | Contiguous mask (0.75) | $0.541152\pm0.011892$ | $0.754388\pm0.009935$ | $+0.001700\pm0.000721$ | $+0.000067\pm0.000058$ |
 | Temporal shift (1.00) | $0.509639\pm0.002927$ | $0.511274\pm0.002509$ | $-0.000133\pm0.000058$ | $0.000000\pm0.000000$ |
 | Modality missing (1.00) | $0.407169\pm0.227165$ | $0.999857\pm0.000248$ | $+0.012700\pm0.003110$ | $+0.003600\pm0.003195$ |
+
+![Held-out corruption detection and task sensitivity.](../paper/figures/f4_mosei_cross_corruption_en.png)
+
+**Fig. 4 | Held-out corruption detection and task sensitivity.** a Clean/corrupt AUROC for visual and acoustic timestep dropout, contiguous masking, temporal shift, and modality missing; the dashed line marks chance AUROC of 0.5. b Change in task MAE after the same corruption, computed as corrupt minus clean. Bars and error bars show mean $\pm$ sample standard deviation over three frozen seeds, with all 4,659 MOSEI test samples audited per seed. Near-chance detection for several perturbations and the mismatch between acoustic detectability and task effect demonstrate that degradation detection is not equivalent to general reliability or task utility. Source data are provided with the figure files.
 
 Three boundaries follow. First, Gaussian reliability is not a general quality estimate: visual detection is near random for timestep dropout and temporal shift, and acoustic detection is only moderate for contiguous masking. Second, complete absence is asymmetric. Acoustic absence is almost perfectly detected, whereas visual absence produces below-chance mean AUROC with large seed variation, placing the all-zero state outside a stable learned ordering. Third, degradation detectability is not task utility. Acoustic interventions barely change predictions, while missing vision increases MAE by 0.0127 on average. We therefore restrict the claim to reliability under the Gaussian training intervention and fixed-budget auxiliary allocation, rather than cross-corruption quality estimation or missing-modality robustness.
 
@@ -331,6 +343,10 @@ We ran a uniform microbenchmark on one NVIDIA GeForce RTX 4090 D using the same 
 | P4 Learned | 130.796 | 30,914 | 585.14 | 1024.97 | 31.22 | 1.136 | 1120.03 | 4.805 |
 
 P4 adds 30,914 optimized reliability parameters, approximately 0.024% of the repaired-MFON optimizer parameter count. All variants instantiate the same model class in the current implementation, so stored parameters (153.347M) and checkpoint size are identical; reliability branches are inactive at inference, and inference peak memory is also identical. Relative to repaired MFON, Learned shows 1.46% lower observed inference latency, 0.71% higher forward-plus-backward latency, and 0.29% higher peak training memory. Because these small timing differences come from one sequential session, we do not interpret them as speedups. The supported conclusion is that P4 has small additional parameter and training-memory cost without expanding the deployed inference graph.
+
+![Single-GPU parameter, runtime, and memory audit.](../paper/figures/f5_mosei_efficiency_en.png)
+
+**Fig. 5 | Single-GPU parameter, runtime, and memory audit.** a Added optimized reliability parameters as a percentage of the repaired-MFON optimizer scope. b--d Inference and forward-plus-backward latency, throughput, and peak allocated memory. All variants use the same seed-1111 checkpoint protocol, one 32-sample MOSEI batch, one NVIDIA GeForce RTX 4090 D, three warmup iterations, and 20 timed repetitions. The measurements are single-session means without uncertainty estimates; data loading, optimizer updates, and checkpoint writes are excluded from forward-plus-backward timing. All checkpoints are 585.14 MiB, and the reliability branch is absent from deployed inference. Source data are provided with the figure files.
 
 ## 8. Discussion
 

@@ -1,0 +1,28 @@
+method,metric,mean,sd,direction
+Repaired MFON,Has0 Acc-2,0.8131,0.0194,higher
+P4 Constant,Has0 Acc-2,0.8193,0.0204,higher
+P4 Learned,Has0 Acc-2,0.8258,0.0218,higher
+Repaired MFON,Has0 F1,0.8183,0.0177,higher
+P4 Constant,Has0 F1,0.8228,0.0161,higher
+P4 Learned,Has0 F1,0.8280,0.0178,higher
+Repaired MFON,Non0 Acc-2,0.8579,0.0081,higher
+P4 Constant,Non0 Acc-2,0.8549,0.0040,higher
+P4 Learned,Non0 Acc-2,0.8553,0.0065,higher
+Repaired MFON,Non0 F1,0.8576,0.0080,higher
+P4 Constant,Non0 F1,0.8536,0.0067,higher
+P4 Learned,Non0 F1,0.8531,0.0083,higher
+Repaired MFON,Acc-5,0.5513,0.0075,higher
+P4 Constant,Acc-5,0.5556,0.0089,higher
+P4 Learned,Acc-5,0.5543,0.0082,higher
+Repaired MFON,Acc-7,0.5347,0.0070,higher
+P4 Constant,Acc-7,0.5383,0.0088,higher
+P4 Learned,Acc-7,0.5375,0.0078,higher
+Repaired MFON,MAE,0.5312,0.0053,lower
+P4 Constant,MAE,0.5341,0.0066,lower
+P4 Learned,MAE,0.5316,0.0062,lower
+Repaired MFON,Corr,0.7746,0.0035,higher
+P4 Constant,Corr,0.7747,0.0011,higher
+P4 Learned,Corr,0.7754,0.0011,higher
+Repaired MFON,Loss,0.495199,0.005712,lower
+P4 Constant,Loss,0.500237,0.004028,lower
+P4 Learned,Loss,0.496244,0.002190,lower

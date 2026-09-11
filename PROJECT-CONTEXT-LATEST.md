@@ -7,6 +7,8 @@
 
 > **当前状态覆盖：** MOSEI seeds 1111--1113 的 Repaired MFON、P4 Constant、P4
 > Learned、完整高斯审计、四类非高斯压力审计与统一效率微基准均已完成；扩展测试为 37/37 通过。
+> F1--F5 中英文论文图表也已完成，定量图均有 CSV 源数据及 SVG/PDF/PNG 输出，并已写入
+> 中英文稿和 NCA LaTeX 正文。
 > 本文件后部的早期“待运行”描述仅是历史记录，以 `MOSEI-HANDOFF-LATEST.md` 第 0 节为准。
 
 > **效率结果：** seed 1111、batch 32、RTX 4090 D、3 次预热与 20 次重复下，Learned

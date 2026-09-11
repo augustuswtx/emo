@@ -714,6 +714,21 @@ F1, +0.0004 Non0 Acc-2, -0.0004 Non0 F1, -0.0013 Acc-5, -0.0007 Acc-7,
 used only for reporting; no method or allocation variant was selected from
 them.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/f2_mosei_main_results_en.pdf}
+\caption{Frozen MOSEI task comparison under an equal auxiliary budget.
+\textbf{a--c}, Mean MAE, correlation, and test loss for repaired MFON, P4
+Constant, and P4 Learned; error bars denote sample standard deviation over
+seeds 1111, 1112, and 1113 ($n=3$ seeds). \textbf{d}, Favourable-direction
+difference between Learned and Constant across all reported endpoints; MAE
+and loss are sign-reversed so that bars to the right consistently favour
+Learned. The panel shows favourable regression directions but mixed
+classification effects and does not constitute a significance test. Source
+data are provided with the figure files.}
+\label{fig:mosei-main-results}
+\end{figure*}
+
 \subsection{Cross-corruption reliability stress
 audit}\label{cross-corruption-audit}
 
@@ -750,6 +765,23 @@ energy $-0.2705\pm0.1630$. Correlations with absolute sentiment labels are
 small (visual $0.0185\pm0.0200$; acoustic $0.0261\pm0.0115$), although these
 checks cannot exclude other confounds.
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/f3_mosei_gaussian_audit_en.pdf}
+\caption{In-family Gaussian reliability and residual confound audit.
+\textbf{a}, Clean/corrupt AUROC. \textbf{b}, Negative Spearman correlation
+between corruption severity and reliability score, plotted so that larger
+values indicate stronger monotonic decrease. \textbf{c}, Fraction of
+highest-severity scores below the paired clean score. \textbf{d}, Pearson
+correlations between clean reliability scores and feature length, feature
+energy, or absolute sentiment label. Bars and error bars show mean $\pm$
+sample standard deviation over the three frozen seeds; each seed audits all
+4,659 MOSEI test samples. The heads detect the Gaussian corruption used in
+training, while the correlations in panel d motivate a bounded rather than
+universal reliability claim. Source data are provided with the figure files.}
+\label{fig:mosei-gaussian-audit}
+\end{figure*}
+
 \begin{table*}[t]
 \caption{MOSEI cross-corruption stress audit. AUROC measures clean/corrupt
 separation; $\Delta$MAE is corrupt minus clean. Values are mean $\pm$ sample
@@ -774,6 +806,22 @@ Modality missing (1.00) & $0.407169\pm0.227165$ & $0.999857\pm0.000248$
 \end{tabular}
 }
 \end{table*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/f4_mosei_cross_corruption_en.pdf}
+\caption{Held-out corruption detection and task sensitivity. \textbf{a},
+Clean/corrupt AUROC for visual and acoustic timestep dropout, contiguous
+masking, temporal shift, and modality missing; the dashed line marks chance
+AUROC of 0.5. \textbf{b}, Change in task MAE after the same corruption,
+computed as corrupt minus clean. Bars and error bars show mean $\pm$ sample
+standard deviation over three frozen seeds, with all 4,659 MOSEI test samples
+audited per seed. Near-chance detection for several perturbations and the
+mismatch between acoustic detectability and task effect show that degradation
+detection is not equivalent to general reliability or task utility. Source
+data are provided with the figure files.}
+\label{fig:mosei-cross-corruption}
+\end{figure*}
 
 Three boundaries follow. First, Gaussian reliability is not a general quality
 estimate: visual detection is near random for timestep dropout and temporal
@@ -832,6 +880,22 @@ and 0.29\% higher peak training memory. Because these small timing differences
 come from one sequential session, we do not interpret them as speedups. The
 supported conclusion is small additional parameter and training-memory cost
 without an expanded deployed inference graph.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{../figures/f5_mosei_efficiency_en.pdf}
+\caption{Single-GPU parameter, runtime, and memory audit. \textbf{a}, Added
+optimized reliability parameters as a percentage of the repaired-MFON
+optimizer scope. \textbf{b--d}, Inference and forward-plus-backward latency,
+throughput, and peak allocated memory. All variants use the same seed-1111
+checkpoint protocol, one 32-sample MOSEI batch, one NVIDIA GeForce RTX 4090 D,
+three warmup iterations, and 20 timed repetitions. The measurements are
+single-session means without uncertainty estimates; data loading, optimizer
+updates, and checkpoint writes are excluded from forward-plus-backward timing.
+All checkpoints are 585.14 MiB, and the reliability branch is absent from
+deployed inference. Source data are provided with the figure files.}
+\label{fig:mosei-efficiency}
+\end{figure*}
 
 \section{Discussion}\label{discussion}
 

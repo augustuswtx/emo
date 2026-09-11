@@ -1,0 +1,4 @@
+method,optimized_parameters,added_reliability_parameters,checkpoint_mib,inference_ms_per_batch,inference_samples_per_second,inference_peak_gib,forward_backward_ms_per_batch,forward_backward_samples_per_second,forward_backward_peak_gib
+Repaired MFON,130764865,0,585.14,1040.20,30.76,1.136,1112.09,28.77468917289016,4.791
+P4 Constant,130795779,30914,585.14,1009.84,31.69,1.136,1135.09,28.191486612368834,4.805
+P4 Learned,130795779,30914,585.14,1024.97,31.22,1.136,1120.03,28.570724441917328,4.805

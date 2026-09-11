@@ -42,4 +42,5 @@ audit, and four held-out-corruption stress audits are now complete. The remainin
 empirical gate is, if resources permit, the final-schedule
 inverse/difficulty-aware and permutation control. The uniform efficiency
 microbenchmark is complete and is reported as a single-GPU cost audit rather
-than a general speed comparison.
+than a general speed comparison. The bilingual F1--F5 figure package is also
+complete, with quantitative source CSV files and editable SVG/PDF exports.

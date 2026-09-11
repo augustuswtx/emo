@@ -1099,3 +1099,16 @@ inference-latency difference is not interpreted as a speedup because the audit
 is a single sequential hardware session. Efficiency evidence is now complete
 for the paper's bounded overhead claim; full-epoch and cross-device timing were
 not measured.
+
+## 2026-09-11 Manuscript Figure Package Complete
+
+The Python/matplotlib figure package now contains bilingual F1--F5 figures:
+the training/inference method boundary, frozen MOSEI task results, Gaussian
+reliability and confound audit, held-out corruption audit, and single-GPU
+efficiency audit. F2--F4 report mean and sample standard deviation over seeds
+1111--1113; F5 reports the single seed-1111 microbenchmark without an
+uncertainty estimate. Every quantitative figure is backed by a standalone CSV
+and exported as editable SVG, vector PDF, and 300 dpi PNG. Full-resolution
+English and Chinese previews were visually inspected. The figures preserve
+mixed/negative findings and do not introduce significance, general-reliability,
+robust-fusion, or speedup claims.

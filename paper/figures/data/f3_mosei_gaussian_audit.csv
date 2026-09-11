@@ -1,0 +1,13 @@
+section,modality,metric,mean,sd
+audit,Vision,AUROC,0.972161,0.009176
+audit,Audio,AUROC,0.999982,0.000014
+audit,Vision,-Spearman,0.931602,0.007408
+audit,Audio,-Spearman,0.830330,0.005901
+audit,Vision,Highest below clean,0.985905,0.000328
+audit,Audio,Highest below clean,1.000000,0.000000
+confound,Vision,Length,0.1008,0.0400
+confound,Audio,Length,0.2194,0.0384
+confound,Vision,Energy,-0.1358,0.0791
+confound,Audio,Energy,-0.2705,0.1630
+confound,Vision,Absolute label,0.0185,0.0200
+confound,Audio,Absolute label,0.0261,0.0115
