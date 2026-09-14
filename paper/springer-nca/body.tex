@@ -385,12 +385,18 @@ variants to share the same nominal auxiliary scale.
 \subsection{Exact finite-batch budget and allocation
 warmup}\label{exact-finite-batch-budget-and-allocation-warmup}
 
-For modality \(m\), define the normalized reliability allocation
+For modality \(m\), let
+\(\bar q_i^m=\operatorname{stopgrad}(q_i^m)\) and define the normalized
+reliability allocation
 
 \[
 a_i^m=
-\frac{B(q_i^m+\epsilon)}{\sum_{j=1}^{B}(q_j^m+\epsilon)}.
+\frac{B(\bar q_i^m+\epsilon)}{\sum_{j=1}^{B}(\bar q_j^m+\epsilon)}.
 \]
+
+The stop-gradient operation matches the implementation: auxiliary-task
+gradients cannot train the reliability head by manipulating sample weights;
+that head is trained only by its ranking and invariance objectives.
 
 Let \(\delta_m\) be the original MFON auxiliary coefficient and
 \(p_t\in[0,1]\) the allocation-warmup progress. P4 uses
@@ -434,9 +440,9 @@ L=L_{\mathrm{task}}+L_{\mathrm{aux}}
 hypothesis}\label{allocation-direction-hypothesis}
 
 Assigning larger auxiliary weights to higher-reliability samples is a design
-hypothesis, not a consequence of budget conservation. Let (e_i^m) denote
+hypothesis, not a consequence of budget conservation. Let \(e_i^m\) denote
 the unobserved error in the auxiliary target or positive-pair relation for
-modality (m). P4 assumes that, in expectation, larger reliability implies
+modality \(m\). P4 assumes that, in expectation, larger reliability implies
 no larger auxiliary-target error:
 
 \[
@@ -464,8 +470,8 @@ additionally permuted score--sample correspondence, reversed score
 ranks, and used severity-based oracle scores. Because those earlier
 controls were completed before the final P4 allocation-warmup schedule
 was frozen, we report them as diagnostic evidence rather than pooling
-them with the final three-seed P4 comparison. The confirmatory experiment
-plan therefore precommits a final-schedule inverse/difficulty-aware control
+them with the final three-seed P4 comparison. The frozen-protocol experiment
+plan therefore records a final-schedule inverse/difficulty-aware control
 and a within-batch permuted control; neither is reported as completed
 evidence in this draft.
 
@@ -479,10 +485,10 @@ Five-batch and full-test reliability diagnostics were inspected during
 development: the early visual result supported retaining the visual head,
 whereas the near-random acoustic result motivated the temporal-descriptor
 acoustic head. Consequently, the matched three-seed MOSI comparison and
-reliability audit are exploratory rather than untouched confirmatory
+reliability audit are exploratory rather than untouched validation
 evidence. The P4 architecture, allocation direction, warmup, corruption
 scale, and auxiliary budgets were then frozen. CMU-MOSEI
-\cite{zadeh2018mosei} is the confirmatory cross-dataset evaluation under
+\cite{zadeh2018mosei} is the frozen-protocol cross-dataset replication under
 that protocol. Repaired MFON, P4 Constant, and P4 Learned are complete for
 seeds 1111, 1112, and 1113, with checkpoint selection based only on validation
 loss. MOSEI test outputs were used only for reporting, not to revise P4 or
@@ -501,7 +507,7 @@ Because MOSI test diagnostics influenced earlier head and schedule
 decisions, these comparisons quantify development-stage behavior and are
 not presented as an untouched holdout. Tuning on MOSI stopped once P4 was
 frozen; subsequent selection is validation-only, and MOSEI is reserved for
-frozen confirmatory evaluation.
+frozen cross-dataset replication.
 
 \subsection{Metrics}\label{metrics}
 
@@ -561,6 +567,7 @@ aggregate results.
 Spearman and higher AUROC indicate better degradation tracking.}
 \label{tab:reliability-audit}
 \centering
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
 Modality & Spearman(severity, score) $\downarrow$
@@ -571,7 +578,8 @@ Vision & $-0.962946\pm0.004189$ & $0.995197\pm0.004719$
 Audio & $-0.819850\pm0.007717$ & $0.941968\pm0.009641$
 & Length $0.241182\pm0.012280$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table*}
 
 Both heads strongly distinguish the training corruption, and the converged
@@ -596,23 +604,36 @@ over seeds 1111, 1112, and 1113). Bold marks the better value between the
 two equal-budget P4 variants; tied Acc-5 values are both bold.}
 \label{tab:mosi-results}
 \centering
-\setlength{\tabcolsep}{3.2pt}
+\small
+\textbf{(a) Binary metrics}\par\smallskip
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lccccccccc}
+\begin{tabular}{lcccc}
 \toprule
-Method & Has0 Acc-2 & Has0 F1 & Non0 Acc-2 & Non0 F1
-& Acc-5 & Acc-7 & MAE & Corr & Loss \\
+Method & Has0 Acc-2 & Has0 F1 & Non0 Acc-2 & Non0 F1 \\
 \midrule
 Repaired MFON & $0.8270\pm0.0009$ & $0.8260\pm0.0008$
-& $0.8476\pm0.0016$ & $0.8472\pm0.0014$ & $0.5063\pm0.0099$
-& $0.4505\pm0.0125$ & $0.7258\pm0.0028$ & $0.7943\pm0.0015$ & -- \\
+& $0.8476\pm0.0016$ & $0.8472\pm0.0014$ \\
 P4 Constant & $0.8285\pm0.0022$ & $0.8277\pm0.0019$
-& $0.8486\pm0.0017$ & $0.8484\pm0.0014$ & $\mathbf{0.4990\pm0.0009}$
-& $\mathbf{0.4378\pm0.0075}$ & $0.7263\pm0.0069$ & $0.7937\pm0.0033$
-& $0.9809\pm0.0160$ \\
+& $0.8486\pm0.0017$ & $0.8484\pm0.0014$ \\
 P4 Learned & $\mathbf{0.8299\pm0.0031}$ & $\mathbf{0.8290\pm0.0029}$
 & $\mathbf{0.8496\pm0.0032}$ & $\mathbf{0.8493\pm0.0030}$
-& $\mathbf{0.4990\pm0.0072}$ & $0.4363\pm0.0067$
+\\
+\bottomrule
+\end{tabular}%
+}
+
+\vspace{0.7em}
+\textbf{(b) Fine-grained and regression metrics}\par\smallskip
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Method & Acc-5 & Acc-7 & MAE & Corr & Loss \\
+\midrule
+Repaired MFON & $0.5063\pm0.0099$ & $0.4505\pm0.0125$
+& $0.7258\pm0.0028$ & $0.7943\pm0.0015$ & -- \\
+P4 Constant & $\mathbf{0.4990\pm0.0009}$ & $\mathbf{0.4378\pm0.0075}$
+& $0.7263\pm0.0069$ & $0.7937\pm0.0033$ & $0.9809\pm0.0160$ \\
+P4 Learned & $\mathbf{0.4990\pm0.0072}$ & $0.4363\pm0.0067$
 & $\mathbf{0.7213\pm0.0068}$ & $\mathbf{0.7952\pm0.0035}$
 & $\mathbf{0.9708\pm0.0122}$ \\
 \bottomrule
@@ -625,7 +646,7 @@ The corresponding Learned-minus-Constant deltas are +0.0015 Has0 Acc-2,
 \(-0.0015\) Acc-7, \(-0.0050\) MAE, +0.0015 correlation, and \(-0.0101\)
 loss. These exploratory results motivate learned redistribution for the
 primary binary/regression view of MOSI, but the effects are small,
-test-informed development limits their confirmatory value, and not every
+test-informed development limits their holdout value, and not every
 classification resolution improves.
 
 \subsection{Earlier actionability controls show metric-dependent
@@ -657,12 +678,12 @@ limit the inference-time interpretation. The current MFON checkpoints
 are strongly text-dominant, so the study cannot claim that the learned
 scores already provide dynamic, noise-adaptive fusion at inference.
 
-\subsection{Three-seed confirmatory task results on
-MOSEI}\label{mosei-confirmatory-results}
+\subsection{Three-seed frozen-protocol task results on
+MOSEI}\label{mosei-frozen-protocol-results}
 
 The frozen P4 implementation was ported to MOSEI without changing feature
 dimensions, learning rates, base auxiliary weights, allocation direction, or
-the corruption schedule. All three prespecified seeds of repaired MFON, P4
+the corruption schedule. All three fixed seeds of repaired MFON, P4
 Constant, and P4 Learned completed 25-epoch training, validation-loss
 checkpoint selection, and checkpoint-reloaded testing.
 Table~\ref{tab:mosei-results} reports the mean and sample standard deviation.
@@ -683,24 +704,37 @@ deviation over seeds 1111, 1112, and 1113). Bold marks the better value
 between the two equal-budget P4 variants.}
 \label{tab:mosei-results}
 \centering
-\setlength{\tabcolsep}{3.2pt}
+\small
+\textbf{(a) Binary metrics}\par\smallskip
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lccccccccc}
+\begin{tabular}{lcccc}
 \toprule
-Method & Has0 Acc-2 & Has0 F1 & Non0 Acc-2 & Non0 F1
-& Acc-5 & Acc-7 & MAE & Corr & Loss \\
+Method & Has0 Acc-2 & Has0 F1 & Non0 Acc-2 & Non0 F1 \\
 \midrule
 Repaired MFON & $0.8131\pm0.0194$ & $0.8183\pm0.0177$
-& $0.8579\pm0.0081$ & $0.8576\pm0.0080$ & $0.5513\pm0.0075$
-& $0.5347\pm0.0070$ & $0.5312\pm0.0053$ & $0.7746\pm0.0035$
-& $0.495199\pm0.005712$ \\
+& $0.8579\pm0.0081$ & $0.8576\pm0.0080$ \\
 P4 Constant & $0.8193\pm0.0204$ & $0.8228\pm0.0161$
 & $0.8549\pm0.0040$ & $\mathbf{0.8536\pm0.0067}$
-& $\mathbf{0.5556\pm0.0089}$ & $\mathbf{0.5383\pm0.0088}$
-& $0.5341\pm0.0066$ & $0.7747\pm0.0011$ & $0.500237\pm0.004028$ \\
+\\
 P4 Learned & $\mathbf{0.8258\pm0.0218}$ & $\mathbf{0.8280\pm0.0178}$
 & $\mathbf{0.8553\pm0.0065}$ & $0.8531\pm0.0083$
-& $0.5543\pm0.0082$ & $0.5375\pm0.0078$
+\\
+\bottomrule
+\end{tabular}%
+}
+
+\vspace{0.7em}
+\textbf{(b) Fine-grained and regression metrics}\par\smallskip
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Method & Acc-5 & Acc-7 & MAE & Corr & Loss \\
+\midrule
+Repaired MFON & $0.5513\pm0.0075$ & $0.5347\pm0.0070$
+& $0.5312\pm0.0053$ & $0.7746\pm0.0035$ & $0.495199\pm0.005712$ \\
+P4 Constant & $\mathbf{0.5556\pm0.0089}$ & $\mathbf{0.5383\pm0.0088}$
+& $0.5341\pm0.0066$ & $0.7747\pm0.0011$ & $0.500237\pm0.004028$ \\
+P4 Learned & $0.5543\pm0.0082$ & $0.5375\pm0.0078$
 & $\mathbf{0.5316\pm0.0062}$ & $\mathbf{0.7754\pm0.0011}$
 & $\mathbf{0.496244\pm0.002190}$ \\
 \bottomrule
@@ -739,12 +773,12 @@ contiguous masking use severity 0.75, temporal shift circularly moves active
 steps by up to half the valid sequence, and modality missing zeros all active
 features. Every transformation preserves padding.
 
-\begin{table}[t]
+\begin{table*}[t]
 \caption{Gaussian reliability audit on frozen MOSEI P4 Learned checkpoints
 (mean $\pm$ sample standard deviation over three seeds).}
 \label{tab:mosei-gaussian-audit}
 \centering
-\resizebox{\columnwidth}{!}{%
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
 Modality & Spearman $\downarrow$ & AUROC $\uparrow$ & Highest below clean $\uparrow$ \\
@@ -756,7 +790,7 @@ Audio & $-0.830330\pm0.005901$ & $0.999982\pm0.000014$
 \bottomrule
 \end{tabular}%
 }
-\end{table}
+\end{table*}
 
 The Gaussian response is stable across seeds, but clean scores retain
 correlations with simple statistics: visual length $0.1008\pm0.0400$, visual
@@ -851,23 +885,33 @@ inputs, and timing protocol. Reliability branches execute only during P4
 training.}
 \label{tab:efficiency-audit}
 \centering
+\small
+\textbf{(a) Model size and peak allocated memory}\par\smallskip
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lrrrrrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
 Method & Opt. params (M) & Added rel. params & Ckpt. (MiB)
-& Inf. (ms/batch) $\downarrow$ & Samples/s $\uparrow$
-& Inf. peak (GiB) $\downarrow$ & F+B (ms/batch) $\downarrow$
-& F+B peak (GiB) $\downarrow$ \\
+& Inf. peak (GiB) $\downarrow$ & F+B peak (GiB) $\downarrow$ \\
 \midrule
-Repaired MFON & 130.765 & 0 & 585.14 & 1040.20 & 30.76 & 1.136
-& 1112.09 & 4.791 \\
-P4 Constant & 130.796 & 30,914 & 585.14 & 1009.84 & 31.69 & 1.136
-& 1135.09 & 4.805 \\
-P4 Learned & 130.796 & 30,914 & 585.14 & 1024.97 & 31.22 & 1.136
-& 1120.03 & 4.805 \\
+Repaired MFON & 130.765 & 0 & 585.14 & 1.136 & 4.791 \\
+P4 Constant & 130.796 & 30,914 & 585.14 & 1.136 & 4.805 \\
+P4 Learned & 130.796 & 30,914 & 585.14 & 1.136 & 4.805 \\
 \bottomrule
 \end{tabular}%
 }
+
+\vspace{0.7em}
+\textbf{(b) Runtime}\par\smallskip
+\begin{tabular}{lrrr}
+\toprule
+Method & Inf. (ms/batch) $\downarrow$ & Samples/s $\uparrow$
+& F+B (ms/batch) $\downarrow$ \\
+\midrule
+Repaired MFON & 1040.20 & 30.76 & 1112.09 \\
+P4 Constant & 1009.84 & 31.69 & 1135.09 \\
+P4 Learned & 1024.97 & 31.22 & 1120.03 \\
+\bottomrule
+\end{tabular}
 \end{table*}
 
 P4 adds 30,914 optimized reliability parameters, approximately 0.024\% of

@@ -2,7 +2,7 @@
 
 > **Manuscript status:** evidence-grounded English draft v3, revised on 8 September 2026 after completing the three-seed MOSEI study and stress audits.
 >
-> **Evidence roles:** CMU-MOSI was used during method development, including test-split reliability diagnostics that informed visual-head retention and acoustic-head redesign; its results are therefore exploratory. P4 was then frozen before the formal CMU-MOSEI comparison, which is the confirmatory cross-dataset experiment. All three prespecified seeds of repaired MFON, P4 Constant, and P4 Learned are complete; MOSEI test outputs were not used to revise the method.
+> **Evidence roles:** CMU-MOSI was used during method development, including test-split reliability diagnostics that informed visual-head retention and acoustic-head redesign; its results are therefore exploratory. P4 was then frozen before the formal CMU-MOSEI comparison, which is the frozen-protocol cross-dataset replication. All three fixed seeds of repaired MFON, P4 Constant, and P4 Learned are complete; MOSEI test outputs were not used to revise the method.
 > **Writing boundary:** MFON is the base architecture and is not claimed as an original contribution. The present evidence supports reliability estimation and training-time auxiliary-supervision allocation; it does not establish inference-time noise-adaptive fusion, state-of-the-art performance, or universal improvement over MFON.
 
 ## Abstract
@@ -163,12 +163,14 @@ The mean of each unreduced objective matches the original MFON objective, which 
 
 ### 5.4 Exact finite-batch budget and allocation warmup
 
-For modality $m$, define the normalized reliability allocation
+For modality $m$, let $\bar q_i^m=\operatorname{stopgrad}(q_i^m)$ and define the normalized reliability allocation
 
 $$
 a_i^m=
-\frac{B(q_i^m+\epsilon)}{\sum_{j=1}^{B}(q_j^m+\epsilon)}.
+\frac{B(\bar q_i^m+\epsilon)}{\sum_{j=1}^{B}(\bar q_j^m+\epsilon)}.
 $$
+
+The stop-gradient operation matches the implementation: auxiliary-task gradients cannot train the reliability head by manipulating sample weights; that head is trained only by its ranking and invariance objectives.
 
 Let $\delta_m$ be the original MFON auxiliary coefficient and $p_t\in[0,1]$ the allocation-warmup progress. P4 uses
 
@@ -217,17 +219,17 @@ Under this assumption, reliability-proportional allocation emphasizes samples fo
 
 ### 5.6 Equal-budget controls
 
-P4 Learned uses the predicted reliability scores; P4 Constant replaces every score by one while preserving all other reliability-head training and the same mean budget. Earlier single-seed actionability experiments additionally permuted score--sample correspondence, reversed score ranks, and used severity-based oracle scores. Because those earlier controls were completed before the final P4 allocation-warmup schedule was frozen, we report them as diagnostic evidence rather than pooling them with the final three-seed P4 comparison. The confirmatory experiment plan therefore precommits a final-schedule inverse/difficulty-aware control and a within-batch permuted control; neither is reported as completed evidence in this draft.
+P4 Learned uses the predicted reliability scores; P4 Constant replaces every score by one while preserving all other reliability-head training and the same mean budget. Earlier single-seed actionability experiments additionally permuted score--sample correspondence, reversed score ranks, and used severity-based oracle scores. Because those earlier controls were completed before the final P4 allocation-warmup schedule was frozen, we report them as diagnostic evidence rather than pooling them with the final three-seed P4 comparison. The frozen-protocol experiment plan therefore records a final-schedule inverse/difficulty-aware control and a within-batch permuted control; neither is reported as completed evidence in this draft.
 
 ## 6. Experimental Protocol
 
 ### 6.1 Datasets and current scope
 
-CMU-MOSI [@zadeh2016multimodal] served as the development dataset. Five-batch and full-test reliability diagnostics were inspected during development: the early visual result supported retaining the visual head, whereas the near-random acoustic result motivated the temporal-descriptor acoustic head. Consequently, the matched three-seed MOSI comparison and reliability audit are reported as exploratory rather than untouched confirmatory evidence. After this stage, the P4 architecture, allocation direction, warmup, corruption scale, and auxiliary budgets were frozen. CMU-MOSEI [@zadeh2018mosei] is the confirmatory cross-dataset evaluation under that frozen protocol. Repaired MFON, P4 Constant, and P4 Learned are complete for seeds 1111, 1112, and 1113, with checkpoint selection based only on validation loss. CH-SIMS and additional backbones are outside the present confirmatory evidence. MOSEI test outputs were used only for reporting, not to revise P4 or select an allocation variant.
+CMU-MOSI [@zadeh2016multimodal] served as the development dataset. Five-batch and full-test reliability diagnostics were inspected during development: the early visual result supported retaining the visual head, whereas the near-random acoustic result motivated the temporal-descriptor acoustic head. Consequently, the matched three-seed MOSI comparison and reliability audit are reported as exploratory rather than untouched validation evidence. After this stage, the P4 architecture, allocation direction, warmup, corruption scale, and auxiliary budgets were frozen. CMU-MOSEI [@zadeh2018mosei] is the frozen-protocol cross-dataset replication under that protocol. Repaired MFON, P4 Constant, and P4 Learned are complete for seeds 1111, 1112, and 1113, with checkpoint selection based only on validation loss. CH-SIMS and additional backbones are outside the present frozen-protocol evidence. MOSEI test outputs were used only for reporting, not to revise P4 or select an allocation variant.
 
 ### 6.2 Compared methods
 
-The final MOSI comparison includes: (1) repaired MFON, which fixes a batch-size-one squeeze error and positional-index construction; (2) P4 Constant, which trains the reliability heads but allocates each auxiliary objective uniformly under the fixed budget; and (3) P4 Learned, which uses the learned reliability scores for allocation. All methods use the same data split, base architecture, training length, and seeds 1111, 1112, and 1113. Checkpoint selection uses validation loss. Because MOSI test diagnostics influenced earlier head and schedule decisions, these comparisons quantify development-stage behavior and are not presented as an untouched holdout. Tuning on MOSI stopped once P4 was frozen; subsequent selection is validation-only, and MOSEI is reserved for frozen confirmatory evaluation.
+The final MOSI comparison includes: (1) repaired MFON, which fixes a batch-size-one squeeze error and positional-index construction; (2) P4 Constant, which trains the reliability heads but allocates each auxiliary objective uniformly under the fixed budget; and (3) P4 Learned, which uses the learned reliability scores for allocation. All methods use the same data split, base architecture, training length, and seeds 1111, 1112, and 1113. Checkpoint selection uses validation loss. Because MOSI test diagnostics influenced earlier head and schedule decisions, these comparisons quantify development-stage behavior and are not presented as an untouched holdout. Tuning on MOSI stopped once P4 was frozen; subsequent selection is validation-only, and MOSEI is reserved for frozen cross-dataset replication.
 
 ### 6.3 Metrics
 
@@ -268,7 +270,7 @@ Table 2 gives the final matched comparison. P4 Learned improves both binary metr
 | P4 Constant | $0.8285\pm0.0022$ | $0.8277\pm0.0019$ | $0.8486\pm0.0017$ | $0.8484\pm0.0014$ | $0.4990\pm0.0009$ | **$0.4378\pm0.0075$** | $0.7263\pm0.0069$ | $0.7937\pm0.0033$ | $0.9809\pm0.0160$ |
 | P4 Learned | **$0.8299\pm0.0031$** | **$0.8290\pm0.0029$** | **$0.8496\pm0.0032$** | **$0.8493\pm0.0030$** | **$0.4990\pm0.0072$** | $0.4363\pm0.0067$ | **$0.7213\pm0.0068$** | **$0.7952\pm0.0035$** | **$0.9708\pm0.0122$** |
 
-The corresponding Learned-minus-Constant deltas are +0.0015 Has0 Acc-2, +0.0014 Has0 F1, +0.0010 Non0 Acc-2/F1, approximately zero Acc-5, $-0.0015$ Acc-7, $-0.0050$ MAE, +0.0015 correlation, and $-0.0101$ loss. These exploratory results motivate learned redistribution for the primary binary/regression view of MOSI, but the effects are small, test-informed development limits their confirmatory value, and not every classification resolution improves.
+The corresponding Learned-minus-Constant deltas are +0.0015 Has0 Acc-2, +0.0014 Has0 F1, +0.0010 Non0 Acc-2/F1, approximately zero Acc-5, $-0.0015$ Acc-7, $-0.0050$ MAE, +0.0015 correlation, and $-0.0101$ loss. These exploratory results motivate learned redistribution for the primary binary/regression view of MOSI, but the effects are small, test-informed development limits their holdout value, and not every classification resolution improves.
 
 ### 7.4 Earlier actionability controls show metric-dependent effects
 
@@ -278,9 +280,9 @@ Before the final P4 schedule was frozen, a matched seed-1111 study compared lear
 
 Across the completed MOSI reliability audits, severe corruption of the acoustic or visual feature stream produced only small changes in task predictions. This observation does not negate the reliability-head results: the heads are optimized to measure synthetic degradation, while reliability controls training-time auxiliary losses. It does, however, limit the inference-time interpretation. The current MFON checkpoints are strongly text-dominant, so the study cannot claim that the learned scores already provide dynamic, noise-adaptive fusion at inference.
 
-### 7.6 Three-seed confirmatory task results on MOSEI
+### 7.6 Three-seed frozen-protocol task results on MOSEI
 
-The frozen P4 implementation was ported to MOSEI without changing feature dimensions, learning rates, base auxiliary weights, allocation direction, or corruption schedule. All three prespecified seeds of repaired MFON, P4 Constant, and P4 Learned completed 25-epoch training, validation-loss checkpoint selection, and checkpoint-reloaded testing. Table 3 reports the three-seed mean and sample standard deviation.
+The frozen P4 implementation was ported to MOSEI without changing feature dimensions, learning rates, base auxiliary weights, allocation direction, or corruption schedule. All three fixed seeds of repaired MFON, P4 Constant, and P4 Learned completed 25-epoch training, validation-loss checkpoint selection, and checkpoint-reloaded testing. Table 3 reports the three-seed mean and sample standard deviation.
 
 Relative to the equal-budget Constant control, Learned moves both frozen primary endpoints in the favorable direction: mean MAE decreases from 0.5341 to 0.5316 (an improvement of 0.0025), correlation increases from 0.7747 to 0.7754 (+0.0007), and test loss decreases by 0.0040. Has0 binary metrics and Non0 Acc-2 are slightly higher, whereas Non0 F1, Acc-5, and Acc-7 are slightly lower. Relative to repaired MFON, Learned improves correlation by 0.0009 but worsens MAE by 0.0004 and loss by 0.0010. The confirmation therefore supports a favorable primary-endpoint direction over uniform allocation, not uniform superiority to the base model.
 

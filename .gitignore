@@ -22,3 +22,14 @@ save_models/
 *.pptx
 *.ppt
 *.inspect.ndjson
+
+# Derived NCA submission package and TeX build products
+paper/springer-nca/build/
+tmp/
+paper/springer-nca/*.aux
+paper/springer-nca/*.bbl
+paper/springer-nca/*.blg
+paper/springer-nca/*.fls
+paper/springer-nca/*.fdb_latexmk
+paper/springer-nca/*.out
+paper/springer-nca/*.synctex.gz

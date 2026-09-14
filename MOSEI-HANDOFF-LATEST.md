@@ -1,9 +1,9 @@
-# MOSEI实验交接（2026-09-11）
+# MOSEI实验交接（2026-09-14）
 
 > 新Codex对话请先读本文件，再读 `PROJECT-CONTEXT-LATEST.md` 和
 > `docs/experiment-log.md`。不要从零开始，不要重复启动正在运行的任务。
 
-## 0. 2026-09-11 当前唯一有效状态
+## 0. 2026-09-14 当前唯一有效状态
 
 MOSEI 冻结实验已经完成，不再训练 seeds 1111/1112/1113 的 encoder、Baseline、P4
 Constant 或 P4 Learned。三个种子的正式 checkpoint 均存在，干净测试、完整高斯可靠性
@@ -75,8 +75,14 @@ baseline 的前向+反向延迟高 0.71%，峰值训练显存高 0.29%；推理�
    尺寸和分页微调。
 3. 若投稿前 GPU 预算允许，再做最终日程的 inverse/difficulty-aware 和 batch-permuted
    作用性控制；这是检验“高可靠性正向分配”而非继续刷分。
-4. 下载官方 Springer Nature 模板、编译 NCA 双盲稿，并做引用/数字/格式完整性检查。
-5. 非高斯审计代码提交为 `f341865`，效率审计工具为 `78a8ede`，旧 PyTorch 兼容修复为
+4. 官方 Springer Nature 2024-12 模板、NCA 编号引用格式和匿名稿编译预检已经完成：
+   当前 A4 PDF 为 23 页，日志无 LaTeX 错误、缺失文件、未定义引用/交叉引用或 overfull；
+   全页光栅化目检无裁切、重叠或缺字。Python 打包器可生成不含 `\\input` 的九文件匿名
+   可编辑源码 ZIP。投稿前仍需用常规 `pdflatex`/BibTeX 或 Editorial Manager 做最终引擎复核。
+5. 当前稿件和投稿状态位于 `paper/springer-nca/`，预览 PDF 位于
+   `output/pdf/nca_anonymous_draft.pdf`。独立 title page 仍需作者填写姓名、单位、ORCID、
+   通讯信息及各项声明；这些身份信息不得加入匿名稿或匿名 ZIP。
+6. 非高斯审计代码提交为 `f341865`，效率审计工具为 `78a8ede`，旧 PyTorch 兼容修复为
    `918c41e`。
 
 效率工具的本地上传包为

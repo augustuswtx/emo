@@ -1,6 +1,6 @@
 # Venue strategy
 
-Updated: 2026-08-11
+Updated: 2026-09-14
 
 ## Primary target: Neural Computing and Applications
 
@@ -37,13 +37,15 @@ supplementary materials must omit author-identifying information; author names,
 affiliations, acknowledgments, funding, and contact details belong on a
 separate title page. The journal accepts Word and manuscripts with mathematical
 content in the Springer Nature LaTeX template. The usual abstract range is
-150--250 words and 4--6 keywords are requested. The current 209-word abstract
+150--250 words and 4--6 keywords are requested. The current 222-word abstract
 and five keywords satisfy those working constraints.
 
 The `paper/springer-nca/` directory uses the generic Springer Nature `sn-jnl`
-structure as a working draft. Before submission, download the latest official
-template package and recheck all policies; the local workspace does not yet
-contain `sn-jnl.cls` or a TeX engine.
+structure. The official December 2024 class and numbered bibliography style are
+now vendored locally. A 23-page anonymous A4 draft has passed an isolated
+Tectonic preflight and full-page visual review, and a flat editable-source ZIP
+can be generated with the included Python packager. A conventional
+`pdflatex`/BibTeX or Editorial Manager build remains the final engine check.
 
 ## Backups
 
@@ -58,7 +60,7 @@ contain `sn-jnl.cls` or a TeX engine.
 
 ## Policy freshness
 
-Official sources checked on 2026-08-11:
+Official sources checked on 2026-09-11:
 
 - CCF artificial-intelligence directory: https://www.ccf.org.cn/Academic_Evaluation/AI/
 - NCA submission guidelines: https://link.springer.com/journal/521/submission-guidelines

@@ -9,14 +9,28 @@ Neural Computing and Applications (NCA).
   declarations.
 - `body.tex`: evidence-grounded manuscript body shared in content with the
   long-form English draft.
+- `sn-jnl.cls` and `sn-basic.bst`: official Springer Nature template files
+  from the December 2024 author package.
+- `build_submission_package.py`: creates a flat, anonymous editable-source
+  archive without `\\input` dependencies.
+- `title-page-template.tex`: separate identity-bearing title-page template;
+  do not include it in the anonymous review archive.
 - `submission-status.md`: NCA-specific readiness ledger.
 
 ## Template and build status
 
 NCA accepts manuscripts with mathematical content in LaTeX and recommends the
-Springer Nature LaTeX template. Download the latest official template before
-submission and place its `sn-jnl.cls` and required bibliography files in this
-directory. A typical build is:
+Springer Nature LaTeX template. The official December 2024 `sn-jnl` class and
+numbered `sn-basic` bibliography style are vendored here. Build the anonymous
+editable-source package first:
+
+```sh
+python3 build_submission_package.py
+```
+
+This writes `build/anonymous-manuscript/` and
+`build/nca-anonymous-manuscript.zip`. The flattened package can then be built
+with the standard Springer Nature sequence:
 
 ```sh
 pdflatex main.tex
@@ -25,8 +39,13 @@ pdflatex main.tex
 pdflatex main.tex
 ```
 
-This workspace currently has neither the official class package nor a TeX
-engine, so the draft has not been compiled or visually inspected.
+An isolated Tectonic 0.17 preflight produced the 23-page A4 PDF at
+`../../output/pdf/nca_anonymous_draft.pdf`. The final log has no LaTeX errors,
+undefined citations or references, missing files, or overfull boxes. All pages
+were rasterized and visually checked; no clipping, overlap, or missing glyphs
+were found. Tectonic was used only as a local preflight. Repeat the standard
+`pdflatex`/BibTeX build in the submission package or Editorial Manager before
+uploading.
 
 ## Double-blind boundary
 

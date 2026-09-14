@@ -1,6 +1,6 @@
 # NCA submission-status ledger
 
-Updated: 2026-09-11
+Updated: 2026-09-14
 
 ## Current state
 
@@ -8,16 +8,22 @@ Updated: 2026-09-11
   artificial-intelligence directory).
 - Article type: original research article.
 - Review model: double-blind.
-- Format: generic Springer Nature `sn-jnl` working structure; latest official
-  class and bibliography files still need to be downloaded.
+- Format: official December 2024 Springer Nature `sn-jnl` class with numbered
+  `sn-basic` citations; class and bibliography style are vendored locally.
 - Abstract: 222 words, within the usual 150--250 word range.
 - Keywords: five, within the requested 4--6 range.
-- Compilation: not compiled because the local template and TeX engine are
-  unavailable.
+- Compilation: isolated Tectonic 0.17 preflight passed. The anonymous draft is
+  23 A4 pages; the final log has no errors, missing files, undefined citations
+  or references, or overfull boxes. All pages passed rasterized visual review.
+- Packaging: the Python packager produces one flattened `main.tex`, the BibTeX
+  database, official class/style files, and five English PDF figures in a
+  nine-file anonymous ZIP archive.
+- Anonymity: source-package marker scan passed; PDF metadata contains no author,
+  title, subject, keywords, custom metadata, forms, or JavaScript.
 - Evidence designation: MOSI is exploratory/development evidence because
   test-split reliability diagnostics informed head design. The frozen MOSEI
-  protocol is the confirmatory comparison.
-- Evidence complete: all three prespecified MOSEI seeds for repaired MFON,
+  protocol is the frozen-protocol cross-dataset replication.
+- Evidence complete: all three fixed MOSEI seeds for repaired MFON,
   P4 Constant, and P4 Learned; full-test Gaussian reliability audits; and four
   held-out corruption audits; plus a matched single-GPU efficiency audit. The
   extended implementation suite passes 37 tests.
@@ -25,7 +31,7 @@ Updated: 2026-09-11
   comparison, Gaussian reliability/confound audit, held-out corruption audit,
   and efficiency audit; each quantitative figure has standalone CSV source
   data and editable SVG/PDF exports.
-- Confirmatory outcome hierarchy, fixed before the P4 Constant formal test:
+- Frozen outcome hierarchy, fixed before the P4 Constant formal test:
   MAE/Corr primary, Has0/Non0 accuracy/F1 secondary, and Acc-5/7, loss, and
   reliability/confound measures diagnostic.
 
@@ -50,7 +56,8 @@ Updated: 2026-09-11
 
 ## Submission-package gates
 
-- Download and compile with the latest official Springer Nature template.
+- Recompile the flattened package with a conventional `pdflatex`/BibTeX TeX
+  Live environment or Editorial Manager as the final engine check.
 - Prepare a separate title page containing author identities, affiliations,
   corresponding-author details, ORCIDs, acknowledgments, funding, and author
   contributions.
