@@ -1,9 +1,9 @@
-# MOSEI实验交接（2026-09-14）
+# MOSEI实验交接（2026-09-15）
 
 > 新Codex对话请先读本文件，再读 `PROJECT-CONTEXT-LATEST.md` 和
 > `docs/experiment-log.md`。不要从零开始，不要重复启动正在运行的任务。
 
-## 0. 2026-09-14 当前唯一有效状态
+## 0. 2026-09-15 当前唯一有效状态
 
 MOSEI 冻结实验已经完成，不再训练 seeds 1111/1112/1113 的 encoder、Baseline、P4
 Constant 或 P4 Learned。三个种子的正式 checkpoint 均存在，干净测试、完整高斯可靠性
@@ -16,6 +16,25 @@ pgrep -af "run_experiment.py.*MOSEI|audit_model_quality.py.*MOSEI"
 df -h /home/jovyan
 nvidia-smi
 ```
+
+2026-09-14 的专业审稿给出 Major Revision / 5 分。2026-09-15 已完成第一轮论文与工具
+大修：标题和主张收缩为“高斯退化响应分数”，Fig. 2 改为逐种子配对图，补充一般样本
+重加权、课程学习与 DEAR，增加跨样本可比性/目标保真度的只读审计脚本、Inverse 接口、
+C1--C5 实验矩阵、匿名代码工件构建器和逐条回应稿。**这些修改没有产生新的实验结果，
+当前科学评分仍按 5/10 看待。**完整计划见：
+
+```text
+docs/major-revision-experiment-plan-20260915.md
+docs/major-revision-response-20260915.md
+MFON/audit_cross_sample_validity.py
+```
+
+新增 Python 文件已在本地通过 `py_compile`；本机没有 PyTorch，因此新加的 3 项 C1 单测
+和 Inverse 别名单测必须先在服务器环境执行，不能提前记为通过。
+
+严格下一步是先在服务器运行 C1 冻结检查点只读审计；它不训练、不写 checkpoint。只有
+C1 结果可接受后，才依次启动最终日程 Permuted、Inverse 和组件消融。任何训练前必须先
+让用户检查后台进程、磁盘和 GPU，一次只运行一个任务。
 
 ### 冻结 MOSEI 三种子干净结果
 

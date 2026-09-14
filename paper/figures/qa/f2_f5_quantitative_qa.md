@@ -1,6 +1,6 @@
 # F2--F5 quantitative-figure QA
 
-Date: 2026-09-11
+Date: 2026-09-15
 
 ## Evidence and statistics
 
@@ -10,7 +10,8 @@ Date: 2026-09-11
 | F3 values match the full-test Gaussian audit and confound summary | Pass |
 | F4 values match the four full-test held-out-corruption audits | Pass |
 | F5 values match the uniform seed-1111 efficiency audit | Pass |
-| F2--F4 error bars are identified as sample SD over seeds 1111--1113 | Pass |
+| F2 uses paired seed-level points and favorable-direction deltas without synthesized uncertainty | Pass |
+| F3--F4 error bars are identified as sample SD over seeds 1111--1113 | Pass |
 | F5 omits uncertainty bars and identifies the single-session protocol | Pass |
 | No confidence interval, p value, or significance claim is synthesized | Pass |
 | Negative and near-chance cross-corruption findings remain visible | Pass |
@@ -32,8 +33,9 @@ Date: 2026-09-11
 
 ## Claim boundaries
 
-- F2 supports favourable mean directions over Constant on MAE, correlation,
-  and loss, not statistical significance or comprehensive superiority.
+- F2 exposes the three paired seed trajectories and supports only favourable
+  descriptive mean directions over Constant on MAE, correlation, and loss,
+  not stability, statistical significance, or comprehensive superiority.
 - F3 supports in-family Gaussian degradation detection, not a general quality
   estimator.
 - F4 distinguishes degradation detectability from task utility and documents

@@ -91,7 +91,7 @@ def apply_quality_control(quality, mode='learned', oracle_quality=None):
         controlled = torch.ones_like(quality)
     elif mode == 'permuted':
         controlled = quality.roll(1) if quality.numel() > 1 else quality
-    elif mode == 'reversed':
+    elif mode in {'reversed', 'inverse'}:
         order = quality.argsort()
         controlled = torch.empty_like(quality)
         controlled[order] = quality[order.flip(0)]
@@ -174,5 +174,11 @@ def build_budgeted_auxiliary(
         'w_a': w_a,
         'w_nce_v': w_nce_v,
         'w_nce_a': w_nce_a,
+        # Retain detached per-sample evidence for read-only calibration audits.
+        # These tensors do not alter the optimized objective.
+        'loss_v_each': loss_v_each.detach(),
+        'loss_a_each': loss_a_each.detach(),
+        'loss_nce_v_each': loss_nce_v_each.detach(),
+        'loss_nce_a_each': loss_nce_a_each.detach(),
         'progress': torch.as_tensor(progress, dtype=x_v_embed.dtype, device=x_v_embed.device),
     }

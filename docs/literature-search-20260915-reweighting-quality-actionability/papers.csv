@@ -1,0 +1,9 @@
+key,year,venue,topic,status,primary_url
+ren2018reweight,2018,ICML,validation-gradient example reweighting,included,https://proceedings.mlr.press/v80/ren18a.html
+kumar2010selfpaced,2010,NeurIPS,self-paced easy-first sample selection,included,https://proceedings.neurips.cc/paper/2010/hash/e57c6b956a6521b28495f2886ca0977a-Abstract.html
+mai2022curriculum,2022,EMNLP,multimodal curriculum over correlation pairs,included,https://aclanthology.org/2022.emnlp-main.209/
+zou2026dear,2026,Findings ACL,missing-modality reconstruction reliability and routing,included,https://aclanthology.org/2026.findings-acl.1517/
+zhang2023qmf,2023,ICML,quality-aware inference fusion,already-cited,https://proceedings.mlr.press/v202/zhang23ar.html
+mai2025samlml,2025,EMNLP,ordered low-quality multimodal learning,already-cited,https://aclanthology.org/2025.emnlp-main.1084/
+zhu2026qamoe,2026,ACL,continuous reliability expert routing,already-cited,https://aclanthology.org/2026.acl-long.1461/
+moon2026quality,2026,INTERSPEECH,leakage-safe score actionability audit,already-cited,https://arxiv.org/abs/2606.26473

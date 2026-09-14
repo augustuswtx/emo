@@ -3,7 +3,11 @@
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{array,tabularx}
 \usepackage{url}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
 % Pandoc-generated lists may call this command.
 \providecommand{\tightlist}{%
@@ -11,40 +15,39 @@
 
 \begin{document}
 
-\title[Audited Fixed-Budget Multimodal Learning]{Are Modality Quality
-Scores Trustworthy? Audited, Fixed-Budget Auxiliary Learning for Multimodal
-Sentiment Analysis}
+\title[Auditing Degradation Scores for Multimodal Learning]{Are Modality
+Quality Scores Trustworthy? Auditing Degradation-Response Scores for
+Fixed-Budget Multimodal Auxiliary Learning}
 
 % The review manuscript is double-blind. Submit author identities and contact
 % information on the separate title page required by the journal.
 \author*[1]{\fnm{Anonymous} \sur{Author(s)}}
 \affil*[1]{\orgdiv{Affiliation withheld for double-blind review}}
 
-\abstract{Quality-aware multimodal learning assumes that a model can estimate
-modality trustworthiness and use it to regulate fusion or optimization, yet
-the score itself is rarely audited. Using MFON as the base model, we introduce
-a five-part audit of sample granularity, degradation monotonicity, confound
-sensitivity, actionability, and weight collapse. It exposes batch aggregation
-of sample scores, auxiliary losses reduced before weighting, and a norm proxy
-that increases under stronger Gaussian corruption. We then learn visual and
-acoustic reliability from ordered clean--mild--strong feature triplets and use
-the scores only to redistribute per-sample distillation and contrastive losses.
-An allocation warmup preserves every batch's mean auxiliary budget from the
-first epoch. Three-seed CMU-MOSI development experiments favor Learned over an
-equal-budget Constant allocation on mean binary metrics, MAE, correlation, and
-test loss, but not every fine-grained metric; these results are exploratory
-because MOSI test diagnostics informed head development. In the frozen
-three-seed CMU-MOSEI replication, Learned lowers mean MAE by 0.0025, raises
-correlation by 0.0007, and lowers test loss by 0.0040 relative to Constant, but
-does not improve MAE or loss over repaired MFON. Gaussian visual/acoustic
+\abstract{Quality-aware multimodal learning assumes that modality
+trustworthiness can regulate fusion or optimization, yet the score itself is
+rarely audited. Using MFON as a case-study backbone, we introduce a five-part
+audit of sample granularity, degradation monotonicity, confound sensitivity,
+actionability, and weight collapse. The audit exposes batch aggregation,
+premature loss reduction, and a norm proxy that rises under stronger Gaussian
+corruption. We then learn visual and acoustic Gaussian-degradation response
+scores from ordered clean--mild--strong triplets and use them only to
+redistribute per-sample distillation and contrastive losses under an exact
+batch budget. CMU-MOSI development evidence remains exploratory because test
+diagnostics informed head design. In a frozen three-seed CMU-MOSEI replication,
+Learned lowers mean MAE by 0.0025, raises correlation by 0.0007, and lowers test
+loss by 0.0040 relative to Constant, but classification effects are mixed and
+repaired MFON is not uniformly surpassed. In-family Gaussian visual/acoustic
 AUROC reaches 0.9722/1.0000, whereas detection weakens under unseen timestep
 dropout, contiguous masking, and temporal shifts; complete visual absence is
-unstable. The evidence supports audited training-time fixed-budget allocation,
-but not a general quality estimator, uniform gains over MFON, statistical
-significance, or inference-time robustness.}
+unstable. Crucially, within-sample ordinal supervision does not establish that
+absolute clean scores are comparable across samples, as required by the
+allocator. The evidence supports an auditable fixed-budget training mechanism,
+but not a general quality estimator, a validated allocation direction,
+uniform gains, statistical significance, or inference-time robustness.}
 
-\keywords{multimodal sentiment analysis, modality reliability,
-quality-score audit, fixed-budget learning, auxiliary supervision}
+\keywords{multimodal sentiment analysis, degradation-response score,
+score audit, fixed-budget learning, sample reweighting}
 
 \maketitle
 
@@ -53,18 +56,21 @@ quality-score audit, fixed-budget learning, auxiliary supervision}
 \bmhead{Statements and Declarations}
 
 \begin{itemize}
-\item \textbf{Funding:} To be completed on the separate title page before
-submission.
-\item \textbf{Competing interests:} To be completed before submission.
+\item \textbf{Funding:} Funding information is withheld from the blinded
+manuscript and must be supplied in the separate, non-anonymous title page.
+\item \textbf{Competing interests:} The corresponding declaration is withheld
+from the blinded manuscript and must be supplied in the separate title page.
 \item \textbf{Data availability:} CMU-MOSI and CMU-MOSEI are third-party
-benchmark datasets and are not redistributed by this project. Dataset access
-details and processed-feature provenance will be documented in the final
-version.
-\item \textbf{Code availability:} An anonymized code package and reproducible
-configuration files will be prepared for review; datasets, credentials, and
-private checkpoints will be excluded.
-\item \textbf{Author contributions:} To be completed on the separate title
-page before submission.
+benchmark datasets and are not redistributed. The accompanying anonymous
+artifact records dataset access, split, preprocessing, and feature-provenance
+instructions without repackaging the restricted data.
+\item \textbf{Code availability:} The anonymous artifact contains the method
+implementation, frozen configurations, tests, audit programs, source data for
+figures, and figure-generation scripts. Dataset files, credentials, pretrained
+BERT files, and large private checkpoints are excluded.
+\item \textbf{Author contributions:} Contributions are withheld from the
+blinded manuscript and must be supplied in the separate title page using the
+CRediT taxonomy.
 \end{itemize}
 
 \bibliography{../../docs/small-paper-references}

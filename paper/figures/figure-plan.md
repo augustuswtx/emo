@@ -26,7 +26,7 @@ visual QA.
 | ID | Role and core conclusion | Archetype | Source | Status / gate |
 |---|---|---|---|---|
 | F1 | Reliability controls only training-time auxiliary-loss allocation; clean features remain on the MFON task path and inference has no reliability-gated fusion. | Schematic-led composite | Frozen method equations and implementation | First review version produced in English and Chinese |
-| F2 | On frozen MOSEI, Learned improves the prespecified regression endpoints over equal-budget Constant, but secondary metrics are mixed and the method does not uniformly beat repaired MFON. | Quantitative grid with direction-normalized delta panel | Frozen three-seed clean-test table | Complete in English and Chinese; mean ± sample SD, with no significance claim |
+| F2 | On frozen MOSEI, Learned has favorable three-seed mean regression directions over equal-budget Constant, but paired seed trajectories and secondary metrics are heterogeneous. | Paired-seed quantitative grid with direction-normalized delta panel | Frozen seed-level clean-test results | Complete in English and Chinese; paired descriptive evidence with no significance claim |
 | F3 | MOSEI reliability scores strongly detect and rank the Gaussian corruption used in training, while retaining measurable correlations with simple feature statistics. | Quantitative audit grid | Frozen full-test Gaussian audits | Complete in English and Chinese; confounds remain descriptive |
 | F4 | Gaussian-trained reliability does not generalize uniformly to held-out corruptions, and corruption detectability differs from task sensitivity. | Paired horizontal-bar audit | Frozen full-test held-out-corruption audits | Complete in English and Chinese; preserves near-chance and below-chance findings |
 | F5 | P4 adds negligible optimized-parameter and peak-memory overhead without changing the deployed inference footprint. | Quantitative efficiency grid | Uniform seed-1111 efficiency microbenchmark | Complete in English and Chinese; single-session timings are not a speedup claim |
@@ -56,12 +56,15 @@ MFON feature-fusion path alone produces sentiment predictions at inference.
 
 ### F2: frozen MOSEI task results
 
-- Hero evidence: MAE, correlation, and loss means with sample-SD error bars.
-- Supporting evidence: favourable-direction Learned-minus-Constant deltas for
-  all reported endpoints; lower-is-better metrics are sign-reversed only in
-  this delta panel and are labelled explicitly.
+- Hero evidence: per-seed MAE, correlation, and loss points. Thin lines connect
+  Constant and Learned values from the same seed; repaired-MFON points are
+  shown as references rather than paired treatment observations.
+- Supporting evidence: per-seed favourable-direction Learned-minus-Constant
+  deltas for all reported endpoints, with a mean diamond. Lower-is-better
+  metrics are sign-reversed only in this delta panel and are labelled explicitly.
 - Reviewer risk: the visual must not imply statistical significance or uniform
-  superiority over repaired MFON.
+  superiority over repaired MFON. Locally scaled endpoint axes must not be
+  interpreted as effect-size normalization; the paired values remain explicit.
 
 ### F3: Gaussian reliability and confounds
 

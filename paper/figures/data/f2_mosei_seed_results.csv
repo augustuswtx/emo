@@ -1,0 +1,82 @@
+seed,method,metric,value,direction
+1111,Repaired MFON,Has0 Acc-2,0.8150,higher
+1111,P4 Constant,Has0 Acc-2,0.7995,higher
+1111,P4 Learned,Has0 Acc-2,0.8008,higher
+1112,Repaired MFON,Has0 Acc-2,0.7929,higher
+1112,P4 Constant,Has0 Acc-2,0.8403,higher
+1112,P4 Learned,Has0 Acc-2,0.8410,higher
+1113,Repaired MFON,Has0 Acc-2,0.8315,higher
+1113,P4 Constant,Has0 Acc-2,0.8180,higher
+1113,P4 Learned,Has0 Acc-2,0.8356,higher
+1111,Repaired MFON,Has0 F1,0.8205,higher
+1111,P4 Constant,Has0 F1,0.8064,higher
+1111,P4 Learned,Has0 F1,0.8075,higher
+1112,Repaired MFON,Has0 F1,0.7996,higher
+1112,P4 Constant,Has0 F1,0.8386,higher
+1112,P4 Learned,Has0 F1,0.8388,higher
+1113,Repaired MFON,Has0 F1,0.8349,higher
+1113,P4 Constant,Has0 F1,0.8234,higher
+1113,P4 Learned,Has0 F1,0.8377,higher
+1111,Repaired MFON,Non0 Acc-2,0.8635,higher
+1111,P4 Constant,Non0 Acc-2,0.8555,higher
+1111,P4 Learned,Non0 Acc-2,0.8550,higher
+1112,Repaired MFON,Non0 Acc-2,0.8487,higher
+1112,P4 Constant,Non0 Acc-2,0.8506,higher
+1112,P4 Learned,Non0 Acc-2,0.8489,higher
+1113,Repaired MFON,Non0 Acc-2,0.8616,higher
+1113,P4 Constant,Non0 Acc-2,0.8586,higher
+1113,P4 Learned,Non0 Acc-2,0.8619,higher
+1111,Repaired MFON,Non0 F1,0.8634,higher
+1111,P4 Constant,Non0 F1,0.8559,higher
+1111,P4 Learned,Non0 F1,0.8552,higher
+1112,Repaired MFON,Non0 F1,0.8485,higher
+1112,P4 Constant,Non0 F1,0.8460,higher
+1112,P4 Learned,Non0 F1,0.8440,higher
+1113,Repaired MFON,Non0 F1,0.8608,higher
+1113,P4 Constant,Non0 F1,0.8588,higher
+1113,P4 Learned,Non0 F1,0.8602,higher
+1111,Repaired MFON,Acc-5,0.5426,higher
+1111,P4 Constant,Acc-5,0.5467,higher
+1111,P4 Learned,Acc-5,0.5463,higher
+1112,Repaired MFON,Acc-5,0.5559,higher
+1112,P4 Constant,Acc-5,0.5645,higher
+1112,P4 Learned,Acc-5,0.5626,higher
+1113,Repaired MFON,Acc-5,0.5553,higher
+1113,P4 Constant,Acc-5,0.5557,higher
+1113,P4 Learned,Acc-5,0.5540,higher
+1111,Repaired MFON,Acc-7,0.5267,higher
+1111,P4 Constant,Acc-7,0.5304,higher
+1111,P4 Learned,Acc-7,0.5302,higher
+1112,Repaired MFON,Acc-7,0.5398,higher
+1112,P4 Constant,Acc-7,0.5478,higher
+1112,P4 Learned,Acc-7,0.5458,higher
+1113,Repaired MFON,Acc-7,0.5375,higher
+1113,P4 Constant,Acc-7,0.5366,higher
+1113,P4 Learned,Acc-7,0.5366,higher
+1111,Repaired MFON,MAE,0.5372,lower
+1111,P4 Constant,MAE,0.5406,lower
+1111,P4 Learned,MAE,0.5388,lower
+1112,Repaired MFON,MAE,0.5290,lower
+1112,P4 Constant,MAE,0.5274,lower
+1112,P4 Learned,MAE,0.5283,lower
+1113,Repaired MFON,MAE,0.5273,lower
+1113,P4 Constant,MAE,0.5342,lower
+1113,P4 Learned,MAE,0.5277,lower
+1111,Repaired MFON,Corr,0.7721,higher
+1111,P4 Constant,Corr,0.7735,higher
+1111,P4 Learned,Corr,0.7742,higher
+1112,Repaired MFON,Corr,0.7730,higher
+1112,P4 Constant,Corr,0.7757,higher
+1112,P4 Learned,Corr,0.7758,higher
+1113,Repaired MFON,Corr,0.7786,higher
+1113,P4 Constant,Corr,0.7750,higher
+1113,P4 Learned,Corr,0.7763,higher
+1111,Repaired MFON,Loss,0.500200593969192,lower
+1111,P4 Constant,Loss,0.5008784563954897,lower
+1111,P4 Learned,Loss,0.49853695405478843,lower
+1112,Repaired MFON,Loss,0.49642193281591696,lower
+1112,P4 Constant,Loss,0.49592633410108067,lower
+1112,P4 Learned,Loss,0.49602032167048227,lower
+1113,Repaired MFON,Loss,0.4889743074592436,lower
+1113,P4 Constant,Loss,0.5039059355627904,lower
+1113,P4 Learned,Loss,0.49417355053413065,lower

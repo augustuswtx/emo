@@ -92,15 +92,19 @@ class BudgetedAuxiliaryTest(unittest.TestCase):
         constant = apply_quality_control(quality, 'constant')
         permuted = apply_quality_control(quality, 'permuted')
         reversed_score = apply_quality_control(quality, 'reversed')
+        inverse_score = apply_quality_control(quality, 'inverse')
         oracle_score = apply_quality_control(quality, 'oracle', oracle)
 
         self.assertTrue(torch.equal(learned, quality))
         self.assertTrue(torch.equal(constant, torch.ones_like(quality)))
         self.assertTrue(torch.equal(permuted, quality.roll(1)))
         self.assertTrue(torch.equal(permuted.sort().values, quality.sort().values))
+        self.assertTrue(torch.equal(inverse_score, reversed_score))
         self.assertTrue(torch.equal(reversed_score.sort().values, quality.sort().values))
         self.assertTrue(torch.equal(oracle_score, oracle))
-        for controlled in [learned, constant, permuted, reversed_score, oracle_score]:
+        for controlled in [
+            learned, constant, permuted, reversed_score, inverse_score, oracle_score
+        ]:
             weights = fixed_budget_weights(controlled, base_weight=0.5)
             self.assertTrue(
                 torch.allclose(weights.mean(), torch.tensor(0.5), atol=1e-7)

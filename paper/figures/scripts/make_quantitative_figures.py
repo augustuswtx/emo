@@ -42,6 +42,7 @@ TEXT = {
         "vision": "Vision",
         "audio": "Audio",
         "mean_sd": "Mean ± sample SD (3 seeds)",
+        "paired": "Paired results for seeds 1111--1113",
         "primary": "Primary regression endpoints",
         "delta_title": "Learned versus equal-budget Constant",
         "delta_x": "Favourable-direction delta",
@@ -81,6 +82,7 @@ TEXT = {
         "vision": "视觉",
         "audio": "音频",
         "mean_sd": "均值 ± 样本标准差（3 个种子）",
+        "paired": "随机种子 1111--1113 的配对结果",
         "primary": "主要回归终点",
         "delta_title": "Learned 相对等预算 Constant",
         "delta_x": "有利方向差值",
@@ -190,38 +192,24 @@ def format_bar_labels(ax: plt.Axes, bars, fmt: str, pad: float = 2.0) -> None:
 
 def draw_metric_panel(ax: plt.Axes, data: pd.DataFrame, metric: str, locale: str) -> None:
     labels = TEXT[locale]
-    subset = data[data["metric"] == metric].set_index("method").loc[METHODS]
+    subset = data[data["metric"] == metric]
     x = np.arange(len(METHODS))
-    values = subset["mean"].to_numpy()
-    sd = subset["sd"].to_numpy()
-    bars = ax.bar(
-        x,
-        values,
-        yerr=sd,
-        capsize=2.4,
-        width=0.68,
-        color=[METHOD_COLORS[m] for m in METHODS],
-        edgecolor=INK,
-        linewidth=0.65,
-        error_kw={"elinewidth": 0.8, "capthick": 0.8},
-    )
-    for patch, method in zip(bars, METHODS):
-        patch.set_hatch(METHOD_HATCHES[method])
-    spread = max(values.max() + sd.max() - (values.min() - sd.max()), 0.002)
-    lower = values.min() - sd.max() - 0.34 * spread
-    upper = values.max() + sd.max() + 0.42 * spread
-    ax.set_ylim(lower, upper)
+    for seed, group in subset.groupby("seed", sort=True):
+        values = group.set_index("method").loc[METHODS, "value"].to_numpy()
+        ax.plot(x[1:], values[1:], color="#8B96A0", linewidth=0.9, alpha=0.8, zorder=1)
+        ax.scatter(x, values, s=[18, 22, 25], c=[METHOD_COLORS[m] for m in METHODS],
+                   edgecolors=INK, linewidths=0.55, zorder=2)
+        ax.text(x[2] + 0.08, values[2], str(seed), fontsize=5.2, va="center", color=MUTED)
     ax.set_xticks(x)
-    ax.set_xticklabels(labels["methods"], rotation=16, ha="right")
+    ax.set_xticklabels(labels["methods"], rotation=12, ha="right")
     ax.set_title(metric, fontweight="bold", pad=5)
-    format_bar_labels(ax, bars, "%.4f")
     light_axis(ax)
 
 
 def make_f2(locale: str) -> None:
     configure(locale)
     labels = TEXT[locale]
-    data = pd.read_csv(DATA_DIR / "f2_mosei_main_results.csv")
+    data = pd.read_csv(DATA_DIR / "f2_mosei_seed_results.csv")
     fig, axes = plt.subplots(2, 2, figsize=(WIDTH_MM * MM, 122 * MM))
     for ax, metric, letter in zip(axes.flat[:3], ["MAE", "Corr", "Loss"], "abc"):
         draw_metric_panel(ax, data, metric, locale)
@@ -239,38 +227,35 @@ def make_f2(locale: str) -> None:
         "Corr",
         "Loss",
     ]
-    pivot = data.pivot(index="metric", columns="method", values="mean")
+    pivot = data.pivot(index=["seed", "metric"], columns="method", values="value")
     direction = data.drop_duplicates("metric").set_index("metric")["direction"]
     delta = pivot["P4 Learned"] - pivot["P4 Constant"]
     favourable = delta.copy()
-    favourable[direction == "lower"] *= -1
-    values = favourable.loc[order].to_numpy()
+    for metric in order:
+        if direction.loc[metric] == "lower":
+            favourable.loc[(slice(None), metric)] *= -1
     y = np.arange(len(order))[::-1]
-    colors = [POSITIVE if value >= 0 else NEGATIVE for value in values]
-    bars = ax.barh(y, values, color=colors, edgecolor=INK, linewidth=0.6, height=0.68)
-    for patch, value in zip(bars, values):
-        patch.set_hatch("//" if value >= 0 else "\\\\")
+    for seed, marker in zip(sorted(data["seed"].unique()), ["o", "s", "^"]):
+        values = favourable.loc[(seed, order)].to_numpy()
+        ax.scatter(values, y, s=15, marker=marker, facecolors="white", edgecolors=INK,
+                   linewidths=0.65, label=str(seed), zorder=2)
+    means = np.array([favourable.xs(metric, level="metric").mean() for metric in order])
+    ax.scatter(means, y, s=24, marker="D",
+               c=[POSITIVE if value >= 0 else NEGATIVE for value in means],
+               edgecolors=INK, linewidths=0.55, label="Mean", zorder=3)
     ax.axvline(0, color=INK, linewidth=0.8)
     ax.set_yticks(y)
     ax.set_yticklabels(order)
     ax.set_xlabel(labels["delta_x"])
     ax.set_title(labels["delta_title"], fontweight="bold", pad=5)
     ax.text(0.5, -0.22, labels["delta_note"], transform=ax.transAxes, ha="center", va="top", fontsize=5.7, color=MUTED)
-    for yi, value in zip(y, values):
-        label_x = value + 0.00022 if value >= 0 else 0.00016
-        ax.text(
-            label_x,
-            yi,
-            f"{value:+.4f}",
-            ha="left",
-            va="center",
-            fontsize=5.5,
-        )
-    ax.set_xlim(-0.0020, 0.0077)
+    ax.legend(loc="lower right", ncol=2, fontsize=5.4)
+    max_abs = max(abs(favourable.min()), abs(favourable.max())) * 1.15
+    ax.set_xlim(-max_abs, max_abs)
     light_axis(ax, xgrid=True, ygrid=False)
     panel_label(ax, "d")
 
-    fig.suptitle(labels["mean_sd"], y=0.995, fontsize=7.2, color=MUTED)
+    fig.suptitle(labels["paired"], y=0.995, fontsize=7.2, color=MUTED)
     fig.subplots_adjust(left=0.10, right=0.985, top=0.92, bottom=0.12, hspace=0.48, wspace=0.34)
     save_figure(fig, f"f2_mosei_main_results_{locale}")
 

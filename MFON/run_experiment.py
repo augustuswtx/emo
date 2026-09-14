@@ -113,7 +113,7 @@ def parse_args():
     )
     parser.add_argument(
         '--reliability-allocation-control',
-        choices=['learned', 'constant', 'permuted', 'reversed', 'oracle'],
+        choices=['learned', 'constant', 'permuted', 'reversed', 'inverse', 'oracle'],
         default='learned',
         help='Equal-budget control applied only to reliability-based auxiliary allocation.',
     )

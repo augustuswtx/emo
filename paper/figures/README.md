@@ -26,11 +26,12 @@ submission figures and Chinese review figures as editable SVG, vector PDF, and
 - No sample-level distribution, scatter, confidence interval, or error bar is
   synthesized when sample-level source data are unavailable.
 - F1 is schematic and contains no empirical values.
-- F2--F4 report mean and sample standard deviation over the three frozen MOSEI
-  seeds. F5 is a single-session microbenchmark and therefore has no uncertainty
-  bars.
-- Error bars are sample standard deviations, not confidence intervals or
-  significance tests.
+- F2 reads the nine seed-level rows in `data/f2_mosei_seed_results.csv` and
+  shows paired Constant--Learned trajectories plus per-seed deltas. F3--F4
+  report mean and sample standard deviation over the three frozen MOSEI seeds.
+  F5 is a single-session microbenchmark and therefore has no uncertainty bars.
+- F3--F4 error bars are sample standard deviations, not confidence intervals or
+  significance tests. F2 is paired descriptive evidence, not a significance test.
 
 See `figure-plan.md` for the figure inventory and layout contract, and `qa/`
 for visual and scientific-boundary checks.

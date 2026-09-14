@@ -89,11 +89,12 @@ The current study makes four evidence-bounded contributions:
 \item
   We implement interventional reliability learning and exact
   finite-batch redistribution of per-sample distillation and contrastive
-  losses. The final P4 schedule keeps the mean auxiliary budget
+  losses. The final P4 schedule (an implementation label retained for
+  traceability) keeps the mean auxiliary budget
   identical to the repaired MFON baseline from the first epoch.
 \item
-  We report an exploratory three-seed CMU-MOSI study and a frozen
-  three-seed CMU-MOSEI confirmation, then use Gaussian, timestep-dropout,
+  We report an exploratory three-seed CMU-MOSI study and a frozen-protocol
+  three-seed CMU-MOSEI replication, then use Gaussian, timestep-dropout,
   contiguous-mask, temporal-shift, and modality-missing audits to distinguish
   in-family degradation detection from cross-corruption generalization.
 \end{enumerate}
@@ -140,6 +141,22 @@ motivate per-sample treatment, but per-sample weighting alone is
 insufficient: the weighting signal and the amount of supervision it
 controls must both be verified.
 
+\subsection{Example reweighting and curriculum
+learning}\label{example-reweighting-and-curriculum-learning}
+
+Sample allocation has a broader history than quality-aware MSA. Self-paced
+learning prioritizes easier examples and gradually expands the training set
+\cite{kumar2010selfpaced}, whereas validation-driven meta-reweighting chooses
+example weights through their gradient effect on a clean validation objective
+\cite{ren2018reweight}. In MSA, curriculum learning has also been used to order
+weakly supervised cross-modal pairs by estimated difficulty, while discarding
+the hardest pairs as potential noise \cite{mai2022curriculum}. These methods
+make clear that emphasizing reliable or easy samples is not the only plausible
+direction: hard-example and validation-utility rules encode different
+objectives. Our fixed-budget construction controls total auxiliary supervision,
+but the direction and score--sample correspondence remain empirical hypotheses
+that require inverse and permuted controls.
+
 \subsection{Quality-aware learning under degraded or incomplete
 modalities}\label{quality-aware-learning-under-degraded-or-incomplete-modalities}
 
@@ -157,7 +174,9 @@ handles incomplete inputs through probabilistic proxy modalities
 \cite{zhu2025prmf}, and QA-MoE models a continuous reliability spectrum
 for expert routing \cite{zhu2026qamoe}. CPSC calibrates both
 representations and gradients through conformal prediction
-\cite{jiang2026cpsc}. QMF and QA-MoE use quality or reliability to
+\cite{jiang2026cpsc}. DEAR estimates reconstruction fidelity under missing
+modalities and uses it to gate synergistic and robust inference streams
+\cite{zou2026dear}. QMF, QA-MoE, and DEAR use quality or reliability to
 alter prediction-time fusion or routing, whereas P4 confines
 reliability to training-time auxiliary allocation and leaves the
 inference fusion graph unchanged. Our method does not claim that
@@ -165,6 +184,29 @@ corruption-based ranking or quality-aware weighting is itself new. Its narrower
 distinction is to audit the score as an intermediate variable and
 compare allocations under an exactly matched training-time auxiliary
 budget.
+
+\begin{table*}[t]
+\caption{Mechanism boundary relative to representative quality-aware and
+sample-allocation methods. ``Ordinal'' refers to within-sample ordering under
+controlled corruption; it does not imply cross-sample calibration.}
+\label{tab:related-boundary}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{lYYY}
+\toprule
+Method & Signal & Stage and control & Main boundary \\
+\midrule
+Meta-reweighting \cite{ren2018reweight} & Validation gradient & Training; example loss & Validation utility \\
+MSA curriculum \cite{mai2022curriculum} & Pair difficulty & Training; pair schedule & Easy-to-hard order \\
+QMF \cite{zhang2023qmf} & Uncertainty/quality & Inference; modality fusion & Prediction robustness \\
+SAM-LML \cite{mai2025samlml} & Ordered corruption & Training; representation & Low-quality learning \\
+QA-MoE \cite{zhu2026qamoe} & Reliability spectrum & Inference; expert routing & Continuous routing \\
+DEAR \cite{zou2026dear} & Reconstruction error & Inference; dual-stream gate & Missing modalities \\
+This study & Ordinal response & Training; auxiliary losses & Exact batch budget and score audit \\
+\bottomrule
+\end{tabularx}
+\end{table*}
 
 \subsection{Diagnosing quality
 signals}\label{diagnosing-quality-signals}
@@ -220,6 +262,13 @@ mildly noisy speech may still carry a strong sentiment cue. The present
 method estimates reliability for allocating training-time auxiliary
 supervision; it does not replace the main sentiment objective with a
 direct estimate of modality utility.
+
+The supervision used below is ordinal within each original sample. It
+establishes whether the score decreases along that sample's synthetic
+degradation path; it does not, by itself, calibrate the absolute scores of two
+different clean samples. Because allocation normalizes clean scores across a
+mini-batch, cross-sample comparability and auxiliary-target fidelity are
+additional assumptions rather than consequences of the ranking objective.
 
 \section{Auditing Modality Quality
 Signals}\label{auditing-modality-quality-signals}
@@ -302,6 +351,11 @@ The final P4 setting keeps the sentiment-task input clean and uses
 synthetic corruptions only for reliability supervision. Thus, the main
 comparison isolates training-time allocation from both inference-time
 gating and corruption of the sentiment path.
+
+Throughout the paper, ``reliability'' is shorthand for response under the
+modeled Gaussian feature corruption. Where evidence concerns unseen
+corruptions or cross-sample allocation, we use the narrower term
+\emph{degradation-response score} to avoid implying general perceptual quality.
 
 \begin{figure*}[t]
 \centering
@@ -451,6 +505,13 @@ q_i^m>q_j^m
 \mathbb E[e_i^m\mid q_i^m]\le
 \mathbb E[e_j^m\mid q_j^m].
 \]
+
+Importantly, the within-sample ranking loss does not identify this cross-sample
+ordering. High clean/corrupt AUROC can coexist with arbitrary clean-vs-clean
+offsets across speakers or content. The pending cross-sample calibration audit
+therefore measures score--target-fidelity association, stratified consistency,
+and residual length/energy dependence; until it is completed, the implication
+above is a testable design premise, not an empirical result.
 
 Under this assumption, reliability-proportional allocation emphasizes samples
 for which frozen-teacher distillation and cross-modal alignment targets are
@@ -694,9 +755,9 @@ to 0.5316 (an improvement of 0.0025), correlation increases from 0.7747 to
 0.7754 (+0.0007), and test loss decreases by 0.0040. Has0 binary metrics and
 Non0 Acc-2 are slightly higher, whereas Non0 F1, Acc-5, and Acc-7 are slightly
 lower. Relative to repaired MFON, Learned improves correlation by 0.0009 but
-worsens MAE by 0.0004 and loss by 0.0010. The confirmation therefore supports
-a favorable primary-endpoint direction over uniform allocation, not uniform
-superiority to the base model.
+worsens MAE by 0.0004 and loss by 0.0010. The frozen-protocol replication
+therefore supports only a descriptive primary-endpoint mean direction over
+uniform allocation, not stability or uniform superiority to the base model.
 
 \begin{table*}[t]
 \caption{Clean CMU-MOSEI test performance (mean $\pm$ sample standard
@@ -751,15 +812,17 @@ them.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/f2_mosei_main_results_en.pdf}
-\caption{Frozen MOSEI task comparison under an equal auxiliary budget.
-\textbf{a--c}, Mean MAE, correlation, and test loss for repaired MFON, P4
-Constant, and P4 Learned; error bars denote sample standard deviation over
-seeds 1111, 1112, and 1113 ($n=3$ seeds). \textbf{d}, Favourable-direction
-difference between Learned and Constant across all reported endpoints; MAE
-and loss are sign-reversed so that bars to the right consistently favour
-Learned. The panel shows favourable regression directions but mixed
-classification effects and does not constitute a significance test. Source
-data are provided with the figure files.}
+\caption{Paired frozen MOSEI task results under an equal auxiliary budget.
+\textbf{a--c}, Per-seed MAE, correlation, and test loss for repaired MFON, P4
+Constant, and P4 Learned. Lines connect Constant and Learned results obtained
+with the same seed; repaired-MFON points are references and are not joined
+because that comparison also changes the reliability-training path.
+\textbf{d}, Per-seed favourable-direction differences between Learned and
+Constant across all endpoints; diamonds show the three-seed mean, and MAE and
+loss are sign-reversed so that right consistently favours Learned. The visible
+heterogeneity and mixed classification effects are descriptive ($n=3$ seeds)
+and do not constitute a significance test. Source data include every plotted
+seed.}
 \label{fig:mosei-main-results}
 \end{figure*}
 
@@ -822,23 +885,35 @@ separation; $\Delta$MAE is corrupt minus clean. Values are mean $\pm$ sample
 standard deviation over three seeds.}
 \label{tab:mosei-cross-corruption}
 \centering
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lcccc}
+\small
+\textbf{(a) Clean/corrupt detection AUROC}\par\smallskip
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrr@{}}
 \toprule
-Corruption & Vision AUROC $\uparrow$ & Audio AUROC $\uparrow$
-& Vision $\Delta$MAE & Audio $\Delta$MAE \\
+Corruption & Vision $\uparrow$ & Audio $\uparrow$ \\
 \midrule
 Timestep dropout (0.75) & $0.498965\pm0.003535$ & $0.593710\pm0.022123$
-& $+0.000933\pm0.000153$ & $+0.000067\pm0.000058$ \\
+\\
 Contiguous mask (0.75) & $0.541152\pm0.011892$ & $0.754388\pm0.009935$
-& $+0.001700\pm0.000721$ & $+0.000067\pm0.000058$ \\
+\\
 Temporal shift (1.00) & $0.509639\pm0.002927$ & $0.511274\pm0.002509$
-& $-0.000133\pm0.000058$ & $0.000000\pm0.000000$ \\
+\\
 Modality missing (1.00) & $0.407169\pm0.227165$ & $0.999857\pm0.000248$
-& $+0.012700\pm0.003110$ & $+0.003600\pm0.003195$ \\
+\\
 \bottomrule
-\end{tabular}
-}
+\end{tabular*}
+
+\vspace{0.65em}
+\textbf{(b) Task sensitivity: corrupt-minus-clean MAE}\par\smallskip
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrr@{}}
+\toprule
+Corruption & Vision $\Delta$MAE & Audio $\Delta$MAE \\
+\midrule
+Timestep dropout (0.75) & $+0.000933\pm0.000153$ & $+0.000067\pm0.000058$ \\
+Contiguous mask (0.75) & $+0.001700\pm0.000721$ & $+0.000067\pm0.000058$ \\
+Temporal shift (1.00) & $-0.000133\pm0.000058$ & $0.000000\pm0.000000$ \\
+Modality missing (1.00) & $+0.012700\pm0.003110$ & $+0.003600\pm0.003195$ \\
+\bottomrule
+\end{tabular*}
 \end{table*}
 
 \begin{figure*}[t]
@@ -941,6 +1016,8 @@ deployed inference. Source data are provided with the figure files.}
 \label{fig:mosei-efficiency}
 \end{figure*}
 
+\FloatBarrier
+
 \section{Discussion}\label{discussion}
 
 \subsection{What the current evidence
@@ -957,12 +1034,13 @@ vector, losses remain unreduced until weighting, and every batch
 preserves the same mean auxiliary budget.
 
 Under these controls, P4 Learned improves mean MAE, correlation, and test loss
-over P4 Constant on both the exploratory MOSI study and the frozen MOSEI
-confirmation. This is consistent with sample assignment having a repeatable
-but small effect under a fixed budget. MOSEI fine-grained metrics and Non0 F1
+over P4 Constant on both the exploratory MOSI study and the frozen-protocol
+MOSEI replication. This is consistent with a small mean allocation effect
+under a fixed budget, but does not establish stability. MOSEI fine-grained
+metrics and Non0 F1
 do not improve simultaneously, however, and Learned does not improve MAE or
-loss over repaired MFON. The confirmation therefore supports the
-primary-endpoint direction against the equal-budget Constant control, not
+loss over repaired MFON. The replication therefore supports a descriptive
+primary-endpoint mean direction against the equal-budget Constant control, not
 uniform performance gains. Three seeds remain descriptive and are
 insufficient for statistical-significance claims.
 
@@ -991,7 +1069,7 @@ inference-time robust fusion mechanism.
 \subsection{Alternative explanations and open
 confounds}\label{alternative-explanations-and-open-confounds}
 
-The acoustic reliability score retains a repeatable correlation with
+The acoustic reliability score retains a recurring correlation with
 effective length. This could reflect a residual shortcut, a genuine relation
 between temporal evidence and corruption detectability, or both.
 Padding-preserving and cross-corruption audits on MOSEI do not resolve the
@@ -1027,8 +1105,8 @@ Use}\label{limitations-reproducibility-and-responsible-use}
 
 This study has six primary empirical limitations. First, MOSI test-split
 reliability diagnostics informed visual-head retention and acoustic-head
-redesign, so MOSI remains exploratory rather than an untouched confirmation.
-Second, although the frozen three-seed MOSEI confirmation is complete, three
+redesign, so MOSI remains exploratory rather than untouched validation.
+Second, although the frozen three-seed MOSEI replication is complete, three
 seeds do not support statistical significance and primary endpoints do not
 uniformly improve over repaired MFON. Third, reliability-proportional
 allocation assumes that higher input reliability implies more trustworthy
@@ -1046,7 +1124,7 @@ Reproducibility controls include fixed seeds, validation-based
 checkpoint selection, unit tests for mathematical contracts, explicit
 logging of score and weight means and standard deviations, and a staged
 cross-dataset gate. The repository should release code and lightweight
-configuration files but must not redistribute dataset files, BERT
+configuration files but does not redistribute dataset files, BERT
 weights, private checkpoints, credentials, or personal attachments.
 
 Sentiment prediction should not be interpreted as a direct measurement
@@ -1075,7 +1153,7 @@ visual absence. A uniform microbenchmark finds that P4 adds approximately
 0.024\% optimized parameters; Learned increases forward-plus-backward latency
 and peak training memory by 0.71\% and 0.29\% relative to MFON without
 expanding the deployed inference graph. Acoustic length dependence,
-text-dominant inference,
+text-dominant inference, unverified cross-sample score calibration,
 incomplete final-schedule actionability controls, and the lack of real-media
 stress tests bound the scope. The evidence establishes a transparent and
 falsifiable audit-and-budget-control mechanism, not a general quality
