@@ -17,6 +17,10 @@ reads the frozen F2--F5 CSV files in `paper/figures/data/`. Both write English
 submission figures and Chinese review figures as editable SVG, vector PDF, and
 300 dpi PNG.
 
+`data/c1_mosei_cross_sample_validity.csv` records the six per-seed,
+per-modality rows underlying the post-hoc C1 validation results. It is source
+data for the manuscript prose and is not converted into a figure.
+
 ## Evidence rules
 
 - Quantitative figures may use only frozen manuscript tables or values in

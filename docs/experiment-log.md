@@ -1112,3 +1112,30 @@ and exported as editable SVG, vector PDF, and 300 dpi PNG. Full-resolution
 English and Chinese previews were visually inspected. The figures preserve
 mixed/negative findings and do not introduce significance, general-reliability,
 robust-fusion, or speedup claims.
+
+## 2026-09-15 MOSEI Cross-Sample Target-Fidelity Audit Complete
+
+The server-side C1 suite passed all five tests. A five-batch seed-1111 smoke
+run and full validation runs for seeds 1111--1113 completed with exit code 0
+on the frozen `p5_mosei_p4_learned_true_budget` checkpoints. Each full run
+audited 1,871 validation samples. The analysis is post-hoc exploratory and no
+test-split run was performed.
+
+| Metric | Vision | Audio |
+|---|---:|---:|
+| Global Spearman(score, `-KL`) | `-0.315423±0.069633` | `0.092174±0.042066` |
+| Partial Spearman controlling length/energy | `-0.248627±0.064859` | `0.072239±0.067445` |
+| Pairwise concordance | `0.393666±0.023143` | `0.529795±0.014286` |
+| Within-batch Spearman, weighted proxy | `-0.290099±0.047795` | `0.064885±0.047447` |
+| Within-batch Spearman, InfoNCE | `0.049671±0.018575` | `-0.017530±0.042611` |
+
+The visual result is consistently opposite to the pre-specified
+target-fidelity direction, while the acoustic result is weak. Gaussian
+degradation detection therefore does not validate clean-sample
+auxiliary-target fidelity. The manuscript must report this negative result
+and remove any implication that larger clean scores identify samples with
+more trustworthy KL or InfoNCE targets. C2 remains scientifically useful
+because the final-schedule Inverse control directly tests whether the current
+positive allocation direction is harmful or whether the score affects
+training through another mechanism. No new training can start with only 5.6
+GiB free; the storage gate is at least 12 GiB available.

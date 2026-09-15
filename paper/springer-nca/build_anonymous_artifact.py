@@ -88,7 +88,10 @@ def build() -> None:
         "The cross-sample audit is read-only and requires an existing frozen checkpoint. "
         "Use `python audit_cross_sample_validity.py --help` from `MFON/` for the "
         "available arguments. Its auxiliary-loss association is a target-fidelity proxy, "
-        "not proof of a perceptual quality scale.\n",
+        "not proof of a perceptual quality scale. The completed per-seed MOSEI "
+        "validation results are recorded in "
+        "`paper/figures/data/c1_mosei_cross_sample_validity.csv`; they reject visual "
+        "cross-sample KL fidelity and show only weak acoustic association.\n",
         encoding="utf-8",
     )
     copied.append(readme)

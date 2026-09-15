@@ -6,7 +6,7 @@
 
 | ID | 核心问题 | 最低证据 | 当前状态 | 论文处理 |
 |---|---|---|---|---|
-| C1 | 样本内排序不保证跨样本可比 | 干净分数与辅助目标保真度的相关、偏相关、pairwise concordance；三种子 | 工具已实现，服务器结果 TBD | 完成前称 degradation-response score |
+| C1 | 样本内排序不保证跨样本可比 | 干净分数与辅助目标保真度的相关、偏相关、pairwise concordance；三种子 | 已完成；视觉反向、音频弱相关 | 称 degradation-response score；撤回跨样本保真度解释 |
 | C2 | 分配方向与对应关系未验证 | final-schedule Learned / Constant / Permuted / Inverse，同种子配对 | 1111--1113 Learned/Constant done；其余 TBD | 不宣称正向可靠性分配最优 |
 | C3 | 三种子效应小 | 逐种子点、配对差值；扩展 1114--1115 | 配对图已完成；新种子 TBD | 现阶段只作描述性均值 |
 | C4 | 相对 MFON 的组件归因不清 | Baseline / per-sample-only / +reliability Constant / Learned | Baseline、Constant、Learned done；per-sample-only TBD | 不把 P4--MFON 差异归因于分配 |
@@ -23,7 +23,9 @@
 - 真实训练尺度的 `0.3*KL + 0.001*InfoNCE` 同样只报告批内 Spearman 与批内成对一致率；
 - 分数与长度、能量的相关。
 
-这里的 `-(KL + InfoNCE)` 是“当前 checkpoint 下辅助目标一致性代理”，不是外部真值。只有三种子方向一致、偏相关仍为正且 concordance 明显高于 0.5，才可谨慎支持跨样本分配语义；否则保留负结果并撤回“可靠性越高、辅助目标越可信”的解释。
+这里的 `-KL` 是跨样本主代理；InfoNCE 及按真实系数组合的代理只在批内比较。它们都不是外部真值。只有三种子方向一致、偏相关仍为正且 concordance 明显高于 0.5，才可谨慎支持跨样本分配语义；否则保留负结果并撤回“可靠性越高、辅助目标越可信”的解释。
+
+三种子 validation 全量审计（每个种子 `n=1871`）已经完成。视觉 `q`--`-KL` Spearman 为 `-0.315423±0.069633`，控制长度和能量后的残差 Spearman 为 `-0.248627±0.064859`，pairwise concordance 为 `0.393666±0.023143`；方向在三个种子上一致为负。音频对应结果为 `0.092174±0.042066`、`0.072239±0.067445` 和 `0.529795±0.014286`，仅表现为弱关联。批内真实加权代理的 Spearman 为视觉 `-0.290099±0.047795`、音频 `0.064885±0.047447`。因此 C1 不支持跨样本辅助目标保真度假设，结果保留为事后探索性负面证据。由于 validation 已经否定支持性门槛，不追加 test-split 审计，避免无必要地扩大事后测试集使用。
 
 先在 validation split 做 seed 1111 smoke，不启动训练：
 
@@ -50,7 +52,7 @@ for s in 1111 1112 1113; do
 done
 ```
 
-validation 结果完成并锁定解释规则后，才对 test split 各运行一次；test 结果仍必须明确写为事后探索性分析，不得称为原冻结协议或预注册验证。
+validation 结果已经锁定为负面解释；不运行 test split，也不得将该分析称为原冻结协议或预注册验证。
 
 ### C5 modality-utility 分层
 
@@ -115,7 +117,7 @@ python run_experiment.py \
 
 ## 5. P2：扩展到五种子
 
-仅在 C1 不失败且 C2 至少显示 Learned 对 Permuted/Inverse 的一致趋势后，新增 seeds 1114、1115。每个新 seed 需要匹配的单模态 encoders 和所有进入统计主表的变体。不得只补 Learned。
+C1 已失败，因此 seeds 1114、1115 暂停，不以增加种子数量掩盖跨样本语义不成立。只有 C2 显示 Learned 对 Permuted/Inverse 的一致趋势且论文仍需要更稳定的任务效应估计时，才重新评估扩展；每个新 seed 仍需匹配的单模态 encoders 和所有进入统计主表的变体，不得只补 Learned。
 
 五种子报告：逐种子原值、配对差值、均值、样本 SD、配对差值的 bootstrap 95% CI。统计重采样单位是 seed；测试样本 bootstrap 只能用于 checkpoint 内预测不确定性，不能冒充五次独立训练。
 
@@ -133,8 +135,8 @@ Corr、Loss 与所有分类指标使用相同格式完整报告，不能只挑�
 
 ## 7. 资源顺序与停止条件
 
-1. 先运行 C1 只读审计（小时级以内，不训练）。
-2. 再运行 seed 1111 Permuted、Inverse；每次只跑一个。
+1. C1 只读审计已完成，结论为视觉反向、音频弱关联。
+2. 释放磁盘至至少 12 GiB 后，再运行 seed 1111 Permuted、Inverse；每次只跑一个。
 3. 若两项能区分机制，再扩展至 seeds 1112--1113。
 4. 运行 seed 1111 Per-sample only，判断是否值得扩展组件消融。
 5. 做 modality-utility 分层。

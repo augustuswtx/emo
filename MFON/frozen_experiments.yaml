@@ -42,12 +42,26 @@ variants:
     allocation_control: inverse
 audit_contract:
   cross_sample_validity:
-    status: pending
+    status: complete
+    completed: 2026-09-15
     design: post-hoc exploratory
     first_split: valid
+    evaluated_split: valid
+    test_split: not_run
+    n_per_seed: 1871
+    result: not_supported
     primary_proxy: per-sample KL, compared globally across samples
     secondary_proxies:
       - per-sample InfoNCE, compared only within the generating mini-batch
       - delta_va * KL + delta_nce * InfoNCE, compared only within the generating mini-batch
     controls: [active_sequence_length, active_feature_rms]
     checkpoint_variant: p4_learned
+    summary_mean_sample_sd:
+      vision_global_spearman: [-0.315423, 0.069633]
+      vision_partial_spearman: [-0.248627, 0.064859]
+      vision_pairwise_concordance: [0.393666, 0.023143]
+      audio_global_spearman: [0.092174, 0.042066]
+      audio_partial_spearman: [0.072239, 0.067445]
+      audio_pairwise_concordance: [0.529795, 0.014286]
+      vision_weighted_proxy_within_batch_spearman: [-0.290099, 0.047795]
+      audio_weighted_proxy_within_batch_spearman: [0.064885, 0.047447]

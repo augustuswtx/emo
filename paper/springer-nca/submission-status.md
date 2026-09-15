@@ -12,16 +12,16 @@ Updated: 2026-09-15
   `sn-basic` citations; class and bibliography style are vendored locally.
 - Major-revision state: reviewer score 5/10 (Major Revision). Language,
   terminology, literature positioning, paired visualization, implementation
-  hooks, and experiment planning have been revised; C1--C5 empirical gates
-  remain open and the scientific score should not be treated as improved yet.
-- Abstract: 213 words, within the working 150--250-word target.
+  hooks, and experiment planning have been revised. C1 is complete with a
+  negative cross-sample target-fidelity result; C2--C5 remain open or
+  conditional, and the scientific score should not be treated as improved yet.
+- Abstract: 216 words, within the working 150--250-word target.
 - Keywords: five, within the requested 4--6 range.
-- Compilation: isolated Tectonic 0.17 preflight passed after the major-revision
-  edits. The anonymous draft is 25 A4 pages; the final log has no errors,
-  missing files, undefined citations/references, or overfull boxes. All 25 pages
-  passed rasterized contact-sheet review, with detailed checks of the related-
-  work table, Figs. 1--5, the split cross-corruption table, Discussion flow,
-  declarations, and references.
+- Compilation: the last isolated Tectonic 0.17 preflight, before the C1 result
+  integration, produced a 25-page A4 anonymous draft without errors, missing
+  files, undefined citations/references, or overfull boxes. The current C1
+  revision has passed source/package checks but still requires a fresh TeX
+  compile and raster review on a host with a TeX engine.
 - Packaging: the manuscript packager produces one flattened `main.tex`, the
   BibTeX database, official class/style files, and five English PDF figures.
   A separate anonymous code-artifact packager includes implementation, tests,
@@ -35,10 +35,9 @@ Updated: 2026-09-15
 - Existing evidence complete: all three fixed MOSEI seeds for repaired MFON,
   P4 Constant, and P4 Learned; full-test Gaussian reliability audits; and four
   held-out corruption audits; plus a matched single-GPU efficiency audit. The
-  previously deployed extended implementation suite passes 37 tests. The three
-  new cross-sample-audit unit tests and updated inverse-alias test pass syntax
-  compilation locally but still require execution in the server PyTorch
-  environment.
+  previously deployed extended implementation suite passes 37 tests. The five
+  cross-sample-audit tests pass in the server PyTorch environment, and full
+  validation audits are complete for all three frozen Learned checkpoints.
 - Figure package complete: bilingual method overview, frozen MOSEI task
   comparison, Gaussian reliability/confound audit, held-out corruption audit,
   and efficiency audit. Fig. 2 now displays paired seed-level trajectories and
@@ -50,10 +49,10 @@ Updated: 2026-09-15
 
 ## Evidence gates
 
-- First resolve C1 with the read-only frozen-checkpoint cross-sample validity
-  audit. Within-sample ordinal ranking and Gaussian AUROC do not establish that
-  absolute clean scores are comparable across samples or track auxiliary-target
-  fidelity.
+- Preserve the completed post-hoc C1 validation audit: visual score--KL
+  fidelity is consistently reversed and acoustic association is weak. Do not
+  infer clean-sample target fidelity from within-sample ordinal ranking or
+  Gaussian AUROC, and do not add an unnecessary test-split C1 analysis.
 
 - Preserve the complete three-seed MOSEI table and the explicit finding that
   Learned improves the primary endpoints over Constant but not uniformly over
@@ -103,4 +102,5 @@ Updated: 2026-09-15
 - Real-world or inference-time robustness.
 - General reliability estimation beyond the tested synthetic corruption
   family.
+- Cross-sample auxiliary-target fidelity of the learned scores.
 - Untouched-holdout confirmation from MOSI.

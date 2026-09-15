@@ -38,13 +38,14 @@ diagnostics informed head design. In a frozen three-seed CMU-MOSEI replication,
 Learned lowers mean MAE by 0.0025, raises correlation by 0.0007, and lowers test
 loss by 0.0040 relative to Constant, but classification effects are mixed and
 repaired MFON is not uniformly surpassed. In-family Gaussian visual/acoustic
-AUROC reaches 0.9722/1.0000, whereas detection weakens under unseen timestep
-dropout, contiguous masking, and temporal shifts; complete visual absence is
-unstable. Crucially, within-sample ordinal supervision does not establish that
-absolute clean scores are comparable across samples, as required by the
-allocator. The evidence supports an auditable fixed-budget training mechanism,
-but not a general quality estimator, a validated allocation direction,
-uniform gains, statistical significance, or inference-time robustness.}
+AUROC reaches 0.9722/1.0000, whereas detection weakens under unseen
+corruptions. A post-hoc validation audit further finds that clean visual
+scores are anti-aligned with KL target fidelity (Spearman
+$-0.3154\pm0.0696$), while the acoustic association is weak
+($0.0922\pm0.0421$). The evidence supports an auditable fixed-budget training
+mechanism, but not cross-sample target fidelity, a general quality estimator,
+a validated allocation direction, uniform gains, statistical significance,
+or inference-time robustness.}
 
 \keywords{multimodal sentiment analysis, degradation-response score,
 score audit, fixed-budget learning, sample reweighting}

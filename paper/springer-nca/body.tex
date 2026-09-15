@@ -94,9 +94,10 @@ The current study makes four evidence-bounded contributions:
   identical to the repaired MFON baseline from the first epoch.
 \item
   We report an exploratory three-seed CMU-MOSI study and a frozen-protocol
-  three-seed CMU-MOSEI replication, then use Gaussian, timestep-dropout,
-  contiguous-mask, temporal-shift, and modality-missing audits to distinguish
-  in-family degradation detection from cross-corruption generalization.
+  three-seed CMU-MOSEI replication, then use Gaussian, held-out corruption,
+  and cross-sample target-fidelity audits to separate degradation detection
+  from the properties required by allocation. The validation audit falsifies
+  cross-sample KL fidelity for vision and finds only weak acoustic support.
 \end{enumerate}
 
 \section{Related Work}\label{related-work}
@@ -508,10 +509,11 @@ q_i^m>q_j^m
 
 Importantly, the within-sample ranking loss does not identify this cross-sample
 ordering. High clean/corrupt AUROC can coexist with arbitrary clean-vs-clean
-offsets across speakers or content. The pending cross-sample calibration audit
-therefore measures score--target-fidelity association, stratified consistency,
-and residual length/energy dependence; until it is completed, the implication
-above is a testable design premise, not an empirical result.
+offsets across speakers or content. Our post-hoc validation audit therefore
+measures score--target-fidelity association and residual length/energy
+dependence. Section~\ref{cross-sample-target-fidelity-audit} shows that the
+implication above fails for visual KL fidelity and receives only weak acoustic
+support.
 
 Under this assumption, reliability-proportional allocation emphasizes samples
 for which frozen-teacher distillation and cross-modal alignment targets are
@@ -580,7 +582,11 @@ sentiment regression. Has0/Non0 accuracy and F1 are secondary endpoints;
 Acc-5, Acc-7, and test loss are diagnostic outcomes. Reliability metrics
 are severity--score Spearman correlation, clean/corrupt AUROC, the fraction
 of strongest corruptions scoring below their clean counterparts, and
-correlations with sequence length and feature energy. We report every metric
+correlations with sequence length and feature energy. The post-hoc
+cross-sample audit additionally reports score--negative-KL Spearman and
+Pearson correlations, length/energy-controlled Spearman correlation, and
+pairwise concordance; InfoNCE-based quantities are compared only within their
+generating mini-batches. We report every metric
 for every completed method, together with per-seed Learned-minus-Constant
 differences, the three-seed mean, and sample standard deviation. This
 hierarchy was fixed while seed-1111 P4 Constant was still training and before
@@ -591,8 +597,9 @@ not support a claim of statistical significance.
 
 The MOSEI port and shared reliability/allocation core pass the original 33
 server-side tests. After adding four cross-corruption audits, the extended
-suite passes all 37 tests and Python syntax compilation. Coverage includes
-per-sample losses, exact budget conservation, score controls, corruption
+suite passes all 37 tests and Python syntax compilation. Five additional C1
+cross-sample-audit tests pass in the server PyTorch environment. Coverage
+includes per-sample losses, exact budget conservation, score controls, corruption
 ordering, padding protection, reliability-head invariances, clean-task
 routing, cross-dataset consistency, and deterministic padding-preserving
 non-Gaussian corruptions. Tests establish implementation contracts, not
@@ -944,6 +951,28 @@ reliability under the Gaussian training intervention and fixed-budget
 auxiliary allocation, rather than cross-corruption quality estimation or
 missing-modality robustness.
 
+\subsection{Cross-sample target-fidelity
+audit}\label{cross-sample-target-fidelity-audit}
+
+We performed a post-hoc exploratory audit on the MOSEI validation split of
+each frozen Learned checkpoint ($n=1{,}871$ per seed). The primary proxy was
+negative per-sample KL, whose definition is stable across mini-batches.
+InfoNCE and the coefficient-weighted proxy
+$0.3\,\mathrm{KL}+0.001\,\mathrm{InfoNCE}$ were compared only within their
+generating mini-batches because their negative sets vary across batches.
+
+Visual scores consistently contradicted the proposed fidelity direction.
+Across seeds, global Spearman correlation with negative KL was
+$-0.315423\pm0.069633$, partial Spearman after controlling active length and
+feature energy was $-0.248627\pm0.064859$, and pairwise concordance was
+$0.393666\pm0.023143$. Acoustic associations were weak:
+$0.092174\pm0.042066$, $0.072239\pm0.067445$, and
+$0.529795\pm0.014286$, respectively. Within-batch weighted-proxy Spearman was
+$-0.290099\pm0.047795$ for vision and $0.064885\pm0.047447$ for audio. Thus,
+Gaussian degradation ordering does not establish that higher clean-sample
+scores identify more trustworthy auxiliary targets. We retain this negative
+result and do not reinterpret the score direction after observing it.
+
 \subsection{Efficiency and resource cost}\label{efficiency-audit}
 
 We ran a uniform microbenchmark on one NVIDIA GeForce RTX 4090 D using the
@@ -1052,6 +1081,14 @@ completed under the final schedule, the defensible claim is that sample
 allocation can matter under a fixed budget---not that higher-reliability
 weighting is universally optimal.
 
+The cross-sample validation audit gives a sharper mechanism boundary. Visual
+reliability scores are consistently anti-aligned with KL target fidelity, and
+acoustic scores show only weak alignment. The favorable Learned-versus-Constant
+task means therefore cannot be attributed to the stated assumption that higher
+scores identify cleaner auxiliary targets. Final-schedule Permuted and Inverse
+controls are needed to distinguish score correspondence, allocation direction,
+and hard-example weighting.
+
 \subsection{Why reliability measurement does not imply robust
 fusion}\label{why-reliability-measurement-does-not-imply-robust-fusion}
 
@@ -1108,9 +1145,9 @@ reliability diagnostics informed visual-head retention and acoustic-head
 redesign, so MOSI remains exploratory rather than untouched validation.
 Second, although the frozen three-seed MOSEI replication is complete, three
 seeds do not support statistical significance and primary endpoints do not
-uniformly improve over repaired MFON. Third, reliability-proportional
-allocation assumes that higher input reliability implies more trustworthy
-auxiliary targets; final-schedule inverse/difficulty-aware and permutation
+uniformly improve over repaired MFON. Third, the post-hoc MOSEI validation
+audit contradicts cross-sample KL fidelity for vision and provides only weak
+acoustic support; final-schedule inverse/difficulty-aware and permutation
 controls remain incomplete. Fourth, interventions operate on pre-extracted
 features, and the new non-Gaussian audits reveal substantial cross-corruption
 failure rather than replacing real-media noise, occlusion, and misalignment
@@ -1147,14 +1184,14 @@ redistribution for binary and regression-oriented metrics, while fine-grained
 classification remains mixed. Exploratory MOSI and frozen MOSEI three-seed
 results both favor Learned over equal-budget Constant on mean MAE,
 correlation, and test loss, but repaired MFON is not uniformly surpassed.
-Cross-corruption audits further show that Gaussian degradation detection does
-not transfer automatically to timestep dropout, temporal shift, or complete
-visual absence. A uniform microbenchmark finds that P4 adds approximately
+Cross-corruption audits show limited transfer, while the cross-sample
+validation audit finds visual anti-alignment and only weak acoustic alignment
+with KL target fidelity. A uniform microbenchmark finds that P4 adds approximately
 0.024\% optimized parameters; Learned increases forward-plus-backward latency
 and peak training memory by 0.71\% and 0.29\% relative to MFON without
 expanding the deployed inference graph. Acoustic length dependence,
-text-dominant inference, unverified cross-sample score calibration,
-incomplete final-schedule actionability controls, and the lack of real-media
-stress tests bound the scope. The evidence establishes a transparent and
-falsifiable audit-and-budget-control mechanism, not a general quality
-estimator or a validated robust-fusion model.
+text-dominant inference, failed cross-sample target fidelity, incomplete
+final-schedule actionability controls, and the lack of real-media stress tests
+bound the scope. The evidence establishes a transparent and falsifiable
+audit-and-budget-control mechanism, not a general quality estimator, a
+validated allocation direction, or a robust-fusion model.
