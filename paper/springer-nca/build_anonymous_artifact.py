@@ -22,7 +22,7 @@ ANONYMITY_MARKERS = (
     "Tianxi Wang",
     "augustuswtx",
     "/Users/",
-    "/home/jovyan/",
+    "/home/",
     "shu-common-",
 )
 

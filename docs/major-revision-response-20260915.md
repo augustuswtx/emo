@@ -16,7 +16,7 @@
 
 - 在问题定义中新增“样本内有序性不推出跨样本校准”的形式化边界。
 - 在方法中新增“分配方向假设”，明确写出高分对应较低辅助目标误差只是待检验前提。
-- 新增只读审计程序 `MFON/audit_cross_sample_validity.py`，在冻结检查点上测量退化响应分数与逐样本 KL+InfoNCE 代理目标保真度的 Spearman、Pearson、长度/能量控制后的偏 Spearman，以及成对排序一致率。
+- 修正只读审计程序 `MFON/audit_cross_sample_validity.py`：跨样本主分析单独使用定义跨批稳定的逐样本 KL；InfoNCE 及按真实系数 `0.3*KL+0.001*InfoNCE` 构造的训练目标代理仅在生成它们的 mini-batch 内比较，避免把不同负样本集合的数值拼接排序。程序报告 Spearman、Pearson、长度/能量控制后的偏 Spearman及成对排序一致率，并将 validation/test 结果明确标为事后探索性分析。
 - `MFON/budgeted_auxiliary.py` 暴露分离后的逐样本损失，仅供审计读取；训练目标和默认行为不变。
 - 结果出来前，全文不再把分数称为通用“质量”，也不把高 Gaussian AUROC 当作跨样本校准证据。
 

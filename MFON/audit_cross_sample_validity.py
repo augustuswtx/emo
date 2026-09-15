@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Read-only audit of cross-sample score comparability and target fidelity."""
+"""Read-only, post-hoc audit of score comparability and target fidelity.
+
+KL is the primary cross-sample proxy because its per-sample value has a stable
+definition across batches. InfoNCE depends on the negative examples in the
+current mini-batch, so InfoNCE and the coefficient-weighted training proxy are
+reported only through within-batch associations.
+"""
 
 import argparse
 import os
@@ -61,12 +67,53 @@ def summarize(name, score, loss, length, energy):
     }
 
 
+def within_batch_summary(name, score_batches, loss_batches):
+    """Summarize score--fidelity association without comparing batches."""
+    correlations = []
+    concordant = 0
+    comparable = 0
+    samples = 0
+    for score, loss in zip(score_batches, loss_batches):
+        score = np.asarray(score, dtype=np.float64).reshape(-1)
+        fidelity = -np.asarray(loss, dtype=np.float64).reshape(-1)
+        if score.size != fidelity.size:
+            raise ValueError('score and loss batch sizes must match')
+        samples += score.size
+        correlation = spearman(score, fidelity)
+        if np.isfinite(correlation):
+            correlations.append(correlation)
+        if score.size < 2:
+            continue
+        left, right = np.triu_indices(score.size, k=1)
+        score_delta = score[left] - score[right]
+        fidelity_delta = fidelity[left] - fidelity[right]
+        valid = (score_delta != 0) & (fidelity_delta != 0)
+        concordant += int(np.sum(np.sign(score_delta[valid]) == np.sign(fidelity_delta[valid])))
+        comparable += int(valid.sum())
+    correlations = np.asarray(correlations, dtype=np.float64)
+    return {
+        'name': name,
+        'n': int(samples),
+        'n_batches': int(len(score_batches)),
+        'within_batch_spearman_mean': (
+            float(correlations.mean()) if correlations.size else float('nan')
+        ),
+        'within_batch_spearman_sd': (
+            float(correlations.std(ddof=1)) if correlations.size > 1 else float('nan')
+        ),
+        'within_batch_pairwise_concordance': (
+            float(concordant) / comparable if comparable else float('nan')
+        ),
+        'comparable_pairs': int(comparable),
+    }
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--dataset', choices=DATASETS.keys(), default='MOSEI')
     parser.add_argument('--seed', type=int, default=1111)
     parser.add_argument('--exp-name', required=True)
-    parser.add_argument('--split', choices=['train', 'valid', 'test'], default='test')
+    parser.add_argument('--split', choices=['train', 'valid', 'test'], default='valid')
     parser.add_argument('--max-batches', type=int, default=None)
     return parser.parse_args()
 
@@ -124,20 +171,52 @@ def main():
             a_energy.append(active_rms(audio_cpu))
 
     arrays = {key: to_numpy(value) for key, value in fields.items()}
-    vision_loss = arrays['loss_v_each'] + arrays['loss_nce_v_each']
-    audio_loss = arrays['loss_a_each'] + arrays['loss_nce_a_each']
-    results = [
-        summarize('vision', arrays['q_v'], vision_loss,
+    delta_va = float(train_cfg.delta_va)
+    delta_nce = float(train_cfg.delta_nce)
+    q_v_batches = [part.numpy() for part in fields['q_v']]
+    q_a_batches = [part.numpy() for part in fields['q_a']]
+    kl_v_batches = [part.numpy() for part in fields['loss_v_each']]
+    kl_a_batches = [part.numpy() for part in fields['loss_a_each']]
+    nce_v_batches = [part.numpy() for part in fields['loss_nce_v_each']]
+    nce_a_batches = [part.numpy() for part in fields['loss_nce_a_each']]
+    weighted_v_batches = [
+        delta_va * kl + delta_nce * nce
+        for kl, nce in zip(kl_v_batches, nce_v_batches)
+    ]
+    weighted_a_batches = [
+        delta_va * kl + delta_nce * nce
+        for kl, nce in zip(kl_a_batches, nce_a_batches)
+    ]
+    primary_results = [
+        summarize('vision_kl_global', arrays['q_v'], arrays['loss_v_each'],
                   to_numpy(v_length), to_numpy(v_energy)),
-        summarize('audio', arrays['q_a'], audio_loss,
+        summarize('audio_kl_global', arrays['q_a'], arrays['loss_a_each'],
                   to_numpy(a_length), to_numpy(a_energy)),
     ]
-    print('Cross-sample validity audit dataset=%s split=%s seed=%d exp=%s' %
-          (args.dataset, args.split, args.seed, args.exp_name))
-    for result in results:
+    secondary_results = [
+        within_batch_summary('vision_kl_within_batch', q_v_batches, kl_v_batches),
+        within_batch_summary('audio_kl_within_batch', q_a_batches, kl_a_batches),
+        within_batch_summary('vision_infonce_within_batch', q_v_batches, nce_v_batches),
+        within_batch_summary('audio_infonce_within_batch', q_a_batches, nce_a_batches),
+        within_batch_summary('vision_weighted_proxy_within_batch', q_v_batches,
+                             weighted_v_batches),
+        within_batch_summary('audio_weighted_proxy_within_batch', q_a_batches,
+                             weighted_a_batches),
+    ]
+    print('Cross-sample validity audit (post-hoc exploratory) '
+          'dataset=%s split=%s seed=%d exp=%s delta_va=%g delta_nce=%g' %
+          (args.dataset, args.split, args.seed, args.exp_name, delta_va, delta_nce))
+    print('Primary analysis: global score--KL association; KL has a stable '
+          'per-sample definition across batches.')
+    for result in primary_results:
         print(' | '.join('%s=%s' % (key, value) for key, value in result.items()))
-    print('Interpretation: positive score--fidelity association and concordance above 0.5 '
-          'support, but do not prove, cross-sample allocation semantics.')
+    print('Secondary analysis: within-batch only; InfoNCE depends on the current '
+          'batch negative set. weighted_proxy=delta_va*KL+delta_nce*InfoNCE.')
+    for result in secondary_results:
+        print(' | '.join('%s=%s' % (key, value) for key, value in result.items()))
+    print('Interpretation: positive score--fidelity association and concordance above '
+          '0.5 support, but do not prove, allocation semantics. Validation and test '
+          'results are post-hoc exploratory and must not be described as preregistered.')
 
 
 if __name__ == '__main__':

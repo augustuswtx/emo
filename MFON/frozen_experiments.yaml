@@ -1,0 +1,53 @@
+schema_version: 1
+updated: 2026-09-15
+dataset: MOSEI
+data:
+  source: CMU-MOSEI third-party benchmark features
+  local_filename: unaligned_50.pkl
+  sha256: not_recorded
+  redistribution: prohibited
+seeds: [1111, 1112, 1113]
+training_contract:
+  epochs: 25
+  checkpoint_selection: minimum validation loss
+  use_budgeted_aux: true
+  use_interventional_reliability: true
+  warmup_epoch: 10
+  budget_warmup_mode: allocation
+  reliability_task_warmup_epoch: 10
+  reliability_task_corrupt_scale: 0.0
+  delta_va: 0.3
+  delta_nce: 0.001
+variants:
+  repaired_mfon:
+    status: complete
+    exp_name: p5_mosei_repaired_baseline
+    train_args: [--dataset, MOSEI, --stage, train-fusion, --epochs, '25']
+    test_args: [--dataset, MOSEI, --stage, test-fusion]
+  p4_constant:
+    status: complete
+    exp_name: p5_mosei_p4_constant_true_budget
+    allocation_control: constant
+  p4_learned:
+    status: complete
+    exp_name: p5_mosei_p4_learned_true_budget
+    allocation_control: learned
+  p4_permuted:
+    status: pending
+    exp_name: p5_mosei_p4_permuted_true_budget
+    allocation_control: permuted
+  p4_inverse:
+    status: pending
+    exp_name: p5_mosei_p4_inverse_true_budget
+    allocation_control: inverse
+audit_contract:
+  cross_sample_validity:
+    status: pending
+    design: post-hoc exploratory
+    first_split: valid
+    primary_proxy: per-sample KL, compared globally across samples
+    secondary_proxies:
+      - per-sample InfoNCE, compared only within the generating mini-batch
+      - delta_va * KL + delta_nce * InfoNCE, compared only within the generating mini-batch
+    controls: [active_sequence_length, active_feature_rms]
+    checkpoint_variant: p4_learned

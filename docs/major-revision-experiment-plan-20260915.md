@@ -16,16 +16,16 @@
 
 ### C1 跨样本可比性与目标保真度
 
-新增脚本：`audit_cross_sample_validity.py`。它在冻结 checkpoint 上读取每个样本的视觉/音频分数、KL 和 InfoNCE，报告：
+新增脚本：`audit_cross_sample_validity.py`。该分析是在审稿后新增的，统一标为 **post-hoc exploratory**。它在冻结 checkpoint 上读取每个样本的视觉/音频分数、KL 和 InfoNCE，采用以下修正版口径：
 
-- Spearman/ Pearson：分数与 `-(KL + InfoNCE)` 的关系；
-- 控制长度和能量后的残差 Spearman；
-- 随机样本对的排序一致率（0.5 为无方向）；
+- 主分析为跨样本 `q` 与 `-KL` 的 Spearman、Pearson、控制长度和能量后的残差 Spearman，以及成对排序一致率（0.5 为无方向）；
+- InfoNCE 的负样本集合依赖当前 mini-batch，因此 `q`--InfoNCE 只在各自生成它的批次内部比较，不跨批拼接排序；
+- 真实训练尺度的 `0.3*KL + 0.001*InfoNCE` 同样只报告批内 Spearman 与批内成对一致率；
 - 分数与长度、能量的相关。
 
 这里的 `-(KL + InfoNCE)` 是“当前 checkpoint 下辅助目标一致性代理”，不是外部真值。只有三种子方向一致、偏相关仍为正且 concordance 明显高于 0.5，才可谨慎支持跨样本分配语义；否则保留负结果并撤回“可靠性越高、辅助目标越可信”的解释。
 
-服务器先做 seed 1111 smoke，不启动训练：
+先在 validation split 做 seed 1111 smoke，不启动训练：
 
 ```bash
 cd /home/jovyan/projects/MFON
@@ -34,21 +34,23 @@ python -m unittest discover -s tests -p 'test_cross_sample_validity.py' -v
 python audit_cross_sample_validity.py \
   --dataset MOSEI --seed 1111 \
   --exp-name p5_mosei_p4_learned_true_budget \
-  --split test --max-batches 5
+  --split valid --max-batches 5
 ```
 
-smoke 无报错后再运行三种子全量（仍为只读审计）：
+smoke 无报错后先运行三种子 validation 全量（仍为只读审计）：
 
 ```bash
 cd /home/jovyan/projects/MFON
 for s in 1111 1112 1113; do
   nohup env PYTHONUNBUFFERED=1 python audit_cross_sample_validity.py \
     --dataset MOSEI --seed "$s" \
-    --exp-name p5_mosei_p4_learned_true_budget --split test \
-    > "mosei_cross_sample_validity_${s}.log" 2>&1 &
+    --exp-name p5_mosei_p4_learned_true_budget --split valid \
+    > "mosei_cross_sample_validity_valid_${s}.log" 2>&1 &
   wait $!
 done
 ```
+
+validation 结果完成并锁定解释规则后，才对 test split 各运行一次；test 结果仍必须明确写为事后探索性分析，不得称为原冻结协议或预注册验证。
 
 ### C5 modality-utility 分层
 

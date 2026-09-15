@@ -322,5 +322,3 @@ dependencies:
     - zipp==3.17.0
     - zope-event==5.0
     - zope-interface==6.2
-prefix: /home/zxm/anaconda3/envs/pytorch
-
