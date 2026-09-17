@@ -1,9 +1,9 @@
-# MOSEI实验交接（2026-09-15）
+# MOSEI实验交接（2026-09-17）
 
 > 新Codex对话请先读本文件，再读 `PROJECT-CONTEXT-LATEST.md` 和
 > `docs/experiment-log.md`。不要从零开始，不要重复启动正在运行的任务。
 
-## 0. 2026-09-15 当前唯一有效状态
+## 0. 2026-09-17 当前唯一有效状态
 
 MOSEI 冻结实验已经完成，不再训练 seeds 1111/1112/1113 的 encoder、Baseline、P4
 Constant 或 P4 Learned。三个种子的正式 checkpoint 均存在，干净测试、完整高斯可靠性
@@ -29,12 +29,17 @@ docs/major-revision-response-20260915.md
 MFON/audit_cross_sample_validity.py
 ```
 
-新增 Python 文件已在本地通过 `py_compile`；本机没有 PyTorch，因此新加的 3 项 C1 单测
-和 Inverse 别名单测必须先在服务器环境执行，不能提前记为通过。
+新增 Python 文件已在本地通过 `py_compile`；服务器环境已运行 5 项新单测并全部通过。
 
-严格下一步是先在服务器运行 C1 冻结检查点只读审计；它不训练、不写 checkpoint。只有
-C1 结果可接受后，才依次启动最终日程 Permuted、Inverse 和组件消融。任何训练前必须先
-让用户检查后台进程、磁盘和 GPU，一次只运行一个任务。
+C1 validation 审计已经完成，视觉跨样本 KL 保真度呈反向、音频关联很弱。C2 最终日程
+Inverse 与 Permuted 的 seed 1111 训练和同配置重载测试也已完成；Learned 的 MAE
+`0.5388` 低于 Permuted `0.5399`、Inverse `0.5405`，但 Corr `0.7742` 略低于
+Inverse `0.7743`。这不足以通过多数种子同时改善两个主终点的判据，更不能改变 C1
+负结果。C2 的 seeds 1112--1113 尚未运行；不得重复 seed 1111。
+
+下一步先归档 Permuted 检查点哈希并完成不需重训的 C5 modality-utility 分层。C4
+Per-sample-only 的 seed 1111 训练尚待运行，启动前必须检查后台进程、磁盘至少 12 GiB
+和 GPU；同一时间只运行一个任务。当前稿件的 C2 结果与限制需要随实验同步更新。
 
 ### 冻结 MOSEI 三种子干净结果
 

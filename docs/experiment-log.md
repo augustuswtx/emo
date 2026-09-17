@@ -1137,5 +1137,35 @@ and remove any implication that larger clean scores identify samples with
 more trustworthy KL or InfoNCE targets. C2 remains scientifically useful
 because the final-schedule Inverse control directly tests whether the current
 positive allocation direction is harmful or whether the score affects
-training through another mechanism. No new training can start with only 5.6
-GiB free; the storage gate is at least 12 GiB available.
+training through another mechanism. At the time of this C1 audit the server
+had only 5.6 GiB free; storage was subsequently cleared above the 12 GiB
+pre-training gate before the seed-1111 C2 runs.
+
+## 2026-09-17 MOSEI Final-Schedule Allocation Controls, Seed 1111
+
+The server completed 25-epoch Inverse and Permuted training with the frozen P4
+schedule (allocation warmup 10, task-path corruption scale 0, validation-loss
+checkpoint selection) after the C1 audit. Both runs reported the MOSEI mean
+auxiliary budgets of 0.3/0.3/0.001/0.001 at epoch 25. The Inverse checkpoint
+was 586M with SHA256
+`4392f451bed76acfa19996007e437504807a792af0cee6d31319f9690a8887cc`.
+Its same-configuration reload printed the full test metrics below; the shell
+exit code was not supplied. The Permuted same-configuration reload completed
+with `test_exit_code=0`; its checkpoint hash has not yet been supplied.
+
+| Allocation | Has0 Acc-2 | Has0 F1 | Non0 Acc-2 | Non0 F1 | Acc-5 | Acc-7 | MAE↓ | Corr↑ | Loss↓ |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Constant | 0.7995 | 0.8064 | 0.8555 | 0.8559 | 0.5467 | 0.5304 | 0.5406 | 0.7735 | 0.5008784563954897 |
+| Learned | 0.8008 | 0.8075 | 0.8550 | 0.8552 | 0.5463 | 0.5302 | 0.5388 | 0.7742 | 0.49853695405478843 |
+| Permuted | 0.7974 | 0.8047 | 0.8550 | 0.8555 | 0.5445 | 0.5280 | 0.5399 | 0.7740 | 0.5001123543971853 |
+| Inverse | 0.7950 | 0.8026 | 0.8544 | 0.8551 | 0.5448 | 0.5284 | 0.5405 | 0.7743 | 0.5010266978486358 |
+
+Learned minus Permuted is -0.0011 MAE, +0.0002 Corr, and -0.0015754 Loss;
+Learned minus Inverse is -0.0017 MAE, -0.0001 Corr, and -0.0024897 Loss.
+Thus the seed-1111 task metrics weakly favor correct score--sample pairing on
+MAE and Corr, but do not jointly favor the positive direction over Inverse on
+both frozen primary endpoints. These small single-seed contrasts cannot
+evaluate the previously fixed majority-of-seeds C2 criterion or repair the
+negative C1 target-fidelity result. Seeds 1112--1113 for these two controls
+remain unrun; neither a three-seed C2 conclusion nor a fidelity mechanism is
+claimed.

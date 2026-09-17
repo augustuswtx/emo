@@ -91,7 +91,10 @@ def build() -> None:
         "not proof of a perceptual quality scale. The completed per-seed MOSEI "
         "validation results are recorded in "
         "`paper/figures/data/c1_mosei_cross_sample_validity.csv`; they reject visual "
-        "cross-sample KL fidelity and show only weak acoustic association.\n",
+        "cross-sample KL fidelity and show only weak acoustic association. "
+        "The final-schedule seed-1111 allocation-control test results are in "
+        "`paper/figures/data/mosei_final_schedule_allocation_seed1111.csv`; "
+        "they are single-seed evidence and do not validate the allocation direction.\n",
         encoding="utf-8",
     )
     copied.append(readme)

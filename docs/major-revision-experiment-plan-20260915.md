@@ -1,13 +1,13 @@
 # NCA 大修实验执行方案（C1--C5）
 
-> 状态日期：2026-09-15。本文档只登记已完成证据和待运行协议，不把 TBD 写成结果。所有新训练必须由用户在服务器上明确启动；本地修改不会自动发起 GPU 任务。
+> 状态日期：2026-09-17。本文档只登记已完成证据和待运行协议，不把 TBD 写成结果。所有新训练由用户在服务器手动启动；本地修改不会自动发起 GPU 任务。
 
 ## 1. 审稿问题与最低闭环
 
 | ID | 核心问题 | 最低证据 | 当前状态 | 论文处理 |
 |---|---|---|---|---|
 | C1 | 样本内排序不保证跨样本可比 | 干净分数与辅助目标保真度的相关、偏相关、pairwise concordance；三种子 | 已完成；视觉反向、音频弱相关 | 称 degradation-response score；撤回跨样本保真度解释 |
-| C2 | 分配方向与对应关系未验证 | final-schedule Learned / Constant / Permuted / Inverse，同种子配对 | 1111--1113 Learned/Constant done；其余 TBD | 不宣称正向可靠性分配最优 |
+| C2 | 分配方向与对应关系未验证 | final-schedule Learned / Constant / Permuted / Inverse，同种子配对 | 1111 四组完成测试；1112--1113 Permuted/Inverse 待定 | 不宣称正向可靠性分配最优 |
 | C3 | 三种子效应小 | 逐种子点、配对差值；扩展 1114--1115 | 配对图已完成；新种子 TBD | 现阶段只作描述性均值 |
 | C4 | 相对 MFON 的组件归因不清 | Baseline / per-sample-only / +reliability Constant / Learned | Baseline、Constant、Learned done；per-sample-only TBD | 不把 P4--MFON 差异归因于分配 |
 | C5 | 文本主导、外部有效性弱 | modality-utility 分层；第二骨干为可选高成本项 | 推理审计 TBD | 不宣称鲁棒融合或模型无关性 |
@@ -68,8 +68,8 @@ validation 结果已经锁定为负面解释；不运行 test split，也不得�
 |---|---|---|---|
 | Constant | constant | 等预算均匀分配 | 1111--1113 done |
 | Learned | learned | 正向分数分配 | 1111--1113 done |
-| Permuted | permuted | 破坏 score--sample 对应 | 1111--1113 TBD |
-| Inverse | inverse | 低分/困难样本优先 | 1111--1113 TBD |
+| Permuted | permuted | 破坏 score--sample 对应 | 1111 done；1112--1113 TBD |
+| Inverse | inverse | 低分/困难样本优先 | 1111 测试指标已取得；1112--1113 TBD |
 
 单元命令模板（`CONTROL` 替换为 `permuted` 或 `inverse`；同一时间只跑一个）：
 
@@ -89,7 +89,7 @@ nohup env PYTHONUNBUFFERED=1 python run_experiment.py \
   > "mosei_${EXP}_${SEED}.log" 2>&1 & echo $!
 ```
 
-预注册判据：Learned 必须在多数种子上同时优于 Permuted 和 Inverse 的 MAE/Corr 配对方向，才支持“正确对应 + 正向分配”。若只优于 Constant，则结论收缩为“非均匀分配改变结果”；若 Permuted/Inverse 相当或更好，则撤回可靠性驱动的因果解释。
+预先固定的判据：Learned 必须在多数种子上同时优于 Permuted 和 Inverse 的 MAE/Corr 配对方向，才支持“正确对应 + 正向分配”。若只优于 Constant，则结论收缩为“非均匀分配改变结果”；若 Permuted/Inverse 相当或更好，则撤回可靠性驱动的因果解释。seed 1111 的 Learned MAE 为 0.5388，优于 Permuted 0.5399 和 Inverse 0.5405；Corr 为 0.7742，高于 Permuted 0.7740，却低于 Inverse 0.7743。单种子差异很小，不能据此宣称判据通过；C1 的跨样本目标保真度负结果仍然成立。
 
 ## 4. P1：组件消融
 
@@ -125,7 +125,7 @@ C1 已失败，因此 seeds 1114、1115 暂停，不以增加种子数量掩盖�
 
 | Seed | Constant MAE | Learned MAE | Permuted MAE | Inverse MAE | Learned-Constant | Learned-Permuted | Learned-Inverse |
 |---:|---:|---:|---:|---:|---:|---:|---:|
-| 1111 | 0.5406 | 0.5388 | TBD | TBD | -0.0018 | TBD | TBD |
+| 1111 | 0.5406 | 0.5388 | 0.5399 | 0.5405 | -0.0018 | -0.0011 | -0.0017 |
 | 1112 | 0.5274 | 0.5283 | TBD | TBD | +0.0009 | TBD | TBD |
 | 1113 | 0.5342 | 0.5277 | TBD | TBD | -0.0065 | TBD | TBD |
 | 1114 | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
@@ -136,10 +136,9 @@ Corr、Loss 与所有分类指标使用相同格式完整报告，不能只挑�
 ## 7. 资源顺序与停止条件
 
 1. C1 只读审计已完成，结论为视觉反向、音频弱关联。
-2. 释放磁盘至至少 12 GiB 后，再运行 seed 1111 Permuted、Inverse；每次只跑一个。
-3. 若两项能区分机制，再扩展至 seeds 1112--1113。
-4. 运行 seed 1111 Per-sample only，判断是否值得扩展组件消融。
-5. 做 modality-utility 分层。
+2. seed 1111 Permuted 和 Inverse 已按冻结日程训练与重载测试；归档日志和 checkpoint 哈希，不重复运行。
+3. 单种子主终点并未同时支持 Learned 优于 Inverse；在决定是否投入约 16 小时串行 GPU 时间扩展 1112--1113 前，先保持机制主张收缩，并完成不需重训的 C5 分层。
+4. 运行 seed 1111 Per-sample only，判断是否值得扩展组件消融；启动前重新满足 12 GiB 磁盘门槛。
 6. 只有前述证据链支持方法解释，才训练 1114--1115；否则以负面审计论文收缩主张。
 
 任何阶段出现磁盘低于 5 GiB、checkpoint 路径冲突、配置不一致或日志异常时立即停止，不覆盖现有 checkpoint。

@@ -1,5 +1,5 @@
 schema_version: 1
-updated: 2026-09-15
+updated: 2026-09-17
 dataset: MOSEI
 data:
   source: CMU-MOSEI third-party benchmark features
@@ -33,11 +33,13 @@ variants:
     exp_name: p5_mosei_p4_learned_true_budget
     allocation_control: learned
   p4_permuted:
-    status: pending
+    status: partial
+    completed_seeds: [1111]
     exp_name: p5_mosei_p4_permuted_true_budget
     allocation_control: permuted
   p4_inverse:
-    status: pending
+    status: partial
+    completed_seeds: [1111]
     exp_name: p5_mosei_p4_inverse_true_budget
     allocation_control: inverse
 audit_contract:

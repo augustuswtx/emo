@@ -1,6 +1,6 @@
 # NCA submission-status ledger
 
-Updated: 2026-09-15
+Updated: 2026-09-17
 
 ## Current state
 
@@ -13,14 +13,16 @@ Updated: 2026-09-15
 - Major-revision state: reviewer score 5/10 (Major Revision). Language,
   terminology, literature positioning, paired visualization, implementation
   hooks, and experiment planning have been revised. C1 is complete with a
-  negative cross-sample target-fidelity result; C2--C5 remain open or
-  conditional, and the scientific score should not be treated as improved yet.
+  negative cross-sample target-fidelity result. C2 has matched seed-1111
+  Inverse and Permuted tests, but its majority-of-seeds criterion is open;
+  C3--C5 remain open or conditional, and the scientific score should not be
+  treated as improved yet.
 - Abstract: 216 words, within the working 150--250-word target.
 - Keywords: five, within the requested 4--6 range.
 - Compilation: the last isolated Tectonic 0.17 preflight, before the C1 result
   integration, produced a 25-page A4 anonymous draft without errors, missing
   files, undefined citations/references, or overfull boxes. The current C1
-  revision has passed source/package checks but still requires a fresh TeX
+  and seed-1111 C2 revision has passed source/package checks but still requires a fresh TeX
   compile and raster review on a host with a TeX engine.
 - Packaging: the manuscript packager produces one flattened `main.tex`, the
   BibTeX database, official class/style files, and five English PDF figures.
@@ -63,8 +65,10 @@ Updated: 2026-09-15
   results; do not describe the reliability heads as general quality estimators.
 - Add original-media acoustic and visual corruptions beyond feature-level
   Gaussian/non-Gaussian stress tests if deployment robustness is claimed.
-- Repeat at least Constant, Inverse/Difficulty-aware, and Permuted allocation
-  controls under the final P4 schedule, or narrow the actionability claim.
+- Report the completed seed-1111 final-schedule Constant, Learned,
+  Inverse/Difficulty-aware, and Permuted controls as single-seed evidence;
+  replicate the latter two on other seeds before claiming allocation direction
+  or narrow the actionability claim.
 - Preserve the measured parameter, latency, throughput, and memory table, while
   labeling it as a single-GPU microbenchmark rather than a speedup claim.
 - Preserve the method, main-result, reliability, cross-corruption, and

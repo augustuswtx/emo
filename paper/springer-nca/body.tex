@@ -535,8 +535,8 @@ controls were completed before the final P4 allocation-warmup schedule
 was frozen, we report them as diagnostic evidence rather than pooling
 them with the final three-seed P4 comparison. The frozen-protocol experiment
 plan therefore records a final-schedule inverse/difficulty-aware control
-and a within-batch permuted control; neither is reported as completed
-evidence in this draft.
+and a within-batch permuted control. Both have now completed seed 1111;
+seeds 1112--1113 remain unrun for these controls.
 
 \section{Experimental Protocol}\label{experimental-protocol}
 
@@ -816,6 +816,58 @@ F1, +0.0004 Non0 Acc-2, -0.0004 Non0 F1, -0.0013 Acc-5, -0.0007 Acc-7,
 used only for reporting; no method or allocation variant was selected from
 them.
 
+\subsection{Final-schedule allocation controls at seed
+1111}\label{final-schedule-allocation-controls}
+
+The same 25-epoch P4 schedule also completed equal-budget Permuted and Inverse
+controls for seed 1111 (Table~\ref{tab:mosei-allocation-seed1111}). Learned
+had lower MAE than Permuted (0.5388 versus 0.5399) and Inverse (0.5405),
+but its correlation of 0.7742 was 0.0001 below Inverse. All differences
+were small. The planned majority-of-seeds criterion requiring favorable
+paired MAE and correlation directions against both controls cannot yet be
+evaluated. This comparison also cannot reverse the negative
+cross-sample target-fidelity audit. The remaining C2 control seeds are not
+reported as completed.
+
+\begin{table*}[t]
+\caption{Final-schedule CMU-MOSEI allocation controls on seed 1111 only.
+All methods use the same mean auxiliary budget, frozen training schedule,
+validation-loss checkpoint rule, and checkpoint-reloaded test protocol.
+These are single-seed descriptive results, separate from the three-seed
+Constant/Learned comparison.}
+\label{tab:mosei-allocation-seed1111}
+\centering
+\small
+\textbf{(a) Binary metrics}\par\smallskip
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccc}
+\toprule
+Allocation & Has0 Acc-2 & Has0 F1 & Non0 Acc-2 & Non0 F1 \\
+\midrule
+Constant & 0.7995 & 0.8064 & 0.8555 & 0.8559 \\
+Learned & 0.8008 & 0.8075 & 0.8550 & 0.8552 \\
+Permuted & 0.7974 & 0.8047 & 0.8550 & 0.8555 \\
+Inverse & 0.7950 & 0.8026 & 0.8544 & 0.8551 \\
+\bottomrule
+\end{tabular}%
+}
+
+\vspace{0.7em}
+\textbf{(b) Fine-grained and regression metrics}\par\smallskip
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+Allocation & Acc-5 & Acc-7 & MAE & Corr & Loss \\
+\midrule
+Constant & 0.5467 & 0.5304 & 0.5406 & 0.7735 & 0.500878 \\
+Learned & 0.5463 & 0.5302 & 0.5388 & 0.7742 & 0.498537 \\
+Permuted & 0.5445 & 0.5280 & 0.5399 & 0.7740 & 0.500112 \\
+Inverse & 0.5448 & 0.5284 & 0.5405 & 0.7743 & 0.501027 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{../figures/f2_mosei_main_results_en.pdf}
@@ -1074,20 +1126,20 @@ uniform performance gains. Three seeds remain descriptive and are
 insufficient for statistical-significance claims.
 
 The comparison with Constant does not by itself justify the direction of
-allocation. Reliability-proportional weighting and uniform weighting differ,
-but a difficulty-aware inverse allocation could also outperform Constant by
-concentrating gradients on hard samples. Until that matched control is
-completed under the final schedule, the defensible claim is that sample
-allocation can matter under a fixed budget---not that higher-reliability
-weighting is universally optimal.
+allocation. In the final-schedule seed-1111 comparison,
+Learned was better than Permuted and Inverse on MAE, but Inverse was better by
+0.0001 on correlation. These small contrasts neither establish a stable
+score--sample correspondence effect nor validate positive allocation. The
+defensible claim remains a descriptive task difference under a fixed budget,
+not that higher-reliability weighting is universally optimal.
 
 The cross-sample validation audit gives a sharper mechanism boundary. Visual
 reliability scores are consistently anti-aligned with KL target fidelity, and
 acoustic scores show only weak alignment. The favorable Learned-versus-Constant
 task means therefore cannot be attributed to the stated assumption that higher
-scores identify cleaner auxiliary targets. Final-schedule Permuted and Inverse
-controls are needed to distinguish score correspondence, allocation direction,
-and hard-example weighting.
+scores identify cleaner auxiliary targets. The seed-1111 Permuted and Inverse
+controls add a limited task comparison, while cross-seed replication and
+component attribution remain open.
 
 \subsection{Why reliability measurement does not imply robust
 fusion}\label{why-reliability-measurement-does-not-imply-robust-fusion}
@@ -1147,8 +1199,8 @@ Second, although the frozen three-seed MOSEI replication is complete, three
 seeds do not support statistical significance and primary endpoints do not
 uniformly improve over repaired MFON. Third, the post-hoc MOSEI validation
 audit contradicts cross-sample KL fidelity for vision and provides only weak
-acoustic support; final-schedule inverse/difficulty-aware and permutation
-controls remain incomplete. Fourth, interventions operate on pre-extracted
+acoustic support; inverse/difficulty-aware and permutation controls are
+complete only for seed 1111. Fourth, interventions operate on pre-extracted
 features, and the new non-Gaussian audits reveal substantial cross-corruption
 failure rather than replacing real-media noise, occlusion, and misalignment
 experiments. Fifth, evidence covers only MFON and does not establish model
