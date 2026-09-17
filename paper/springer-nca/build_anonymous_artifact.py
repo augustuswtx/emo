@@ -94,7 +94,10 @@ def build() -> None:
         "cross-sample KL fidelity and show only weak acoustic association. "
         "The final-schedule seed-1111 allocation-control test results are in "
         "`paper/figures/data/mosei_final_schedule_allocation_seed1111.csv`; "
-        "they are single-seed evidence and do not validate the allocation direction.\n",
+        "they are single-seed evidence and do not validate the allocation direction. "
+        "The read-only post-hoc modality-utility audit is "
+        "`MFON/audit_modality_utility.py`; it requires existing baseline, Constant, "
+        "and Learned checkpoints for the same seed.\n",
         encoding="utf-8",
     )
     copied.append(readme)

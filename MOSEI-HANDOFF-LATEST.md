@@ -37,9 +37,14 @@ Inverse 与 Permuted 的 seed 1111 训练和同配置重载测试也已完成；
 Inverse `0.7743`。这不足以通过多数种子同时改善两个主终点的判据，更不能改变 C1
 负结果。C2 的 seeds 1112--1113 尚未运行；不得重复 seed 1111。
 
-下一步先归档 Permuted 检查点哈希并完成不需重训的 C5 modality-utility 分层。C4
+下一步先归档 Permuted 检查点哈希并完成不需重训的 C5 modality-utility 分层。C5
+只读脚本、本地数值单测和服务器上传包已备好；尚未上传或在服务器运行。上传包为
+`/Users/augustus/projects/论文/mfon_c5_modality_utility_20260917.tar.gz`，SHA256 为
+`bd90cbb5af6e4b9cf080e617745fdedac6bb791301242e88bf063e5dcb2788a6`。
+先做 validation 五批次小样本验证，再做三个种子的完整 test 事后探索性分层。C4
 Per-sample-only 的 seed 1111 训练尚待运行，启动前必须检查后台进程、磁盘至少 12 GiB
-和 GPU；同一时间只运行一个任务。当前稿件的 C2 结果与限制需要随实验同步更新。
+和 GPU；同一时间只运行一个任务。当前稿件已纳入 seed 1111 C2 结果，但新版 PDF
+仍需重新编译和目检。
 
 ### 冻结 MOSEI 三种子干净结果
 

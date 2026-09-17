@@ -67,3 +67,12 @@ audit_contract:
       audio_pairwise_concordance: [0.529795, 0.014286]
       vision_weighted_proxy_within_batch_spearman: [-0.290099, 0.047795]
       audio_weighted_proxy_within_batch_spearman: [0.064885, 0.047447]
+  modality_utility:
+    status: tool_ready_server_validation_pending
+    design: post-hoc exploratory
+    split: test
+    baseline_defines_strata: true
+    controls: [repaired_mfon, p4_constant, p4_learned]
+    strata: [low, middle, high]
+    modalities: [vision, audio]
+    metrics: [MAE, Corr, Loss]

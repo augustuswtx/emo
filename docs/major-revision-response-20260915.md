@@ -49,9 +49,10 @@
 
 ### C5 外部有效性与文本主导
 
-状态：**分层方案已确定，结果 TBD。**
+状态：**分层方案与只读工具已完成，本地数值测试通过；服务器推理结果 TBD。**
 
 - 优先采用不改变骨干、成本较低的 modality-utility 分层：按冻结 MFON 的 leave-one-modality-out 任务损失增量划分视觉/音频低、中、高贡献子集，再比较 Learned−Constant。
+- `audit_modality_utility.py` 固定基线定义的分层并报告并列边界、样本量、三种 checkpoint 的 MAE/Corr/Loss 和检查点哈希；它不会训练或覆盖检查点。需先在服务器执行 validation 小批量验证，再运行完整 test。该分层属于事后探索性分析。
 - 第二骨干作为后续扩展；当前论文明确证据只覆盖 MFON，不能主张模型无关性。
 
 ### C6 “质量”命名过宽

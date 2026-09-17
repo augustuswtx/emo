@@ -60,6 +60,18 @@ validation 结果已经锁定为负面解释；不运行 test split，也不得�
 
 通过条件：高效用层的样本数、阈值和全部指标完整报告；不要求结果必须正向。若高效用层仍无优势，论文保留文本主导限制，并不再投入第二骨干训练。
 
+只读实现：`MFON/audit_modality_utility.py`；纯数值助手与测试分别位于 `MFON/modality_utility_stats.py` 和 `MFON/tests/test_modality_utility.py`。审计标记为 **post-hoc exploratory**。分层采用修复版 MFON 的逐样本误差增量排序，等效用值以数据集索引稳定打破并列，输出会标记边界是否存在并列。它不修改模型和 checkpoint，也不以 Learned/Constant 结果选择分层。服务器先运行：
+
+```bash
+cd /home/jovyan/projects/MFON
+python -m unittest discover -s tests -p 'test_modality_utility.py' -v
+python audit_modality_utility.py --seed 1111 --split valid --max-batches 5 \
+  --output c5_modality_utility_valid_smoke_1111.json \
+  > c5_modality_utility_valid_smoke_1111.log 2>&1
+```
+
+小批量输出必须显示 Baseline、Constant、Learned 各收集相同样本数，六个分层均非空，所有 MAE/Loss 有限。还应检查边界并列标记；若大量样本效用相同，则如实报告该模态分层的解释限制。检查后再对三个冻结种子依次运行完整 test；每种子只运行一次、使用唯一日志与 JSON 文件。test 分层涉及真实标签，是事后探索性亚组分析，不能用于重新选择模型或反向宣称预注册。
+
 ## 3. P1：final-schedule 作用性矩阵
 
 严格复用已冻结参数：25 epochs、validation-loss checkpoint selection、`warmup=10`、`budget-warmup-mode=allocation`、`task-corrupt-scale=0`、相同单模态 encoder 和 seed。
