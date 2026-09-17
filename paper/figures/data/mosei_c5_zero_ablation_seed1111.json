@@ -1,0 +1,249 @@
+{
+  "design": "post-hoc exploratory; baseline-defined modality-utility thirds",
+  "dataset": "MOSEI",
+  "split": "test",
+  "seed": 1111,
+  "n": 4659,
+  "max_batches": null,
+  "experiments": {
+    "baseline": "p5_mosei_repaired_baseline",
+    "constant": "p5_mosei_p4_constant_true_budget",
+    "learned": "p5_mosei_p4_learned_true_budget"
+  },
+  "checkpoint_sha256": {
+    "baseline": "72ded7cec555c4df55cb8cbb8b5d3370d5ec423439599690ac90acbeb563348a",
+    "constant": "c880045a8262a063224c1b695fb19f76c39af7fc4c6d098eeb7cf201a7d72b1b",
+    "learned": "88f778d2d42d195d478af916d9be2400d9e2edce208d221598358d8a48d3b868"
+  },
+  "full_sample_metrics": {
+    "baseline": {
+      "MAE": 0.53719752867564,
+      "Corr": 0.7721173561679263,
+      "Loss": 0.5001852051094478
+    },
+    "constant": {
+      "MAE": 0.5406381712691112,
+      "Corr": 0.7734697433850832,
+      "Loss": 0.5008784558093778
+    },
+    "learned": {
+      "MAE": 0.5388306356413979,
+      "Corr": 0.7742143624309024,
+      "Loss": 0.49853695665555414
+    }
+  },
+  "strata": [
+    {
+      "modality": "vision",
+      "stratum": "low",
+      "n": 1553,
+      "utility_min": -1.0316789150238037,
+      "utility_median": -0.19820034503936768,
+      "utility_max": -0.08228135108947754,
+      "lower_boundary_tied": false,
+      "upper_boundary_tied": false,
+      "metrics": {
+        "baseline": {
+          "MAE": 0.6290881207149238,
+          "Corr": 0.826919842615033,
+          "Loss": 0.5815016778645781
+        },
+        "constant": {
+          "MAE": 0.6353999234205837,
+          "Corr": 0.8212369032893571,
+          "Loss": 0.6022378392929626
+        },
+        "learned": {
+          "MAE": 0.6234380145451079,
+          "Corr": 0.8244798516531907,
+          "Loss": 0.5857923821737084
+        }
+      },
+      "learned_minus_constant": {
+        "MAE": -0.011961908875475769,
+        "Corr": 0.003242948363833653,
+        "Loss": -0.01644545711925416
+      }
+    },
+    {
+      "modality": "vision",
+      "stratum": "middle",
+      "n": 1553,
+      "utility_min": -0.08149218559265137,
+      "utility_median": 0.012159943580627441,
+      "utility_max": 0.11608928442001343,
+      "lower_boundary_tied": false,
+      "upper_boundary_tied": false,
+      "metrics": {
+        "baseline": {
+          "MAE": 0.4694392647982814,
+          "Corr": 0.7583508109727124,
+          "Loss": 0.41021940218490105
+        },
+        "constant": {
+          "MAE": 0.477701257911906,
+          "Corr": 0.7606857583888887,
+          "Loss": 0.4114970288204011
+        },
+        "learned": {
+          "MAE": 0.47417166870368044,
+          "Corr": 0.7619351779651806,
+          "Loss": 0.4077523605773798
+        }
+      },
+      "learned_minus_constant": {
+        "MAE": -0.0035295892082255476,
+        "Corr": 0.001249419576291877,
+        "Loss": -0.003744668243021332
+      }
+    },
+    {
+      "modality": "vision",
+      "stratum": "high",
+      "n": 1553,
+      "utility_min": 0.1162005066871643,
+      "utility_median": 0.2371063530445099,
+      "utility_max": 0.9975370168685913,
+      "lower_boundary_tied": false,
+      "upper_boundary_tied": false,
+      "metrics": {
+        "baseline": {
+          "MAE": 0.5130652005137145,
+          "Corr": 0.8399279040788743,
+          "Loss": 0.5088345352788642
+        },
+        "constant": {
+          "MAE": 0.5088133324748438,
+          "Corr": 0.8439576033401776,
+          "Loss": 0.48890049931477
+        },
+        "learned": {
+          "MAE": 0.5188822236754053,
+          "Corr": 0.8421056346738505,
+          "Loss": 0.5020661272155742
+        }
+      },
+      "learned_minus_constant": {
+        "MAE": 0.010068891200561425,
+        "Corr": -0.0018519686663270862,
+        "Loss": 0.013165627900804222
+      }
+    },
+    {
+      "modality": "audio",
+      "stratum": "low",
+      "n": 1553,
+      "utility_min": -0.09175801277160645,
+      "utility_median": -0.018460825085639954,
+      "utility_max": -0.007551968097686768,
+      "lower_boundary_tied": false,
+      "upper_boundary_tied": false,
+      "metrics": {
+        "baseline": {
+          "MAE": 0.5481096032985318,
+          "Corr": 0.8916537951528598,
+          "Loss": 0.4756677734023671
+        },
+        "constant": {
+          "MAE": 0.5499658770883229,
+          "Corr": 0.886812732677973,
+          "Loss": 0.4780392090423031
+        },
+        "learned": {
+          "MAE": 0.5457841006394881,
+          "Corr": 0.8887600850736324,
+          "Loss": 0.47414443665355444
+        }
+      },
+      "learned_minus_constant": {
+        "MAE": -0.004181776448834773,
+        "Corr": 0.001947352395659352,
+        "Loss": -0.0038947723887486907
+      }
+    },
+    {
+      "modality": "audio",
+      "stratum": "middle",
+      "n": 1553,
+      "utility_min": -0.007534027099609375,
+      "utility_median": -0.0005704164505004883,
+      "utility_max": 0.007024556398391724,
+      "lower_boundary_tied": false,
+      "upper_boundary_tied": false,
+      "metrics": {
+        "baseline": {
+          "MAE": 0.5134481606286568,
+          "Corr": 0.5692100208748028,
+          "Loss": 0.4447510162526069
+        },
+        "constant": {
+          "MAE": 0.5191233148156675,
+          "Corr": 0.5734249280041182,
+          "Loss": 0.44921118238750957
+        },
+        "learned": {
+          "MAE": 0.5165628737650683,
+          "Corr": 0.5727700720345688,
+          "Loss": 0.4457773554695034
+        }
+      },
+      "learned_minus_constant": {
+        "MAE": -0.0025604410505992714,
+        "Corr": -0.000654855969549395,
+        "Loss": -0.0034338269180061443
+      }
+    },
+    {
+      "modality": "audio",
+      "stratum": "high",
+      "n": 1553,
+      "utility_min": 0.007035195827484131,
+      "utility_median": 0.018937017768621445,
+      "utility_max": 0.08685135841369629,
+      "lower_boundary_tied": false,
+      "upper_boundary_tied": false,
+      "metrics": {
+        "baseline": {
+          "MAE": 0.5500348220997312,
+          "Corr": 0.7213777445000611,
+          "Loss": 0.5801368256733693
+        },
+        "constant": {
+          "MAE": 0.5528253219033431,
+          "Corr": 0.7284115309500392,
+          "Loss": 0.575384975998321
+        },
+        "learned": {
+          "MAE": 0.5541449325196373,
+          "Corr": 0.7284073802755113,
+          "Loss": 0.5756890778436046
+        }
+      },
+      "learned_minus_constant": {
+        "MAE": 0.0013196106162941534,
+        "Corr": -4.1506745278585555e-06,
+        "Loss": 0.00030410184528362194
+      }
+    }
+  ],
+  "utility_diagnostics": {
+    "vision": {
+      "unique_values": 4599,
+      "zero_fraction": 0.0128783000643915,
+      "standard_deviation": 0.2508401572704315,
+      "boundary_ties": [
+        false,
+        false
+      ]
+    },
+    "audio": {
+      "unique_values": 4653,
+      "zero_fraction": 0.0,
+      "standard_deviation": 0.025469820946455002,
+      "boundary_ties": [
+        false,
+        false
+      ]
+    }
+  }
+}

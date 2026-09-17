@@ -1169,3 +1169,38 @@ evaluate the previously fixed majority-of-seeds C2 criterion or repair the
 negative C1 target-fidelity result. Seeds 1112--1113 for these two controls
 remain unrun; neither a three-seed C2 conclusion nor a fidelity mechanism is
 claimed.
+
+## 2026-09-17 MOSEI Zero-Ablation Sensitivity Audit, Seed 1111
+
+The read-only C5 script completed a 160-sample validation smoke and then a
+full seed-1111 test audit (`n=4659`) with frozen repaired MFON, Constant, and
+Learned checkpoints. It defined equal-count low/middle/high strata using the
+repaired baseline's increase in absolute error after zeroing vision or audio.
+This is a post-hoc perturbation-sensitivity proxy, not causal or deployment
+modality utility. Each stratum has 1,553 samples; neither modality has a tie
+at a stratum boundary. Baseline, Constant, and Learned full-sample MAE/Corr
+match the existing formal test logs at their reported four-decimal precision.
+Constant and Learned Loss also match closely. Baseline Loss from this audit is
+`0.5001852051` versus `0.5002005940` in the earlier test log, a difference of
+about `0.00001539`; its cause has not been established, so Loss is not claimed
+to reproduce exactly.
+
+| Baseline-defined stratum | Median zero-ablation error increase | Learned−Constant MAE↓ | Learned−Constant Corr↑ | Learned−Constant Loss↓ |
+|---|---:|---:|---:|---:|
+| Vision low | -0.198200 | -0.011962 | +0.003243 | -0.016445 |
+| Vision middle | +0.012160 | -0.003530 | +0.001249 | -0.003745 |
+| Vision high | +0.237106 | +0.010069 | -0.001852 | +0.013166 |
+| Audio low | -0.018461 | -0.004182 | +0.001947 | -0.003895 |
+| Audio middle | -0.000570 | -0.002560 | -0.000655 | -0.003434 |
+| Audio high | +0.018937 | +0.001320 | -0.000004 | +0.000304 |
+
+The Learned model's overall MAE improves on Constant (`0.538831` versus
+`0.540638`) and Corr rises (`0.774214` versus `0.773470`), but neither
+high-sensitivity stratum shows an advantage on the paired primary endpoints.
+Vision's largest MAE gain instead occurs in the low stratum, where zeroing
+vision *improves* baseline predictions for the median sample. This single-seed
+analysis does not establish a cross-seed pattern, nor can it identify a causal
+allocation mechanism. Seeds 1112--1113 remain to be audited without
+retraining. The exact JSON summary, including checkpoint hashes and all
+stratum metrics, is in
+`paper/figures/data/mosei_c5_zero_ablation_seed1111.json`.

@@ -15,7 +15,9 @@ Updated: 2026-09-17
   hooks, and experiment planning have been revised. C1 is complete with a
   negative cross-sample target-fidelity result. C2 has matched seed-1111
   Inverse and Permuted tests, but its majority-of-seeds criterion is open;
-  C3--C5 remain open or conditional, and the scientific score should not be
+  C3--C4 remain open or conditional. C5 has a matched seed-1111 full-test
+  zero-ablation sensitivity audit, with no Learned advantage in either
+  high-sensitivity modality stratum; seeds 1112--1113 remain open. The scientific score should not be
   treated as improved yet.
 - Abstract: 216 words, within the working 150--250-word target.
 - Keywords: five, within the requested 4--6 range.

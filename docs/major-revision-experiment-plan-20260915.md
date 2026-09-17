@@ -10,7 +10,7 @@
 | C2 | 分配方向与对应关系未验证 | final-schedule Learned / Constant / Permuted / Inverse，同种子配对 | 1111 四组完成测试；1112--1113 Permuted/Inverse 待定 | 不宣称正向可靠性分配最优 |
 | C3 | 三种子效应小 | 逐种子点、配对差值；扩展 1114--1115 | 配对图已完成；新种子 TBD | 现阶段只作描述性均值 |
 | C4 | 相对 MFON 的组件归因不清 | Baseline / per-sample-only / +reliability Constant / Learned | Baseline、Constant、Learned done；per-sample-only TBD | 不把 P4--MFON 差异归因于分配 |
-| C5 | 文本主导、外部有效性弱 | modality-utility 分层；第二骨干为可选高成本项 | 推理审计 TBD | 不宣称鲁棒融合或模型无关性 |
+| C5 | 文本主导、外部有效性弱 | 零化敏感度代理分层；第二骨干为可选高成本项 | seed 1111 全量 test 完成，1112--1113 待运行 | 不宣称鲁棒融合或模型无关性 |
 
 ## 2. P0：无需重训的检查点审计
 
@@ -71,6 +71,8 @@ python audit_modality_utility.py --seed 1111 --split valid --max-batches 5 \
 ```
 
 小批量输出必须显示 Baseline、Constant、Learned 各收集相同样本数，六个分层均非空，所有 MAE/Loss 有限。还应检查边界并列标记；若大量样本效用相同，则如实报告该模态分层的解释限制。检查后再对三个冻结种子依次运行完整 test；每种子只运行一次、使用唯一日志与 JSON 文件。test 分层涉及真实标签，是事后探索性亚组分析，不能用于重新选择模型或反向宣称预注册。
+
+seed 1111 的完整 test 审计已完成（`n=4659`，每个模态三层各 `1553`，边界无并列）；全样本 Baseline/Constant/Learned 的 MAE/Corr 与正式测试记录的四位小数吻合。Baseline 的审计 Loss 比早先测试日志低约 `0.00001539`，原因尚未确定，不声称 Loss 完全复现。Learned−Constant 的视觉高敏感度层 MAE 为 `+0.010069`、Corr 为 `−0.001852`，音频高敏感度层为 `+0.001320`、约 `−0.000004`。即单种子高敏感度层未显示预期优势，不能从总体小幅收益推论“更有效地利用重要模态”。原始汇总见 `paper/figures/data/mosei_c5_zero_ablation_seed1111.json`。继续按同一只读协议运行 1112--1113，核查这一方向是否一致；在完整分层结果前不训练第二骨干，也不把该分层称作真实模态效用。
 
 ## 3. P1：final-schedule 作用性矩阵
 
