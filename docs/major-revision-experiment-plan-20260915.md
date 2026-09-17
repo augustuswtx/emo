@@ -56,9 +56,9 @@ validation 结果已经锁定为负面解释；不运行 test split，也不得�
 
 ### C5 modality-utility 分层
 
-对同一测试样本计算完整输入、缺失视觉、缺失音频预测。定义视觉效用为删除视觉后绝对误差的增加，音频同理；按每个基线 checkpoint 的效用分位数分为低/中/高三层。分别比较 Learned 与 Constant 的 MAE、Corr 和 Loss。分层阈值不得用 Learned 的结果选择，主报告使用 repaired MFON seed 对应 checkpoint 定义的层。
+对同一测试样本计算完整输入、视觉特征置零、音频特征置零时的预测。定义视觉/音频**零化敏感度代理**为相应特征置零后绝对误差的增加；按每个 seed 的 repaired MFON checkpoint 给出的代理值分为低/中/高三层。分别比较 Learned 与 Constant 的 MAE、Corr 和 Loss。该代理依赖置零扰动和测试标签，不能视为真实模态效用或因果贡献。分层阈值不得用 Learned 的结果选择。
 
-通过条件：高效用层的样本数、阈值和全部指标完整报告；不要求结果必须正向。若高效用层仍无优势，论文保留文本主导限制，并不再投入第二骨干训练。
+通过条件：高敏感度层的样本数、阈值和全部指标完整报告；不要求结果必须正向。若高敏感度层仍无优势，论文保留文本主导限制，并不再投入第二骨干训练。
 
 只读实现：`MFON/audit_modality_utility.py`；纯数值助手与测试分别位于 `MFON/modality_utility_stats.py` 和 `MFON/tests/test_modality_utility.py`。审计标记为 **post-hoc exploratory**。分层采用修复版 MFON 的逐样本误差增量排序，等效用值以数据集索引稳定打破并列，输出会标记边界是否存在并列。它不修改模型和 checkpoint，也不以 Learned/Constant 结果选择分层。服务器先运行：
 

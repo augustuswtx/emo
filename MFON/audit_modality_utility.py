@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Post-hoc, read-only MOSEI task-utility strata for frozen checkpoints.
+"""Post-hoc, read-only MOSEI zero-ablation sensitivity strata.
 
-The repaired MFON checkpoint defines each sample's visual/acoustic utility as
-the increase in absolute prediction error when that modality is removed. Low,
+The repaired MFON checkpoint defines each sample's visual/acoustic sensitivity
+as the increase in absolute prediction error when that modality's features are
+set to zero. This is a perturbation proxy, not causal or deployment utility. Low,
 middle, and high thirds are fixed from the baseline before inspecting the P4
 comparisons. Equal utility ties are ordered by dataset index for deterministic
 group sizes; a boundary-tie flag is reported for interpretation.
@@ -154,7 +155,8 @@ def main():
 
     labels = baseline['label']
     result = {
-        'design': 'post-hoc exploratory; baseline-defined modality-utility thirds',
+        'design': 'post-hoc exploratory; baseline-defined zero-ablation sensitivity thirds',
+        'utility_definition': 'absolute-error increase after zeroing one modality in the repaired baseline; perturbation proxy only',
         'dataset': 'MOSEI',
         'split': args.split,
         'seed': args.seed,
