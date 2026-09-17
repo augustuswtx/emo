@@ -2,6 +2,8 @@
 
 > 状态日期：2026-09-17。本文档只登记已完成证据和待运行协议，不把 TBD 写成结果。所有新训练由用户在服务器手动启动；本地修改不会自动发起 GPU 任务。
 
+若目标改为证明**新的正向训练分配机制**，请使用独立的[任务效用导向方法方案](literature-search-20260917-task-aligned-allocation/method-plan.md)和[已核验文献矩阵](literature-search-20260917-task-aligned-allocation/papers.md)。它们是新研究设计，不改变本方案已完成的 P4 结果，也不把既有 MOSEI test 称为新方法的盲测集。
+
 ## 1. 审稿问题与最低闭环
 
 | ID | 核心问题 | 最低证据 | 当前状态 | 论文处理 |
