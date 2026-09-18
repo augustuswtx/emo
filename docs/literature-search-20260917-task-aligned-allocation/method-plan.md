@@ -72,8 +72,14 @@ time, and peak GPU memory. It does not yet run a cloned optimizer step, and
 its two adjacent batches are not a locked speaker-disjoint meta split; these
 are explicit requirements before claiming validated utility. Start with
 `--batch-size 4 --max-pairs 1 --max-samples 4` and a unique JSON filename.
-The local environment lacks PyTorch, so only syntax has been checked; server
-inference and gradient smoke remain pending.
+The local environment lacks PyTorch. Server seed-1111 smoke and 32-pair
+screening completed without a logged runtime error; the 32-pair statistical
+summary remains pending. A separate local script,
+`MFON/audit_task_aligned_step.py`, now performs reversible single-projection
+SGD-style perturbations and compares first-order predicted change with actual
+meta-batch task-loss change. It has passed syntax checks only; its server
+runtime and numerical behavior are unverified. It does not replay Adam,
+because the original checkpoint does not include optimizer state.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
