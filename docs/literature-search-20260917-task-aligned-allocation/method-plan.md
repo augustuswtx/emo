@@ -82,9 +82,24 @@ SGD-style perturbations and compares first-order predicted change with actual
 meta-batch task-loss change. A one-pair server smoke completed: visual changes
 matched first-order directions 4/4, while the audio first-order signal was
 far smaller than finite-step changes and central differences agreed only 2/4.
-This is a numerical and scope warning, not a cross-batch method result. The
-script does not replay Adam because the original checkpoint does not include
-optimizer state.
+In an eight-pair expansion, visual first-order direction matched finite-step
+task-loss direction for 29 of 31 valid probes; old degradation score `q`
+did not reliably rank measured utility within each batch (four positive and
+four negative batch-wise correlations). Audio remained too small and unstable
+under this probe. These are same-checkpoint, sequential-training-batch
+screening results, not independent confirmation or an Adam replay. The first
+allocation prototype should vary **visual KL only** and keep audio KL and both
+InfoNCE terms uniform, pending a low-cost score that reproduces the visual
+parameter-gradient signal. The script does not replay Adam because the
+original checkpoint does not include optimizer state.
+
+A read-only feasibility tool, `MFON/audit_visual_representation_proxy.py`,
+now checks a cheaper alternative: the meta-task gradient at the visual fused
+embedding dotted with the analytic per-sample visual KL gradient at that
+embedding. It matches checkpoint hashes and sample IDs to the eight-pair
+finite-step JSON before comparing signs. The tool is syntax-checked locally
+but has no server result yet. Passing this test would support a prototype,
+not establish optimizer-level or held-out generalization.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
