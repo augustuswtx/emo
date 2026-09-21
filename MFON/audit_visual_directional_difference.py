@@ -15,6 +15,7 @@ import time
 from pathlib import Path
 
 import torch
+import torch.nn.functional as F
 
 from audit_task_aligned_gradient import sha256, tensors
 from audit_task_aligned_step import task_mse, training_loader
@@ -33,6 +34,8 @@ def arguments():
     parser.add_argument('--exclude-first', type=int, default=256)
     parser.add_argument('--step-ratio', type=float, default=0.0003,
                         help='central-difference displacement / parameter norm')
+    parser.add_argument('--cached-visual', action='store_true',
+                        help='cache text and recompute only the affected visual branch')
     parser.add_argument('--reference-step-json', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
@@ -49,8 +52,31 @@ def arguments():
     return args
 
 
+def cached_visual_embedding(model, last_hidden_text, vision):
+    """The visual path of TVA_fusion.forward after text projection."""
+    proj_base = model.proj_v(vision).permute(1, 0, 2)
+    if model.use_dpg:
+        prompt = model.dynamic_prompt_v(
+            last_hidden_text, proj_base, model.promptv_m
+        )
+    else:
+        prompt = model.promptv_m.unsqueeze(1)
+    projected = proj_base + prompt
+    return model.vision_with_text(
+        last_hidden_text, projected, projected
+    )[0]
+
+
+def cached_text_embedding(model, text):
+    last_hidden = model.text_encoder(text)
+    return F.dropout(
+        model.proj_t(last_hidden.permute(1, 0, 2)),
+        p=model.text_dropout, training=model.training
+    )
+
+
 def central_visual_kl_derivative(model, inputs, target, parameter, direction,
-                                 displacement):
+                                 displacement, cached_text=None):
     """Return d KL_i / d displacement for the whole batch and restore weight."""
     if not displacement > 0 or not bool(torch.isfinite(direction).all()):
         raise ValueError('invalid directional probe')
@@ -59,8 +85,12 @@ def central_visual_kl_derivative(model, inputs, target, parameter, direction,
 
     def visual_kl():
         with torch.no_grad():
-            _, embeddings = model(text, vision, audio, mode='test')
-            return per_sample_kl(embeddings[1], target).detach().clone()
+            if cached_text is None:
+                _, embeddings = model(text, vision, audio, mode='test')
+                visual = embeddings[1]
+            else:
+                visual = cached_visual_embedding(model, cached_text, vision)
+            return per_sample_kl(visual, target).detach().clone()
 
     try:
         with torch.no_grad():
@@ -138,6 +168,7 @@ def main():
         'batch_size': args.batch_size, 'max_pairs': args.max_pairs,
         'sample_order_seed': args.sample_order_seed,
         'exclude_first': args.exclude_first, 'step_ratio': args.step_ratio,
+        'cached_visual': args.cached_visual,
         'pairs': [],
     }
     iterator = iter(loader)
@@ -176,8 +207,24 @@ def main():
         aux_inputs = tensors(aux_batch, config.DEVICE)
         with torch.no_grad():
             target = model.vision_encoder_froze(aux_inputs[1]).detach()
+            cached_text = (cached_text_embedding(model, aux_inputs[0])
+                           if args.cached_visual else None)
+            if args.cached_visual and pair_number == 0:
+                _, full_embeddings = model(
+                    aux_inputs[0], aux_inputs[1], aux_inputs[2], mode='test'
+                )
+                cached_embedding = cached_visual_embedding(
+                    model, cached_text, aux_inputs[1]
+                )
+                max_diff = float((full_embeddings[1] - cached_embedding)
+                                 .abs().max().item())
+                if not torch.allclose(full_embeddings[1], cached_embedding,
+                                      atol=1e-5, rtol=1e-5):
+                    raise RuntimeError('cached visual path differs from full forward')
+                result['cached_full_max_abs_diff'] = max_diff
         directional, plus, minus = central_visual_kl_derivative(
-            model, aux_inputs, target, parameter, direction, displacement
+            model, aux_inputs, target, parameter, direction, displacement,
+            cached_text=cached_text
         )
 
         records = []

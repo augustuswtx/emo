@@ -2,7 +2,11 @@ import unittest
 
 import torch
 
-from audit_visual_directional_difference import central_visual_kl_derivative
+from audit_visual_directional_difference import (
+    cached_text_embedding,
+    cached_visual_embedding,
+    central_visual_kl_derivative,
+)
 from budgeted_auxiliary import per_sample_kl
 
 
@@ -19,6 +23,30 @@ class ToyVisualModel(torch.nn.Module):
             raise RuntimeError('injected forward failure')
         embedding = vision @ self.weight.T
         return None, (None, embedding, None)
+
+
+class ToyCrossAttention(torch.nn.Module):
+    def forward(self, query, key, value):
+        return query + key.mean(dim=0, keepdim=True)
+
+
+class ToyCachedFusion(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.text_encoder = torch.nn.Identity()
+        self.proj_t = torch.nn.Identity()
+        self.proj_v = torch.nn.Linear(2, 2, bias=False, dtype=torch.float64)
+        self.promptv_m = torch.nn.Parameter(torch.zeros(1, 2, dtype=torch.float64))
+        self.vision_with_text = ToyCrossAttention()
+        self.text_dropout = 0.0
+        self.use_dpg = False
+
+    def forward(self, text, vision, audio, mode='test'):
+        hidden = self.proj_t(self.text_encoder(text).permute(1, 0, 2))
+        projected = self.proj_v(vision).permute(1, 0, 2)
+        projected = projected + self.promptv_m.unsqueeze(1)
+        visual = self.vision_with_text(hidden, projected, projected)[0]
+        return None, (None, visual, None)
 
 
 class VisualDirectionalDifferenceTest(unittest.TestCase):
@@ -63,6 +91,35 @@ class VisualDirectionalDifferenceTest(unittest.TestCase):
                 torch.ones_like(self.model.weight) / 2.0, 1e-4
             )
         self.assertTrue(torch.equal(self.model.weight.detach(), original))
+
+    def test_cached_visual_path_matches_full_probe(self):
+        model = ToyCachedFusion().eval()
+        text = torch.tensor(
+            [[[0.1, 0.3]], [[-0.4, 0.2]]], dtype=torch.float64
+        )
+        vision = torch.tensor(
+            [[[0.8, -0.2]], [[0.5, 0.7]]], dtype=torch.float64
+        )
+        inputs = (text, vision, None, None)
+        target = torch.tensor(
+            [[0.2, 0.4], [-0.3, 0.1]], dtype=torch.float64
+        )
+        direction = torch.ones_like(model.proj_v.weight)
+        direction = direction / direction.norm()
+        cached_text = cached_text_embedding(model, text)
+        _, full_embeddings = model(text, vision, None, mode='test')
+        cached_visual = cached_visual_embedding(model, cached_text, vision)
+        self.assertTrue(torch.allclose(full_embeddings[1], cached_visual))
+        original = model.proj_v.weight.detach().clone()
+        full, _, _ = central_visual_kl_derivative(
+            model, inputs, target, model.proj_v.weight, direction, 1e-4
+        )
+        cached, _, _ = central_visual_kl_derivative(
+            model, inputs, target, model.proj_v.weight, direction, 1e-4,
+            cached_text=cached_text
+        )
+        self.assertTrue(torch.allclose(full, cached, atol=1e-7, rtol=1e-5))
+        self.assertTrue(torch.equal(model.proj_v.weight.detach(), original))
 
 
 if __name__ == '__main__':

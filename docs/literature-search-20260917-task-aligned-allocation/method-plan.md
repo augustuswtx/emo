@@ -146,9 +146,23 @@ unsolved; do not claim final allocation effectiveness from this audit.
 The server's same-24-pair audit has now completed: central directional
 differences agreed with the exact visual projection dot in 93/96 records and
 with measured one-block task-loss change in 91/95 valid records. This clears
-the preregistered numerical sign checks for this development audit. Runtime,
-memory, and near-zero mismatch diagnostics are still pending; the experiment
-does not establish an efficient full-training implementation or test benefit.
+the preregistered numerical sign checks for this development audit. Runtime
+was 168.4 seconds versus about 160 seconds for the earlier step audit, so the
+prespecified cost check failed; run-to-run load may affect the exact ratio.
+Peak PyTorch-allocated memory was 1037.2 MiB. Two nonzero exact-dot sign
+mismatches include one at +1.20e-4, so not every discrepancy can be dismissed
+as a tie. The current code recomputes BERT text, audio, and classifier paths
+for each `+h/-h` forward even though only `proj_v.weight` changes. A cached
+visual-only audit can test whether eliminating those redundant paths preserves
+the same KL and signs at lower cost, but it must be reported as a separate
+implementation, not a retroactive pass of the first cost check. Full-training
+efficiency and test benefit remain unestablished.
+The cached variant now skips repeated BERT, audio, and classifier calls in the
+two perturbed auxiliary forwards; it first checks the cached visual embedding
+against the complete model's output on the same batch. It keeps the identical
+24 batch pairs and fixed displacement, writing a separate JSON. This is an
+engineering optimization of the audit, not a new independent experiment or
+evidence of generalization.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
