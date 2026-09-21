@@ -73,13 +73,18 @@ its two adjacent batches are not a locked speaker-disjoint meta split; these
 are explicit requirements before claiming validated utility. Start with
 `--batch-size 4 --max-pairs 1 --max-samples 4` and a unique JSON filename.
 The local environment lacks PyTorch. Server seed-1111 smoke and 32-pair
-screening completed without a logged runtime error; the 32-pair statistical
-summary remains pending. A separate local script,
+screening completed without a logged runtime error. The 32-pair screening
+showed weak or negative old-score association with gradient alignment; see
+`docs/research-execution-roadmap-20260917.md` for exact exploratory numbers.
+A separate script,
 `MFON/audit_task_aligned_step.py`, now performs reversible single-projection
 SGD-style perturbations and compares first-order predicted change with actual
-meta-batch task-loss change. It has passed syntax checks only; its server
-runtime and numerical behavior are unverified. It does not replay Adam,
-because the original checkpoint does not include optimizer state.
+meta-batch task-loss change. A one-pair server smoke completed: visual changes
+matched first-order directions 4/4, while the audio first-order signal was
+far smaller than finite-step changes and central differences agreed only 2/4.
+This is a numerical and scope warning, not a cross-batch method result. The
+script does not replay Adam because the original checkpoint does not include
+optimizer state.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
