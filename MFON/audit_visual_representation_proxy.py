@@ -19,6 +19,7 @@ import torch
 import torch.nn.functional as F
 
 from audit_task_aligned_gradient import sha256, tensors
+from audit_task_aligned_step import training_loader
 from run_experiment import load_dataset_modules, require_files, resolve_repo_path
 
 
@@ -28,11 +29,17 @@ def arguments():
     parser.add_argument('--exp-name', default='p5_mosei_p4_learned_true_budget')
     parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--max-pairs', type=int, default=8)
+    parser.add_argument('--sample-order-seed', type=int, default=None,
+                        help='seeded random order of train samples; default is original order')
+    parser.add_argument('--exclude-first', type=int, default=0,
+                        help='exclude this many initial train indices before sampling')
     parser.add_argument('--reference-step-json', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     if args.batch_size < 1 or args.max_pairs < 1:
         parser.error('batch-size and max-pairs must be positive')
+    if args.exclude_first < 0:
+        parser.error('exclude-first must be nonnegative')
     args.reference_step_json = args.reference_step_json.resolve()
     args.output = args.output.resolve()
     if args.output.exists():
@@ -66,6 +73,10 @@ def check_reference(reference, args, checkpoint_hash):
         raise ValueError('reference checkpoint hash does not match')
     if reference.get('batch_size') != args.batch_size:
         raise ValueError('reference batch size does not match')
+    if reference.get('sample_order_seed') != args.sample_order_seed:
+        raise ValueError('reference sample order seed does not match')
+    if reference.get('exclude_first', 0) != args.exclude_first:
+        raise ValueError('reference exclusion count does not match')
     if len(reference.get('pairs', [])) < args.max_pairs:
         raise ValueError('reference has fewer pairs than requested')
 
@@ -98,8 +109,9 @@ def main():
         reference = json.load(handle)
     check_reference(reference, args, checkpoint_hash)
 
-    loader = data_loader.MOSEIDataloader(
-        'train', raw_data_path, batch_size=args.batch_size, shuffle=False
+    loader = training_loader(
+        data_loader, raw_data_path, args.batch_size, args.sample_order_seed,
+        args.exclude_first
     )
     model = tva_train.TVA_fusion(config).to(config.DEVICE)
     model.load_froze()
@@ -120,6 +132,8 @@ def main():
         'exp_name': args.exp_name, 'checkpoint_sha256': checkpoint_hash,
         'reference_step_json': args.reference_step_json.name,
         'batch_size': args.batch_size, 'max_pairs': args.max_pairs,
+        'sample_order_seed': args.sample_order_seed,
+        'exclude_first': args.exclude_first,
         'pairs': [],
     }
     iterator = iter(loader)

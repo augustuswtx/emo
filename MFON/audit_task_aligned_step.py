@@ -30,12 +30,18 @@ def arguments():
     parser.add_argument('--max-samples', type=int, default=4)
     parser.add_argument('--step-ratio', type=float, default=0.001,
                         help='L2 step norm as a fraction of parameter L2 norm')
+    parser.add_argument('--sample-order-seed', type=int, default=None,
+                        help='seeded random order of train samples; default is original order')
+    parser.add_argument('--exclude-first', type=int, default=0,
+                        help='exclude this many initial train indices before sampling')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     if min(args.batch_size, args.max_pairs, args.max_samples) < 1:
         parser.error('batch-size, max-pairs, and max-samples must be positive')
     if args.max_samples > args.batch_size or not 0 < args.step_ratio <= 0.01:
         parser.error('require max-samples <= batch-size and 0 < step-ratio <= 0.01')
+    if args.exclude_first < 0:
+        parser.error('exclude-first must be nonnegative')
     args.output = args.output.resolve()
     if args.output.exists():
         raise FileExistsError(args.output)
@@ -46,6 +52,26 @@ def task_mse(model, inputs):
     text, vision, audio, labels = inputs
     predictions, _ = model(text, vision, audio, mode='test')
     return torch.mean((predictions - labels).pow(2))
+
+
+def training_loader(data_loader, raw_data_path, batch_size, sample_order_seed,
+                    exclude_first=0):
+    if sample_order_seed is None and exclude_first == 0:
+        return data_loader.MOSEIDataloader(
+            'train', raw_data_path, batch_size=batch_size, shuffle=False
+        )
+    dataset = data_loader.MOSEIDataset('train', raw_data_path)
+    if not 0 <= exclude_first < len(dataset):
+        raise ValueError('exclude-first must leave at least one train sample')
+    indices = list(range(exclude_first, len(dataset)))
+    if sample_order_seed is not None:
+        generator = torch.Generator().manual_seed(sample_order_seed)
+        order = torch.randperm(len(indices), generator=generator).tolist()
+        indices = [indices[position] for position in order]
+    subset = torch.utils.data.Subset(dataset, indices)
+    return torch.utils.data.DataLoader(
+        subset, batch_size=batch_size, shuffle=False, pin_memory=True
+    )
 
 
 def probe_one(model, inputs, parameter, gradient, dot, baseline, step_ratio):
@@ -110,8 +136,9 @@ def main():
         os.path.join(encoder_dir, 'best_loss_audio_encoder.pt'),
         os.path.join(encoder_dir, 'best_loss_vision_encoder.pt'),
     ], 'task-aligned finite-step pilot')
-    loader = data_loader.MOSEIDataloader(
-        'train', raw_data_path, batch_size=args.batch_size, shuffle=False
+    loader = training_loader(
+        data_loader, raw_data_path, args.batch_size, args.sample_order_seed,
+        args.exclude_first
     )
     model = tva_train.TVA_fusion(config).to(config.DEVICE)
     model.load_froze()
@@ -133,7 +160,10 @@ def main():
         'parameter_blocks': ['proj_v.weight', 'proj_a.weight'],
         'batch_size': args.batch_size, 'max_pairs': args.max_pairs,
         'max_samples_per_pair': args.max_samples,
-        'step_ratio': args.step_ratio, 'pairs': [],
+        'step_ratio': args.step_ratio,
+        'sample_order_seed': args.sample_order_seed,
+        'exclude_first': args.exclude_first,
+        'pairs': [],
     }
     iterator = iter(loader)
     start = time.perf_counter()

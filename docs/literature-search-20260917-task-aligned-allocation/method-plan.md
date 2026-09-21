@@ -100,19 +100,33 @@ embedding. It matched checkpoint hashes and sample IDs to the eight-pair
 finite-step JSON before comparing signs. The server audit completed on 2026-09-21:
 the proxy agreed with measured visual step directions in 19/31 valid cases.
 The same records contain 20/31 helpful steps, so an always-helpful rule is
-already more accurate. Do **not** use this proxy for allocation or launch a
-training run around it. This is a failure of the cheap embedding-level
-candidate on one screened sample, not evidence that parameter-space task
-utility is impossible. Check per-pair errors and computational cost without
-tuning a threshold on these same records, then test a distinct candidate on
-fresh randomized training pairs before any formal run.
+already more accurate overall. However, 10 of the 12 predicted-helpful steps
+were actually helpful (precision 83.3%, recall 50%), with large pair-to-pair
+variation: `[4/4,2/4,0/3,2/4,2/4,4/4,1/4,4/4]`. The audit segment took 7.3
+seconds and peaked at about 1002 MiB of PyTorch-allocated GPU memory. Do
+**not** use this proxy for allocation or launch a training run around it yet.
+There is an exploratory conservative-selection signal, but no independent
+evidence of its stability. Do not tune a threshold on these 31 records. Test
+the existing zero threshold on fresh seeded-random training pairs outside the
+first 256 previously screened train indices. Compare predicted-helpful
+precision with the new sample's helpful-step prevalence and report coverage,
+recall, per-pair variation, and compute cost. This is a failure of overall
+accuracy for the cheap embedding-level candidate on one screened sample, not
+evidence that parameter-space task utility is impossible.
+The next read-only check is fixed before seeing new results: 24 meta/aux batch
+pairs of size four, sample-order seed 271828, excluding train indices 0–255.
+The existing reversible step and representation scripts now accept these
+arguments and record them in their JSON. The sampled pairs still come from
+the training split of a previously trained checkpoint, so this remains a
+method-development check rather than held-out confirmation.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
 and main task objective. If per-sample full-parameter gradients are too costly,
 seek another low-cost score or a small predictor trained on sparse
 parameter-gradient labels from inner training data. The tested fused-embedding
-dot product is excluded by its failed pilot. Freeze the scoring recipe before
+dot product remains a screened candidate only for conservative selection,
+pending fresh-sample confirmation. Freeze the scoring recipe before
 formal runs. Never feed the
 checkpoint-selection validation labels into gate learning. An off-the-shelf
 MoE or new backbone is deferred because it would confound the allocation test.

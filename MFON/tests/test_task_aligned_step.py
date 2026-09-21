@@ -2,7 +2,7 @@ import unittest
 
 import torch
 
-from audit_task_aligned_step import probe_one, task_mse
+from audit_task_aligned_step import probe_one, task_mse, training_loader
 
 
 class ToyModel(torch.nn.Module):
@@ -59,6 +59,20 @@ class TaskAlignedStepTest(unittest.TestCase):
                 torch.tensor([[0.5]]), 2.5, 2.5, 0.001
             )
         self.assertTrue(torch.equal(self.model.weight.detach(), original))
+
+    def test_seeded_loader_is_reproducible_and_excludes_prior_indices(self):
+        class FakeDataModule:
+            @staticmethod
+            def MOSEIDataset(mode, raw_data_path):
+                return list(range(40))
+
+        first = list(training_loader(FakeDataModule, '', 4, 17, 16))
+        second = list(training_loader(FakeDataModule, '', 4, 17, 16))
+        first_indices = [int(item) for batch in first for item in batch]
+        second_indices = [int(item) for batch in second for item in batch]
+        self.assertEqual(first_indices, second_indices)
+        self.assertEqual(set(first_indices), set(range(16, 40)))
+        self.assertNotEqual(first_indices, list(range(16, 40)))
 
 
 if __name__ == '__main__':
