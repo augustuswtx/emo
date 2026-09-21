@@ -124,10 +124,13 @@ probes, predicted and actual loss-change signs agreed in 91/95 cases, and
 predicted and central-difference signs in 93/95. Audio remained unreliable
 (43/96 predicted/actual sign matches). The representation proxy on these same
 24 pairs agreed in only 49/95 cases, versus 50/95 helpful steps for an
-always-helpful majority baseline. Its confusion matrix and precision among
-predicted-helpful samples still need to be read from the JSON. This supports
-measuring a local visual parameter-space signal, not its cheap approximation
-or final-model benefit. Do not start full training with this proxy.
+always-helpful majority baseline. Its confusion matrix was TP 27, FP 23,
+TN 22, FN 23: predicted-helpful precision 27/50 = 54%, barely above the
+50/95 = 52.6% helpful prevalence. The first eight-pair pilot's 10/12
+precision did not replicate. This supports measuring a local visual
+parameter-space signal, not its cheap embedding-level approximation or
+final-model benefit. Retire this embedding-level proxy; do not start full
+training with it.
 
 A second low-cost candidate is being implemented as a read-only audit:
 normalize the visual meta-task gradient on `proj_v.weight`, perturb that
