@@ -77,7 +77,7 @@
 
 **下一步预先固定的复核**：在原先顺序审计涉及的前 256 个训练索引之外，用固定随机顺序抽取 24 个不重叠的 meta/aux batch 对（每批 4 个，最多 96 个视觉小步标签）。同一 checkpoint 上分别运行可逆 `proj_v.weight` 小步审计与表示代理，逐 pair 核对样本 ID，并以 `probe_status=ok` 为分母报告混淆表、预测有利比例、精确率、召回率、总体准确率和批间稳定性。主要判断是预测有利的精确率是否高于该新样本中有利小步的发生率，不能只看总体准确率；还要核对批内排序与额外计算成本。若新样本也无稳定筛选价值，放弃该廉价代理，改研究稀疏参数梯度标签上的轻量预测器或收束为审计型贡献。表示层点积忽略融合表示到共享参数的雅可比变换，本次失败不能推论参数空间效用不可预测。
 
-本地已为两个原审计脚本增加 `--sample-order-seed 271828 --exclude-first 256` 选项；默认不传参数时保留旧数据顺序。随机排列使用独立 `torch.Generator`，排除前 256 个训练索引；每份 JSON 记录随机种子和排除数，代理脚本还逐组校验参照小步 JSON 的样本索引。包 `../../mfon_visual_proxy_random_holdout_20260921.tar.gz` 的 SHA-256 为 `be766e5b1b02f7ce8ebec5be9e09b9636a70cddd87b3bcb7cc552bba4204110d`，内含两个更新后的脚本和随机抽样单元测试；本地已通过 Python 3.8 语法与 `py_compile`，本地无 PyTorch。作者粘贴的服务器输出确认压缩包 SHA-256 校验成功、三个 `test_task_aligned_step.py` 单元测试通过，随机 24 组小步审计以 PID 1485 启动；尚未收到完成日志或结果 JSON，不能推断该审计成功或代理表现。tar 的 macOS provenance 扩展头被忽略提示未阻止测试。抽样设计与上述主要判断在查看随机结果之前确定。
+本地已为两个原审计脚本增加 `--sample-order-seed 271828 --exclude-first 256` 选项；默认不传参数时保留旧数据顺序。随机排列使用独立 `torch.Generator`，排除前 256 个训练索引；每份 JSON 记录随机种子和排除数，代理脚本还逐组校验参照小步 JSON 的样本索引。包 `../../mfon_visual_proxy_random_holdout_20260921.tar.gz` 的 SHA-256 为 `be766e5b1b02f7ce8ebec5be9e09b9636a70cddd87b3bcb7cc552bba4204110d`，内含两个更新后的脚本和随机抽样单元测试；本地已通过 Python 3.8 语法与 `py_compile`，本地无 PyTorch。作者粘贴的服务器输出确认压缩包 SHA-256 校验成功、三个 `test_task_aligned_step.py` 单元测试通过。随机 24 组小步审计从 PID 1485 启动，并已输出 `saved step audit to .../task_gradient_step_seed1111_random24_20260921.json`；日志记录审计段耗时 `159.9654562000651` 秒、PyTorch 已分配显存峰值 `1175.5478515625 MiB`。作者所贴为日志末段，仍需读取完整 JSON 汇总有效条数、视觉预测–实际方向一致率和样本索引；表示代理在该组上的结果尚不存在。tar 的 macOS provenance 扩展头被忽略提示未阻止测试。抽样设计与上述主要判断在查看随机结果之前确定。
 
 ## 3. 公平比较协议（正式训练前冻结）
 
