@@ -119,6 +119,12 @@ The existing reversible step and representation scripts now accept these
 arguments and record them in their JSON. The sampled pairs still come from
 the training split of a previously trained checkpoint, so this remains a
 method-development check rather than held-out confirmation.
+The reversible step half of this check has completed: among valid visual
+probes, predicted and actual loss-change signs agreed in 91/95 cases, and
+predicted and central-difference signs in 93/95. Audio remained unreliable
+(43/96 predicted/actual sign matches). The representation proxy on these same
+24 pairs has not yet been run. This supports measuring a local visual
+parameter-space signal, not its cheap approximation or final-model benefit.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
