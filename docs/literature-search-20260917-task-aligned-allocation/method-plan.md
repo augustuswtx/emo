@@ -94,19 +94,26 @@ parameter-gradient signal. The script does not replay Adam because the
 original checkpoint does not include optimizer state.
 
 A read-only feasibility tool, `MFON/audit_visual_representation_proxy.py`,
-now checks a cheaper alternative: the meta-task gradient at the visual fused
+checked a cheaper alternative: the meta-task gradient at the visual fused
 embedding dotted with the analytic per-sample visual KL gradient at that
-embedding. It matches checkpoint hashes and sample IDs to the eight-pair
-finite-step JSON before comparing signs. The tool is syntax-checked locally
-but has no server result yet. Passing this test would support a prototype,
-not establish optimizer-level or held-out generalization.
+embedding. It matched checkpoint hashes and sample IDs to the eight-pair
+finite-step JSON before comparing signs. The server audit completed on 2026-09-21:
+the proxy agreed with measured visual step directions in 19/31 valid cases.
+The same records contain 20/31 helpful steps, so an always-helpful rule is
+already more accurate. Do **not** use this proxy for allocation or launch a
+training run around it. This is a failure of the cheap embedding-level
+candidate on one screened sample, not evidence that parameter-space task
+utility is impossible. Check per-pair errors and computational cost without
+tuning a threshold on these same records, then test a distinct candidate on
+fresh randomized training pairs before any formal run.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
 and main task objective. If per-sample full-parameter gradients are too costly,
-use a low-cost representation-gradient proxy as a clearly labeled candidate,
-or a small predictor trained on sparse parameter-gradient labels from inner
-training data. Freeze the scoring recipe before formal runs. Never feed the
+seek another low-cost score or a small predictor trained on sparse
+parameter-gradient labels from inner training data. The tested fused-embedding
+dot product is excluded by its failed pilot. Freeze the scoring recipe before
+formal runs. Never feed the
 checkpoint-selection validation labels into gate learning. An off-the-shelf
 MoE or new backbone is deferred because it would confound the allocation test.
 
