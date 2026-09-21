@@ -123,8 +123,23 @@ The reversible step half of this check has completed: among valid visual
 probes, predicted and actual loss-change signs agreed in 91/95 cases, and
 predicted and central-difference signs in 93/95. Audio remained unreliable
 (43/96 predicted/actual sign matches). The representation proxy on these same
-24 pairs has not yet been run. This supports measuring a local visual
-parameter-space signal, not its cheap approximation or final-model benefit.
+24 pairs agreed in only 49/95 cases, versus 50/95 helpful steps for an
+always-helpful majority baseline. Its confusion matrix and precision among
+predicted-helpful samples still need to be read from the JSON. This supports
+measuring a local visual parameter-space signal, not its cheap approximation
+or final-model benefit. Do not start full training with this proxy.
+
+A second low-cost candidate is being implemented as a read-only audit:
+normalize the visual meta-task gradient on `proj_v.weight`, perturb that
+weight by `+h` and `-h`, and obtain every auxiliary sample's KL at both
+points in two batch forwards. The central difference estimates the exact
+parameter-space dot product without one backward pass per auxiliary sample.
+Use the already fixed 24-pair order and a prespecified relative displacement
+`h / ||proj_v.weight|| = 0.0003`. Compare its signs to the stored exact dots
+and actual reversible steps, check restoration and compute cost. This is a
+standard directional derivative approximation, not novelty by itself. Even
+if it works in eval mode, stochastic training mode and Adam state remain
+unsolved; do not claim final allocation effectiveness from this audit.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
