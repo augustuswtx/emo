@@ -143,6 +143,12 @@ and actual reversible steps, check restoration and compute cost. This is a
 standard directional derivative approximation, not novelty by itself. Even
 if it works in eval mode, stochastic training mode and Adam state remain
 unsolved; do not claim final allocation effectiveness from this audit.
+The server's same-24-pair audit has now completed: central directional
+differences agreed with the exact visual projection dot in 93/96 records and
+with measured one-block task-loss change in 91/95 valid records. This clears
+the preregistered numerical sign checks for this development audit. Runtime,
+memory, and near-zero mismatch diagnostics are still pending; the experiment
+does not establish an efficient full-training implementation or test benefit.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
