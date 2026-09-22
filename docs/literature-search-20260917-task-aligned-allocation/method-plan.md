@@ -197,9 +197,16 @@ The three pairs assigned positive visual utility to 15/32, 12/32, and 15/32
 samples. All gates were active; both the original and proposed weight vectors
 had mean 0.3. This checks mean weight only, not equal realized weighted KL
 loss or gradient magnitude. Peak allocated GPU memory was 5473.7 MiB.
-An instrumented three-pair rerun is prepared but not yet run; it separates
-meta-gradient, cached auxiliary features, two-sided visual difference, and
-remaining weight/accounting time. Any cadence reduction must be paired with
+The instrumented three-pair rerun passed three server unit tests and completed.
+After warmup, additional scoring took 1.639 and 1.841 seconds against 1.045
+and 1.148 seconds for normal forward/backward (1.57x and 1.60x). The meta
+gradient used 0.939 and 0.937 seconds, the cached auxiliary features 0.047
+seconds each, and the two-sided visual difference 0.652 and 0.857 seconds.
+Caching is not the bottleneck. Reusing one meta gradient for four or eight
+auxiliary batches could amortize the meta part, but only if its sample-positive
+decisions remain sufficiently stable. A fixed-checkpoint, 12-pair read-only
+screen of this assumption is prepared on newly sampled training examples; it
+does not test drift under updates. Any cadence reduction must be paired with
 the same cadence in uniform and permuted controls and must still check the
 realized KL contribution, not only the mean weight.
 
