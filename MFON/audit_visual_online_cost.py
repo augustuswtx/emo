@@ -114,16 +114,27 @@ def benchmark_pair(model, meta_inputs, aux_inputs, step_ratio):
     del meta_pred, meta_loss
     if not meta_norm > 1e-12:
         raise ValueError('zero visual meta gradient')
+    synchronize()
+    meta_gradient_seconds = time.perf_counter() - begin
+
+    cache_begin = time.perf_counter()
     direction = meta_gradient / meta_norm
     with torch.no_grad():
         cached_text = cached_text_embedding(model, text)
         teacher = model.vision_encoder_froze(vision).detach()
     parameter = model.proj_v.weight
     displacement = step_ratio * float(parameter.detach().norm().item())
+    synchronize()
+    cached_inputs_seconds = time.perf_counter() - cache_begin
+
+    derivative_begin = time.perf_counter()
     derivative, _, _ = central_visual_kl_derivative(
         model, aux_inputs, teacher, parameter, direction, displacement,
         cached_text=cached_text
     )
+    synchronize()
+    directional_derivative_seconds = time.perf_counter() - derivative_begin
+
     utility = derivative.detach() * meta_norm
     positive = utility > 0
     weights, active = positive_visual_weights(utility)
@@ -133,6 +144,13 @@ def benchmark_pair(model, meta_inputs, aux_inputs, step_ratio):
         'baseline_train_backward_seconds': baseline_seconds,
         'additional_score_seconds': score_seconds,
         'additional_score_to_baseline_ratio': score_seconds / baseline_seconds,
+        'meta_gradient_seconds': meta_gradient_seconds,
+        'cached_inputs_seconds': cached_inputs_seconds,
+        'directional_derivative_seconds': directional_derivative_seconds,
+        'weight_and_accounting_seconds': score_seconds - (
+            meta_gradient_seconds + cached_inputs_seconds +
+            directional_derivative_seconds
+        ),
         'baseline_loss': baseline_loss,
         'baseline_visual_weight_mean': baseline_weight,
         'meta_task_loss': meta_loss_value,
@@ -227,6 +245,11 @@ def main():
               (pair_number, record['baseline_train_backward_seconds'],
                record['additional_score_seconds'],
                record['additional_score_to_baseline_ratio']), flush=True)
+        print('  score parts: meta %.3fs, cache %.3fs, direction %.3fs, other %.3fs' %
+              (record['meta_gradient_seconds'],
+               record['cached_inputs_seconds'],
+               record['directional_derivative_seconds'],
+               record['weight_and_accounting_seconds']), flush=True)
     if args.pairs > 1:
         kept = result['records'][1:]
         result['median_after_first_normal_seconds'] = statistics.median(

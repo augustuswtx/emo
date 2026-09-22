@@ -193,6 +193,15 @@ optimizer steps. This fails the prespecified online-cost gate. Do not launch
 profile score components; pursue a lower-cadence scoring policy with matched
 uniform controls or a predictor trained on sparse task-utility labels only if
 the engineering evidence warrants it.
+The three pairs assigned positive visual utility to 15/32, 12/32, and 15/32
+samples. All gates were active; both the original and proposed weight vectors
+had mean 0.3. This checks mean weight only, not equal realized weighted KL
+loss or gradient magnitude. Peak allocated GPU memory was 5473.7 MiB.
+An instrumented three-pair rerun is prepared but not yet run; it separates
+meta-gradient, cached auxiliary features, two-sided visual difference, and
+remaining weight/accounting time. Any cadence reduction must be paired with
+the same cadence in uniform and permuted controls and must still check the
+realized KL contribution, not only the mean weight.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
