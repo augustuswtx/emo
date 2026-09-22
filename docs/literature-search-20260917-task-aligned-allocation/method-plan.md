@@ -205,10 +205,17 @@ seconds each, and the two-sided visual difference 0.652 and 0.857 seconds.
 Caching is not the bottleneck. Reusing one meta gradient for four or eight
 auxiliary batches could amortize the meta part, but only if its sample-positive
 decisions remain sufficiently stable. A fixed-checkpoint, 12-pair read-only
-screen of this assumption is prepared on newly sampled training examples; it
-does not test drift under updates. Any cadence reduction must be paired with
-the same cadence in uniform and permuted controls and must still check the
-realized KL contribution, not only the mean weight.
+screen of this assumption was run on newly sampled training examples. On
+non-refresh batches, four-batch reuse matched fresh positive decisions for
+164/288 samples (56.9%, false-positive rate 44.3%); eight-batch reuse matched
+174/320 (54.4%, false-positive rate 48.6%). Both failed the locked engineering
+gate of at least 90% agreement and at most 10% false positives. Stop the
+current online directional-difference/reuse training route. This result tests
+one frozen checkpoint and a fresh-score reference, not optimizer-step utility
+or all possible task-conditioned scoring methods. Prioritize the existing P4
+per-sample-only component attribution before proposing another method. Any
+future cadence reduction must be paired with the same cadence in uniform and
+permuted controls and must check realized KL contribution, not only mean weight.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,

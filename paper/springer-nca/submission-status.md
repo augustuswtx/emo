@@ -1,6 +1,6 @@
 # NCA submission-status ledger
 
-Updated: 2026-09-17
+Updated: 2026-09-22
 
 ## Current state
 
@@ -19,6 +19,11 @@ Updated: 2026-09-17
   zero-ablation sensitivity audit, with no Learned advantage in either
   high-sensitivity modality stratum; seeds 1112--1113 remain open. The scientific score should not be
   treated as improved yet.
+- A separate task-aligned allocation feasibility study has not produced a new
+  trained method: per-batch scoring exceeded its cost gate, and four/eight-batch
+  meta-gradient reuse failed its prespecified decision-agreement gate. These
+  exploratory screens do not repair the current manuscript's C1/C2 evidence.
+  C4 per-sample-only attribution is the next existing-method experiment.
 - Abstract: 216 words, within the working 150--250-word target.
 - Keywords: five, within the requested 4--6 range.
 - Compilation: the last isolated Tectonic 0.17 preflight, before the C1 result
