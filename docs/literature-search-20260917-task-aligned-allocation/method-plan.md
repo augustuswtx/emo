@@ -163,6 +163,11 @@ against the complete model's output on the same batch. It keeps the identical
 24 batch pairs and fixed displacement, writing a separate JSON. This is an
 engineering optimization of the audit, not a new independent experiment or
 evidence of generalization.
+After a server-only unit-test compatibility fix (`Linear(...).double()`), the
+cached run completed on the same 24 pairs. Its sign results were unchanged:
+93/96 versus exact dots and 91/95 versus measured steps. The first-pair
+embedding parity check did not fail. Runtime, memory, and numeric parity
+maximum remain to be extracted from the saved JSON.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
