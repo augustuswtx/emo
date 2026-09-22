@@ -99,6 +99,8 @@
 
 本地包 `../../mfon_visual_directional_cached_20260921.tar.gz` 的 SHA-256 为 `1d3473cc33855616de151a5a450a319a781beaab26522016316d6a69a06cfa27`，包含更新后的审计脚本和缓存路径测试。安装前需保留远端旧脚本备份与原 JSON；本地 Python 3.8 语法和 `py_compile` 已通过，本地无 PyTorch，服务器单元测试及实际模型运行待完成。
 
+**服务器兼容性修复（2026-09-22）**：作者粘贴的首次安装输出显示，缓存路径单元测试在构造 `torch.nn.Linear(2, 2, bias=False, dtype=torch.float64)` 时失败；该服务器 PyTorch 的 `Linear` 构造函数不接受 `dtype` 关键字。启动命令使用 `set -e`，所以审计未启动、预期日志不存在，旧 JSON 和 checkpoint 未被修改。已将测试改为 `torch.nn.Linear(2, 2, bias=False).double()`；仅改变测试构造方式，不改变审计脚本。修复后测试文件 SHA-256 为 `1bab41dcce9e0d084461774bad86cbcc2fd7cbf5a5839d7e0d661d0e16362639`，本地 Python 3.8 语法/编译已过，服务器复测待完成。远端原压缩包已解开，因此应只核对并替换这一行测试代码，再重跑测试和缓存审计，不要重新执行带“目标文件必须不存在”检查的安装命令。
+
 ## 3. 公平比较协议（正式训练前冻结）
 
 - **主终点**：MAE 越低越好、Corr 越高越好；其他分类指标完整报告，不挑选。

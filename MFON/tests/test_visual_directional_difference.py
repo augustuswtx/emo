@@ -35,7 +35,7 @@ class ToyCachedFusion(torch.nn.Module):
         super().__init__()
         self.text_encoder = torch.nn.Identity()
         self.proj_t = torch.nn.Identity()
-        self.proj_v = torch.nn.Linear(2, 2, bias=False, dtype=torch.float64)
+        self.proj_v = torch.nn.Linear(2, 2, bias=False).double()
         self.promptv_m = torch.nn.Parameter(torch.zeros(1, 2, dtype=torch.float64))
         self.vision_with_text = ToyCrossAttention()
         self.text_dropout = 0.0
