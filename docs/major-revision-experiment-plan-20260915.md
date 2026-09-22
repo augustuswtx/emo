@@ -133,6 +133,8 @@ python run_experiment.py \
 
 先做 seed 1111。若 Per-sample only 与 Baseline 几乎一致而 Reliability Constant 退化，则说明损失冲突主要来自 reliability supervision；再扩展 1112--1113。若 seed 1111 已显示实现异常，停止并排查，不批量运行。
 
+一键启动脚本 `MFON/run_c4_per_sample_only_1111.sh` 已准备，本地 shell 语法检查通过，尚未在服务器运行。它在启动前检查 `/home/jovyan` 至少 12 GiB 可用空间、现有日志/checkpoint 不冲突、训练数据及单模态 encoder 存在、无其他实验或 GPU 计算进程，然后按上述冻结参数启动后台训练。脚本 SHA-256 为 `1aad668a751ecfcd69601504c88f585d81d9d1f8ac7d8ee995e3967879eba7d0`。这些检查不代替训练后核对参数、日志、checkpoint 哈希和完整测试结果。
+
 ## 5. P2：扩展到五种子
 
 C1 已失败，因此 seeds 1114、1115 暂停，不以增加种子数量掩盖跨样本语义不成立。只有 C2 显示 Learned 对 Permuted/Inverse 的一致趋势且论文仍需要更稳定的任务效应估计时，才重新评估扩展；每个新 seed 仍需匹配的单模态 encoders 和所有进入统计主表的变体，不得只补 Learned。
