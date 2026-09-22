@@ -183,6 +183,16 @@ any 25-epoch run. The proposed sign-only visual KL weights have exact mean
 budget 0.3 on active batches and abstain when all signs are nonpositive; this
 requires a matched gate-only uniform control in later training. This cost
 screen cannot validate Adam, dropout, or final performance.
+The server run completed. After discarding its warmup pair, normal P4
+forward/backward took 0.863 and 0.759 seconds, while the additional cached
+score took 1.234 and 1.139 seconds (1.43x and 1.50x the normal computation).
+An every-batch implementation would therefore cost roughly 2.46 times the
+measured forward/backward compute in these two pairs, before data loading and
+optimizer steps. This fails the prespecified online-cost gate. Do not launch
+25 epochs with per-batch scoring. Inspect weight/budget diagnostics and
+profile score components; pursue a lower-cadence scoring policy with matched
+uniform controls or a predictor trained on sparse task-utility labels only if
+the engineering evidence warrants it.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
