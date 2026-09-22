@@ -166,8 +166,23 @@ evidence of generalization.
 After a server-only unit-test compatibility fix (`Linear(...).double()`), the
 cached run completed on the same 24 pairs. Its sign results were unchanged:
 93/96 versus exact dots and 91/95 versus measured steps. The first-pair
-embedding parity check did not fail. Runtime, memory, and numeric parity
-maximum remain to be extracted from the saved JSON.
+embedding parity maximum absolute difference was 0.0. Audit time fell from
+168.4 to 133.5 seconds (1.26x), below the earlier 160-second step audit;
+peak PyTorch-allocated GPU memory was 1040.4 MiB. The numeric and audit-cost
+screens therefore pass on this single development run. A real training batch
+still needs a separate cost and stochastic-mode check before implementation
+or full training, because meta backward and batch-size scaling are unknown.
+A read-only online-cost screen is prepared for three disjoint training pairs
+at the actual auxiliary batch size 32 and a meta batch size of four. It times
+the old P4 train-mode loss/backward against the *additional* eval-mode cached
+directional score, synchronizing CUDA and excluding data loading. It does no
+optimizer step and writes no checkpoint. The first pair is warmup; if the
+median scoring cost on the remaining two pairs already exceeds one normal
+forward/backward, reduce scoring cadence or abandon an every-batch gate before
+any 25-epoch run. The proposed sign-only visual KL weights have exact mean
+budget 0.3 on active batches and abstain when all signs are nonpositive; this
+requires a matched gate-only uniform control in later training. This cost
+screen cannot validate Adam, dropout, or final performance.
 
 **Stage B, minimum method prototype.** Integrate a detached utility gate for
 KL only; keep the original architecture, teacher encoders, 25-epoch schedule,
