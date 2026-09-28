@@ -17,13 +17,33 @@ Date: 2026-09-28
 
 | Dataset | Role | Metrics |
 |---|---|---|
-| CMU-MOSEI | Primary development and full study | MAE, Corr, Acc-2/F1 with and without zero, Acc-5, Acc-7 |
-| CMU-MOSI | Cross-dataset English validation | Same standard regression/classification metrics |
-| CH-SIMS/SIMS | Language/domain transfer | Dataset-standard regression/classification metrics |
+| CMU-MOSEI | Primary development and full study; large scale and diverse speakers/topics | MAE, Corr, Acc-2/F1 with and without zero, Acc-5, Acc-7 |
+| CMU-MOSI | Small English replication and rapid ablation; not the sole evidence source | Same standard regression/classification metrics |
+| Current CH-SIMS/SIMS | Chinese transfer and analysis using its independent unimodal annotations | Dataset-standard regression/classification metrics plus modality-specific analyses |
+| CH-SIMS v2.0 | New locked confirmation set after the method and thresholds are frozen | Same task metrics, allocation diagnostics, and raw/realistic degradation where media are available |
 
 Use official train/validation/test splits. Utility predictor labels come from disjoint
 subsets of the training split. Validation selects checkpoints and locked
 hyperparameters; the test split is used once per frozen configuration.
+
+### Dataset decision
+
+Do not replace the three datasets already integrated in the repository. Replacing
+them would discard comparable MFON results without solving the central evidence gap.
+Instead, assign them different roles and add CH-SIMS v2.0 as an independent
+confirmation dataset only after the method is frozen.
+
+The current MOSI/MOSEI/SIMS test results have already been inspected during method
+development, so they cannot be described as untouched confirmation. The new dataset
+or version must remain unopened for final method selection. MuSe-CaR is a useful
+future real-world application set, but its continuous emotion, engagement, topic, and
+trustworthiness tasks are not identical to the present sentence-level sentiment
+regression protocol. It should not replace the core datasets or be added merely to
+increase the dataset count.
+
+If raw media cannot be obtained, restrict claims to pre-extracted feature-level
+degradation. A claim about real audio/video corruption requires at least one raw-media
+experiment, preferably on CH-SIMS v2.0 or a legally obtained raw subset of MOSEI.
 
 ## 3. Backbones
 
@@ -210,4 +230,3 @@ figures, and release materials.
 | Dataset | Seed/checkpoint split | Feature group | AUROC | AUPRC | Spearman | ECE | Coverage |
 |---|---|---|---:|---:|---:|---:|---:|
 | MOSEI | early/mid -> late | all |  |  |  |  |  |
-
