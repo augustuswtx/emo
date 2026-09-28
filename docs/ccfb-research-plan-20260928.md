@@ -1,6 +1,6 @@
 # CCF-B research plan: from modality reliability to training utility
 
-Date: 2026-09-28  
+Date: 2026-09-28
 Status: method and evidence plan; no positive result is assumed
 
 ## 1. Decision
@@ -16,6 +16,14 @@ The primary CCF-B direction is **sparse-supervised task-utility allocation**. Th
 backup direction is a broader audit paper, **Reliability Is Not Training Utility**.
 The two directions share code, datasets, controls, and most measurements, so the
 backup is not wasted work.
+
+This direction is also the second method layer of the thesis field **trustworthy
+auxiliary learning for non-text modalities in text-dominant multimodal sentiment
+analysis**. The current small paper supplies the input-reliability audit,
+per-sample loss interface, fixed-budget allocator, and actionability controls. The
+CCF-B method adds task-utility prediction and conservative selection. Their exact
+chapter and evidence mapping is recorded in
+`docs/thesis-integration-roadmap-20260928.md`.
 
 ## 2. What the existing work contributes
 
@@ -225,4 +233,3 @@ Total expected research time is roughly 10--16 weeks if the primary direction pa
 early gates. A failed gate should shorten the method attempt and trigger the audit
 track. Publication cannot be guaranteed; this plan raises the work to a reviewable
 CCF-B scope and prevents months of unfocused training.
-
