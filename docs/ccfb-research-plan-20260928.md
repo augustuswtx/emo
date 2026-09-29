@@ -9,21 +9,22 @@ Application setting: **multimodal sentiment analysis of online opinion videos**.
 
 Working Chinese title:
 
-**面向在线视频观点情感分析的任务效用驱动选择性辅助学习**
+**从模态可靠性到训练效用：面向在线视频观点情感分析的选择性辅助学习**
 
 Working English title:
 
-**Task-Utility-Guided Selective Auxiliary Learning for Online Opinion Video Sentiment Analysis**
+**From Modality Reliability to Training Utility: Selective Auxiliary Learning for Multimodal Sentiment Analysis**
 
 The paper addresses one narrow question: when text is the dominant sentiment signal,
 can a model identify which sample-specific visual auxiliary updates will improve the
 main task, and reject harmful updates without changing inference? It does not claim
 to solve general multimodal reliability or all forms of video degradation.
 
-Its relationship to the thesis is direct: the completed reliability paper supplies
-the diagnosis, per-sample loss interface, fixed-budget allocator, and matched
-controls; this CCF-B paper contributes the second method layer, task-utility
-prediction and selective auxiliary learning. The thesis later unifies the two and
+This is an upgrade of the current reliability manuscript, not a second paper. The
+existing manuscript supplies the diagnosis, per-sample loss interface, fixed-budget
+allocator, and matched controls. The upgraded version adds task-utility prediction
+and selective auxiliary learning, and the whole study is submitted as the single
+CCF-B paper required for the thesis. The thesis expands its two technical layers and
 tests their application boundary across datasets, backbones, and degradation types.
 
 ## 1. Decision
@@ -35,17 +36,18 @@ the diagnosis and experimental foundation for a stronger question:
 > **When should a sample-modality teacher loss be applied, and can its true task
 > utility be predicted cheaply enough to guide training?**
 
-The primary CCF-B direction is **sparse-supervised task-utility allocation**. The
+The primary upgrade direction is **sparse-supervised task-utility allocation**. The
 backup direction is a broader audit paper, **Reliability Is Not Training Utility**.
 The two directions share code, datasets, controls, and most measurements, so the
 backup is not wasted work.
 
-This direction is also the second method layer of the thesis field **trustworthy
-auxiliary learning for non-text modalities in text-dominant multimodal sentiment
-analysis**. The current small paper supplies the input-reliability audit,
-per-sample loss interface, fixed-budget allocator, and actionability controls. The
-CCF-B method adds task-utility prediction and conservative selection. Their exact
-chapter and evidence mapping is recorded in
+This upgrade spans two method layers of the thesis field **trustworthy auxiliary
+learning for non-text modalities in text-dominant multimodal sentiment analysis**.
+The current version supplies the input-reliability audit, per-sample loss interface,
+fixed-budget allocator, and actionability controls. The revised version adds
+task-utility prediction and conservative selection. Do not submit the overlapping
+old and upgraded versions as separate papers. Their exact chapter and evidence
+mapping is recorded in
 `docs/thesis-integration-roadmap-20260928.md`.
 
 ## 2. What the existing work contributes
@@ -63,8 +65,8 @@ The existing work is useful in five concrete ways:
    predicts a reversible local task-loss direction, while also measuring why direct
    online use is too expensive.
 
-These become the motivation, evaluation protocol, and failure boundary of the new
-paper. They are not enough by themselves for a positive allocation claim.
+These remain in the upgraded manuscript as its motivation, evaluation protocol, and
+failure boundary. They are not enough by themselves for a positive allocation claim.
 
 ## 3. Proposed method
 
