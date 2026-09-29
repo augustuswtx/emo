@@ -3,6 +3,29 @@
 Date: 2026-09-28
 Status: method and evidence plan; no positive result is assumed
 
+## 0. Paper positioning
+
+Application setting: **multimodal sentiment analysis of online opinion videos**.
+
+Working Chinese title:
+
+**面向在线视频观点情感分析的任务效用驱动选择性辅助学习**
+
+Working English title:
+
+**Task-Utility-Guided Selective Auxiliary Learning for Online Opinion Video Sentiment Analysis**
+
+The paper addresses one narrow question: when text is the dominant sentiment signal,
+can a model identify which sample-specific visual auxiliary updates will improve the
+main task, and reject harmful updates without changing inference? It does not claim
+to solve general multimodal reliability or all forms of video degradation.
+
+Its relationship to the thesis is direct: the completed reliability paper supplies
+the diagnosis, per-sample loss interface, fixed-budget allocator, and matched
+controls; this CCF-B paper contributes the second method layer, task-utility
+prediction and selective auxiliary learning. The thesis later unifies the two and
+tests their application boundary across datasets, backbones, and degradation types.
+
 ## 1. Decision
 
 Do not discard the completed paper, and do not keep extending its old reliability
