@@ -195,6 +195,13 @@ Collect richer cheap features together with exact utility at early, middle, and 
 checkpoints for seed 1111, then repeat the locked analysis at seed 2222. No 25-epoch
 new-method run is allowed before Gate B passes.
 
+The seed-1111 final-checkpoint P6 sample-only predictor failed on 2026-10-03
+(`all` AUROC `0.510`, Spearman `0.013`). Before expanding to other checkpoints,
+run the single P7 repeated-meta stability audit on fresh samples. It tests whether
+the failure came from random meta-batch context and whether an averaged target is
+predictable. If P7 fails its locked stability and predictor checks, stop P1 and use
+the audit route; do not proceed to P2.
+
 ### P2: short training pilot
 
 Run Constant, gate-only uniform, and proposed allocation for five epochs at one seed.

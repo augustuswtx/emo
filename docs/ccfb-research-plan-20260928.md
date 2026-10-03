@@ -173,6 +173,23 @@ On temporally later or checkpoint-held-out records, require all of:
 These are internal engineering gates, not guaranteed paper results. Do not tune them
 on the final test set.
 
+**2026-10-03 P6 result.** The first seed-1111 final-checkpoint screen collected
+2,048 labels from 64 disjoint meta/auxiliary pairs. All auxiliary-sample-only
+predictors were near chance: `q_only` AUROC `0.516`, `q+KL+alignment` `0.515`, all
+features `0.510`, and all features without `q` `0.482`. The all-feature Spearman
+correlation was `0.013`, and its selected top quarter retained a `0.444` harmful
+rate. Gate B therefore failed and no five-epoch training pilot is authorized.
+
+The label is conditional on both an auxiliary sample and a randomly drawn meta
+batch, while P6 exposed only auxiliary-sample features to the predictor. One final
+repair screen is allowed before abandoning the positive method route: P7 evaluates
+the same fresh auxiliary samples against six independent meta batches, measures
+sign stability, uses mean cross-context utility as the target, and compares the
+locked linear baseline with one fixed 16-unit MLP. It passes only if at least half
+the samples have a 5/6 sign majority and the predeclared MLP thresholds above all
+pass on complete held-out auxiliary groups. Failure ends utility-predictor tuning;
+do not try additional architectures or thresholds on the same data.
+
 ### Gate C: short training pilot
 
 Use one seed and five epochs. Continue only if the method is stable, adds at most 15%

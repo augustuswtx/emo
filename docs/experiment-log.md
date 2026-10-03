@@ -1204,3 +1204,27 @@ allocation mechanism. Seeds 1112--1113 remain to be audited without
 retraining. The exact JSON summary, including checkpoint hashes and all
 stratum metrics, is in
 `paper/figures/data/mosei_c5_zero_ablation_seed1111.json`.
+
+## 2026-10-03 P6 Visual Utility Predictor Feasibility, Seed 1111
+
+The read-only P6 screen collected 2,048 visual utility labels from 64 disjoint
+meta/auxiliary training-batch pairs at the final
+`p5_mosei_p4_learned_true_budget` checkpoint. Complete pair groups, rather than
+individual samples, were held out for evaluation. Four deterministic logistic
+baselines gave near-chance results:
+
+| Features | AUROC | AUPRC | Spearman(score, utility) | Top-quarter harmful rate |
+|---|---:|---:|---:|---:|
+| Old reliability only | 0.516 | 0.535 | 0.056 | 0.463 |
+| Reliability + KL + alignment | 0.515 | 0.554 | 0.022 | 0.438 |
+| All forward features | 0.510 | 0.553 | 0.013 | 0.444 |
+| All without reliability | 0.482 | 0.530 | -0.033 | 0.463 |
+
+This result fails the locked feasibility thresholds and independently confirms that
+the old reliability score does not rank local update utility. A five-epoch or full
+training run is not authorized. The likely design mismatch is that each utility
+label depends on the randomly selected meta-task gradient, whereas the predictor
+received only auxiliary-sample features. One final read-only P7 repair screen will
+measure the same fresh auxiliary samples against six independent meta batches and
+test a cross-context mean target using a locked linear model and one fixed small
+MLP. If that screen also fails, positive utility-predictor development stops.
