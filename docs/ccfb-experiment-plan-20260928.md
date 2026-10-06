@@ -1,6 +1,11 @@
-# CCF-B experiment plan: sparse-supervised task-utility allocation
+# Historical CCF-B experiment plan: sparse-supervised task-utility allocation
 
 Date: 2026-09-28
+
+Status: superseded on 2026-10-06 after P6 and P7 failed every predictor gate.
+
+> Do not execute P2 or P3 in this document. The active experiment plan is
+> [the actionability-audit plan](ccfb-actionability-audit-plan-20261006.md).
 
 ## 1. Claim-evidence matrix
 
@@ -201,6 +206,9 @@ run the single P7 repeated-meta stability audit on fresh samples. It tests wheth
 the failure came from random meta-batch context and whether an averaged target is
 predictable. If P7 fails its locked stability and predictor checks, stop P1 and use
 the audit route; do not proceed to P2.
+
+P7 subsequently failed every repair check on 2026-10-06. P1 is closed, and P2/P3
+below are retained only as the preregistered historical stop path.
 
 ### P2: short training pilot
 

@@ -1228,3 +1228,28 @@ received only auxiliary-sample features. One final read-only P7 repair screen wi
 measure the same fresh auxiliary samples against six independent meta batches and
 test a cross-context mean target using a locked linear model and one fixed small
 MLP. If that screen also fails, positive utility-predictor development stops.
+
+## 2026-10-06 P7 Repeated-Meta Visual Utility Stability, Seed 1111
+
+P7 evaluated 768 fresh auxiliary samples at the same final checkpoint. Each sample
+was paired with six independent meta batches; all P6 sample indices were excluded.
+The first random context agreed with the six-context mean sign for `0.641` of samples,
+mean pairwise context-sign agreement was `0.496`, only `0.215` of samples reached a
+5/6 sign majority, and the context reliability ratio was `0.171`. Thus the audited
+local utility behaves mainly as a context-dependent relation rather than a stable
+sample attribute.
+
+| Predictor on mean cross-context utility | AUROC | AUPRC | Spearman | Top-quarter harmful rate |
+|---|---:|---:|---:|---:|
+| Linear reliability only | 0.443 | 0.446 | -0.065 | 0.578 |
+| Linear reliability + KL + alignment | 0.454 | 0.448 | -0.049 | 0.578 |
+| Linear all features | 0.475 | 0.488 | -0.019 | 0.547 |
+| Linear all without reliability | 0.534 | 0.528 | 0.064 | 0.438 |
+| Fixed MLP all features | 0.494 | 0.493 | -0.005 | 0.562 |
+| Fixed MLP all without reliability | 0.536 | 0.523 | 0.076 | 0.469 |
+
+Every predeclared repair check failed. In accordance with the stop rule, no five-epoch
+or full allocation training is authorized, and no further architecture or threshold
+search will be performed on this target. The single-paper route now changes from a
+positive utility-predictor method to a broader actionability audit across score
+families, datasets, and backbones.

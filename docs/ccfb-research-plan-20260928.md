@@ -1,31 +1,32 @@
 # CCF-B research plan: from modality reliability to training utility
 
 Date: 2026-09-28
-Status: method and evidence plan; no positive result is assumed
+Status: actionability-audit route active after the P6/P7 utility-predictor gates failed
 
 ## 0. Paper positioning
 
 Application setting: **multimodal sentiment analysis of online opinion videos**.
 
-Working Chinese title:
+Current working Chinese title:
 
-**从模态可靠性到训练效用：面向在线视频观点情感分析的选择性辅助学习**
+**可靠性不等于训练效用：多模态情感辅助学习分数的作用性审计**
 
 Working English title:
 
-**From Modality Reliability to Training Utility: Selective Auxiliary Learning for Multimodal Sentiment Analysis**
+**Reliability Is Not Training Utility: An Actionability Audit of Sample-wise Auxiliary Weighting in Multimodal Sentiment Analysis**
 
 The paper addresses one narrow question: when text is the dominant sentiment signal,
-can a model identify which sample-specific visual auxiliary updates will improve the
-main task, and reject harmful updates without changing inference? It does not claim
-to solve general multimodal reliability or all forms of video degradation.
+do sample-level reliability, quality, uncertainty, and consistency scores actually
+identify useful auxiliary training actions? It does not claim that every score is
+invalid or that the observed boundaries apply to all video tasks.
 
 This is an upgrade of the current reliability manuscript, not a second paper. The
-existing manuscript supplies the diagnosis, per-sample loss interface, fixed-budget
-allocator, and matched controls. The upgraded version adds task-utility prediction
-and selective auxiliary learning, and the whole study is submitted as the single
-CCF-B paper required for the thesis. The thesis expands its two technical layers and
-tests their application boundary across datasets, backbones, and degradation types.
+existing manuscript supplies the first audited score, per-sample loss interface,
+fixed-budget allocator, and matched controls. P6 and P7 show that its local utility
+cannot be treated as a stable sample attribute or cheaply predicted from the tested
+features. The upgraded manuscript therefore expands the audit across score families,
+datasets, and backbones and is submitted as the single CCF-B paper required for the
+thesis.
 
 ## 1. Decision
 
@@ -33,21 +34,22 @@ Do not discard the completed paper, and do not keep extending its old reliabilit
 score as if more seeds could repair the interpretation. Use the completed work as
 the diagnosis and experimental foundation for a stronger question:
 
-> **When should a sample-modality teacher loss be applied, and can its true task
-> utility be predicted cheaply enough to guide training?**
+> **When is a sample-level multimodal score sufficiently stable and actionable to
+> justify changing auxiliary training weights?**
 
-The primary upgrade direction is **sparse-supervised task-utility allocation**. The
-backup direction is a broader audit paper, **Reliability Is Not Training Utility**.
-The two directions share code, datasets, controls, and most measurements, so the
-backup is not wasted work.
+The active direction is the broader audit paper, **Reliability Is Not Training
+Utility**. The sparse-supervised task-utility predictor was the predeclared positive
+method route; it stopped after both P6 and its single P7 repair failed. These failures
+are retained as evidence and are not hidden or followed by unrestricted model search.
 
-This upgrade spans two method layers of the thesis field **trustworthy auxiliary
-learning for non-text modalities in text-dominant multimodal sentiment analysis**.
-The current version supplies the input-reliability audit, per-sample loss interface,
-fixed-budget allocator, and actionability controls. The revised version adds
-task-utility prediction and conservative selection. Do not submit the overlapping
-old and upgraded versions as separate papers. Their exact chapter and evidence
-mapping is recorded in
+This upgrade spans two analysis layers of the thesis field **trustworthy auxiliary
+learning for non-text modalities in text-dominant multimodal sentiment analysis**:
+what a score measures and whether acting on it improves training. The current version
+supplies the input-reliability case study, per-sample loss interface, fixed-budget
+allocator, and actionability controls. The revised version adds a common audit
+protocol, representative score families, and cross-setting evidence. Do not submit
+the overlapping old and upgraded versions as separate papers. Their exact chapter
+and evidence mapping is recorded in
 `docs/thesis-integration-roadmap-20260928.md`.
 
 ## 2. What the existing work contributes
@@ -68,7 +70,7 @@ The existing work is useful in five concrete ways:
 These remain in the upgraded manuscript as its motivation, evaluation protocol, and
 failure boundary. They are not enough by themselves for a positive allocation claim.
 
-## 3. Proposed method
+## 3. Stopped utility-predictor candidate and retained diagnostic
 
 ### 3.1 Exact but sparse utility label
 
@@ -86,9 +88,9 @@ During training, calculate exact labels on only one refresh batch every `K` batc
 Use disjoint training samples for meta and auxiliary batches. Never use validation or
 test labels to train the score.
 
-### 3.2 Cheap utility predictor
+### 3.2 Cheap utility predictor tested in P6/P7
 
-Train a small stopped-gradient predictor from forward-pass features already available
+P6/P7 tested stopped-gradient predictors from forward-pass features already available
 in MFON:
 
 - old degradation reliability `q`;
@@ -100,55 +102,56 @@ in MFON:
 - modality sequence length and energy;
 - epoch progress and recent batch statistics.
 
-The predictor outputs both the probability that `u > 0` and a normalized magnitude.
-It is trained on a rolling buffer of sparse exact labels. Split the buffer by time or
-checkpoint so that reported predictor quality is measured on later, unseen training
-states rather than on records used to fit it.
+The candidate was intended to output the probability that `u > 0`. Complete
+meta/auxiliary or auxiliary-group units were held out. Both the single-context and
+six-context-mean targets failed the predeclared gates, so this component is not part
+of the proposed paper method.
 
-### 3.3 Conservative abstention and fixed budget
+### 3.3 Cancelled downstream allocation policy
 
-Allocate visual KL only when a calibrated lower confidence bound for positive utility
-passes a locked threshold. When no sample passes, abstain from visual KL for that
-batch. On active batches, normalize weights to preserve the original mean visual KL
-coefficient. Keep audio KL and both InfoNCE terms uniform in the first version because
-the present audio utility signal failed its numerical checks.
+The planned policy would have allocated visual KL only when a calibrated lower
+confidence bound passed a locked threshold, with fixed mean coefficients on active
+batches. Because P6/P7 failed, this policy was never authorized for short or full
+training and is not claimed as a contribution.
 
-Required controls:
+The following controls remain part of the general actionability audit:
 
 - `Constant`: uniform visual KL on every batch;
 - `Old-q`: current degradation-score allocation;
 - `Gate-only uniform`: identical active-batch and active-sample mask, uniform weight;
 - `Permuted`: predicted scores assigned to the wrong samples;
 - `Inverse`: rank order reversed;
-- `Exact sparse oracle`: exact utility on refresh batches only, as an upper-bound
-  diagnostic rather than the final method.
+- `Exact local diagnostic`: exact utility on audited batches only, never presented as
+  a stable sample score.
 
 These controls distinguish correct assignment from lower total regularization,
 abstention, or extra compute.
 
-### 3.4 Why this is not a module stack
+### 3.4 Scientific value of the stopped candidate
 
-The mechanism follows one causal chain:
+The failed mechanism followed one testable chain:
 
-`auxiliary update -> measured task effect -> learned cheap predictor -> conservative
-fixed-budget action`.
+`auxiliary update -> measured local task effect -> repeated-context stability ->
+cheap prediction -> fixed-budget action`.
 
-The reliability head, gradient audit, predictor, and allocation are not independent
-features added for score gains. Each answers one part of the same question. The paper
-must remove any component whose role cannot be verified by this chain.
+The chain broke at repeated-context stability and prediction, before allocation
+training. This is evidence for the audit hierarchy and prevents a negative result
+from being repackaged as an unverified method.
 
-## 4. Novelty relative to closest work
+## 4. Required distinction from closest work
 
-| Closest work | Existing idea | Required distinction here |
+| Closest work family | Existing emphasis | Required distinction here |
 |---|---|---|
-| Meta-Weight-Net | Learns sample weights from meta gradients | Predict utility of a modality-specific teacher update, under fixed budget and abstention |
-| SLMV / CMoB | Sample-level modality valuation | Value the *training action*, not general modality contribution |
-| MMPareto / DTO-KD | Resolve task/auxiliary gradient conflict | Select sample-modality auxiliary targets and amortize sparse labels |
-| G2D | Gradient-guided multimodal distillation | Test whether each teacher update helps on separate data; allow rejection |
-| QMF | Quality-aware fusion | Act during training and evaluate allocation actionability, not only inference fusion |
+| Meta-reweighting | Learns weights from validation gradients | Audit stability across independent meta contexts before calling a value sample-specific |
+| Sample-level modality valuation | Estimates modality contribution | Separate inference contribution from auxiliary-update actionability |
+| Gradient-conflict methods | Resolves task-level or batch-level conflicts | Test local validity, context stability, and final fixed-budget action separately |
+| Gradient-guided distillation | Uses task gradients to guide teachers or losses | Include Permuted/Inverse and repeated-context controls |
+| Quality-aware fusion | Uses quality at inference or in fusion | Audit whether the same score justifies training-time reweighting |
 
-The method is no longer novel if the paper drops sparse supervision, modality-specific
-teacher utility, conservative abstention, or matched actionability controls.
+The audit is no longer distinctive if it only reports correlations on one model. Its
+novelty depends on the four-level protocol, matched actionability controls, multiple
+score families, reusable result schemas, and cross-setting evidence. Exact novelty
+relative to every recent audit paper still requires final literature verification.
 
 ## 5. Go/no-go gates
 
@@ -190,19 +193,24 @@ the samples have a 5/6 sign majority and the predeclared MLP thresholds above al
 pass on complete held-out auxiliary groups. Failure ends utility-predictor tuning;
 do not try additional architectures or thresholds on the same data.
 
-### Gate C: short training pilot
+**2026-10-06 P7 result and route decision.** P7 collected 768 fresh auxiliary
+samples, each evaluated against six independent meta batches. A first random context
+matched the cross-context mean sign only `0.641` of the time; mean pairwise sign
+agreement was `0.496`; only `0.215` of samples had a 5/6 sign majority; and the
+context reliability ratio was `0.171`. Linear and fixed-MLP predictors remained near
+chance. The primary `mlp_all` model obtained AUROC `0.494`, Spearman `-0.005`, and a
+top-quarter harmful rate of `0.562`; every repair check failed. The utility-predictor
+route is therefore closed. No short or full allocation training is authorized from
+this target.
 
-Use one seed and five epochs. Continue only if the method is stable, adds at most 15%
-training time at the chosen sparse-label cadence, and beats both Constant and
-Gate-only uniform on the validation primary metric without a contradictory allocation
-diagnostic.
+### Gate C: short training pilot — not entered
 
-### Gate D: central full experiment
+The utility-predictor candidate did not enter this gate.
 
-Across three seeds, the method must improve the primary regression results over both
-Constant and Old-q, and the correct assignment must beat Permuted/Inverse. If only
-Gate-only uniform improves, rewrite the method as conservative auxiliary gating. If
-all matched controls are tied, stop the method track.
+### Gate D: central full experiment — cancelled for the predictor
+
+No predictor-based central training is permitted. The active audit track has a new
+central matrix specified in `docs/ccfb-actionability-audit-plan-20261006.md`.
 
 ## 6. CCF-B evidence package
 
@@ -210,24 +218,25 @@ A defensible package should contain:
 
 1. **Mechanistic finding:** degradation reliability, target fidelity, and update
    utility are empirically distinct.
-2. **Method:** sparse utility labeling, calibrated amortization, and abstaining
-   fixed-budget allocation.
-3. **Actionability evidence:** correct assignment beats gate-only, permuted, and
-   inverse controls.
+2. **Evaluation contribution:** a four-level protocol separating degradation
+   sensitivity, target fidelity, update stability, and allocation actionability.
+3. **Actionability evidence:** correct assignment is compared with gate-only,
+   Constant, Permuted, and Inverse controls, including negative results.
 4. **Breadth:** MOSEI, MOSI, and SIMS; MFON plus one structurally different fusion
    backbone.
 5. **Robustness:** clean, Gaussian corruption, timestep dropout, contiguous masking,
    temporal shift, and modality missingness.
 6. **Statistics:** at least three seeds for the full matrix, confidence intervals,
    paired sample bootstrap where appropriate, and all failed or mixed metrics shown.
-7. **Efficiency:** parameters, GPU memory, training-time overhead, refresh cadence,
-   and zero inference overhead if the predictor is training-only.
+7. **Efficiency:** audit cost, training overhead of evaluated policies, GPU memory,
+   and inference overhead where applicable.
 8. **Reproducibility:** frozen configurations, checkpoint hashes, raw per-seed tables,
    code, and commands.
 
-## 7. Backup audit track
+## 7. Active actionability-audit track
 
-If Gate A or B fails, expand the existing audit into a method-comparison benchmark:
+The P6/P7 gates failed, so expand the existing audit into a method-comparison
+benchmark:
 
 - three datasets;
 - four to six representative models or score families;
@@ -236,9 +245,12 @@ If Gate A or B fails, expand the existing audit into a method-comparison benchma
 - fixed-budget Constant, Permuted, and Inverse controls;
 - public audit scripts and result schema.
 
-The contribution becomes a general empirical result: scores that detect corruption or
-estimate uncertainty often fail to predict whether an auxiliary training action helps.
-A single MFON model on MOSEI is insufficient for this track; breadth is the novelty.
+The intended contribution is a general empirical result and evaluation protocol:
+scores that detect corruption or estimate uncertainty must not be assumed to predict
+whether an auxiliary training action helps. A single MFON model on MOSEI is
+insufficient for this track; breadth, matched controls, and reusable tooling are the
+novelty. The full active plan is in
+`docs/ccfb-actionability-audit-plan-20261006.md`.
 
 ## 8. Venue strategy
 
@@ -264,14 +276,13 @@ than a title or venue change.
 
 | Phase | Work | Expected time |
 |---|---|---:|
-| 1 | Utility collector and predictor data schema | 4--7 days |
-| 2 | Multi-checkpoint, two-seed feasibility and predictor gate | 7--10 days |
-| 3 | Five-epoch pilot and matched controls | 4--7 days |
-| 4 | Three-dataset, three-seed central matrix | 3--5 weeks |
-| 5 | Second backbone, robustness, ablations, efficiency | 3--5 weeks |
+| 1 | Freeze P6/P7 and consolidate the four-level result schema | 3--5 days |
+| 2 | Implement and lock five score families on MFON/MOSEI | 1--2 weeks |
+| 3 | Port read-only audits to MOSI/SIMS and assess a second backbone | 2--3 weeks |
+| 4 | Run the frozen three-seed actionability matrix | 3--5 weeks |
+| 5 | Second-backbone confirmation, robustness, ablations, efficiency | 3--5 weeks |
 | 6 | Paper figures, writing, internal review, release package | 2--4 weeks |
 
-Total expected research time is roughly 10--16 weeks if the primary direction passes
-early gates. A failed gate should shorten the method attempt and trigger the audit
-track. Publication cannot be guaranteed; this plan raises the work to a reviewable
-CCF-B scope and prevents months of unfocused training.
+Total expected research time is roughly 10--16 weeks if the second-backbone port is
+feasible. Publication cannot be guaranteed; the audit requires breadth and reusable
+evidence to be reviewable at CCF-B level.
