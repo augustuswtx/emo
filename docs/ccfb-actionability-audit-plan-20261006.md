@@ -58,19 +58,29 @@ Every score is evaluated at four distinct levels:
 4. **Allocation actionability:** under a fixed mean auxiliary budget, does correct
    score-to-sample assignment beat Constant, Gate-only, Permuted, and Inverse?
 
-Passing an earlier level never counts as evidence for a later level. This separation
-is the central evaluation contribution.
+Passing an earlier level never counts as evidence for a later level. When a level is
+tautological for a score (for example, `-KL` against `-KL`) or structurally
+undefined, report N/A with the reason rather than count it as supporting evidence.
+This separation is the central evaluation contribution.
 
 ## 4. Score-family matrix
+
+The [pre-experiment score registry](actionability-score-registry-v0-20261007.md)
+specifies the current MFON/MOSEI candidate formulas and prevents post-test choice
+of score direction. A technical smoke test must precede its v1 freeze.
 
 | Score family | Example available signal | What it claims to measure | Required audit |
 |---|---|---|---|
 | Learned degradation reliability | Existing P4 `q_v`, `q_a` | Input preservation under trained corruption | Levels 1--4 |
 | Teacher disagreement | Per-sample KL and representation cosine | Auxiliary-target mismatch | Levels 2--4 |
-| Task confidence/uncertainty | Prediction magnitude, entropy or MC variance | Main-task uncertainty | Levels 1--4 |
-| Counterfactual modality sensitivity | Error change under masked/zeroed modality | Prediction dependence on a modality | Levels 1--4 plus OOD-mask caveat |
-| Local gradient utility | Existing exact/directional dot products | Immediate parameter-space compatibility | Levels 3--4 |
-| Simple combinations | Locked linear calibration on training/validation only | Whether signals complement each other | Complete held-group evaluation |
+| Input availability | Nonzero-timestep fraction and RMS energy | Feature presence, with padding/energy confounds | Levels 1--4 |
+| Predictive uncertainty | Fixed repeated-dropout prediction variance | Stability of the fused task prediction | Levels 1--4; sample-level rather than modality-specific |
+| Counterfactual modality influence | Prediction shift under a zeroed modality | Dependence of the prediction on that modality | Levels 1--4 plus OOD-mask caveat |
+
+Local gradient utility remains a costly, meta-context-dependent reference label for
+level 3. It is not counted as an intrinsic score family. Optional score combinations
+require a separately locked group-held-out calibration protocol; they are not part
+of the five-family core matrix.
 
 Do not add a score family only because it improves one inspected test result. Freeze
 definitions before the central matrix.
@@ -133,6 +143,10 @@ venue outcome is guaranteed. A single negative MFON/MOSEI table is not sufficien
 
 1. Freeze and archive P6/P7 outputs and hashes.
 2. Consolidate existing C1/C2/C5/P6/P7 outputs into one versioned audit schema.
+   As of 2026-10-07, the [local evidence manifest](actionability-evidence-manifest-20261007.json)
+   contains F3/F4, C1/C2/C5, and main-result summaries. P6/P7 summary and raw JSON
+   remain on the server, so the [status record](actionability-evidence-status-20261007.md)
+   marks them missing rather than treating terminal output as a verified import.
 3. Implement the five score families on MFON/MOSEI validation data and lock them.
 4. Port the read-only protocol to MOSI and SIMS.
 5. Select and integrate the second backbone after a two-day compatibility audit.
