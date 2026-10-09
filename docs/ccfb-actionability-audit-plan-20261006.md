@@ -1,5 +1,10 @@
 # CCF-B actionability-audit plan
 
+> **Scope update, 2026-10-09:** The thesis now requires two distinct small papers,
+> with the first submitted in October 2026. This document's "single-paper" thesis
+> assumption is superseded by the [two-paper October plan](two-paper-thesis-and-october-2026-submission.md).
+> Its audit methods and evidence boundaries remain useful for Paper 1.
+
 Date: 2026-10-06
 Status: active route after P6/P7 stopped the sample-only utility predictor
 

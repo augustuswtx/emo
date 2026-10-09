@@ -4,56 +4,58 @@
 \usepackage{booktabs}
 \usepackage{cite}
 \usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{array,tabularx}
 \usepackage{url}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
 % Pandoc-generated lists may call this command.
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-\title{Are Modality Quality Scores Trustworthy? Audited, Fixed-Budget
-Auxiliary Learning for Multimodal Sentiment Analysis}
+\title{From Degradation Response to Training Utility: Auditing
+Fixed-Budget Auxiliary Learning for Multimodal Sentiment Analysis}
 
-% Replace these placeholders only after the author order is final.
-\author{Author Name(s)}
+% Working draft: fill in the approved author order and affiliation before submission.
+\author{Author information pending}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-Quality-aware multimodal learning assumes that a model can estimate how
-trustworthy each modality is and use that estimate to regulate fusion or
-optimization. This assumption is rarely audited: a quality score may collapse
-to a batch-level scalar, track sequence length or feature energy, or be logged
-without materially changing learning. Using MFON as the base model, we
-introduce a five-part audit of sample granularity, degradation monotonicity,
-confound sensitivity, actionability, and weight collapse. The audit exposes
-concrete failures in an earlier prototype, including premature batch reduction
-and a norm-based curriculum score that increases under stronger corruption. We
-then learn visual and acoustic reliability from ordered clean--mild--strong
-feature triplets and use the scores only to redistribute per-sample
-distillation and contrastive losses. An allocation warmup preserves every
-batch's mean auxiliary budget from the first epoch. Across three frozen
-CMU-MOSI seeds, learned allocation improves the mean binary metrics, mean
-absolute error, correlation, and test loss over an equal-budget constant
-allocation; Acc-5 is tied and Acc-7 is lower by 0.0015. Reliability strongly
-tracks synthetic degradation for vision (Spearman $-0.9629$, AUROC $0.9952$)
-and audio (Spearman $-0.8199$, AUROC $0.9420$), although acoustic reliability
-remains moderately correlated with sequence length. The evidence supports
-audited training-time supervision allocation under a matched budget, but not
-uniform gains, statistical significance, or inference-time robustness.
+Reliability scores may detect corrupted inputs, yet weighting auxiliary
+supervision requires evidence that they identify trustworthy targets and
+useful updates. We study
+this gap in MFON-based multimodal sentiment analysis. An audit separates sample
+granularity, response to controlled degradation, confounding, teacher--student agreement,
+and fixed-budget allocation. We learn visual and acoustic degradation-response
+scores from ordered feature corruptions and use them to redistribute per-sample
+distillation and contrastive losses without changing each batch's mean
+auxiliary budget. In a frozen three-seed CMU-MOSEI comparison, learned
+allocation lowers mean absolute error by 0.0025 and raises correlation by
+0.0007 relative to uniform allocation, while classification effects are mixed
+and the repaired MFON baseline is not uniformly surpassed. The scores detect
+in-family Gaussian corruption but transfer unevenly to unseen corruptions.
+On validation data, visual scores are inversely associated with a negative-KL
+teacher--student agreement proxy (mean Spearman correlation -0.3154); acoustic association is weak. In
+one matched seed, inverse allocation attains slightly higher correlation than
+learned allocation. Thus degradation detection does not establish that the
+score provides a sound cross-sample training priority. The study contributes a
+reproducible audit and equal-budget controls, while limiting its conclusions
+to the tested backbone and benchmark settings.
 \end{abstract}
 
 \begin{IEEEkeywords}
-multimodal sentiment analysis, modality reliability, quality-score audit,
-fixed-budget learning, auxiliary supervision
+multimodal sentiment analysis, modality reliability, auxiliary-target audit,
+sample reweighting, fixed-budget auxiliary learning
 \end{IEEEkeywords}
 
 \input{body}
 
-% Add funding, contributor, and permitted AI-use disclosures before submission.
-\section*{Acknowledgment}
-Acknowledgment and disclosure text to be completed before submission.
+% Funding, contribution, and any required AI-use disclosure must be completed
+% and checked against the journal's current instructions before submission.
 
 \bibliographystyle{IEEEtran}
 \bibliography{../../docs/small-paper-references}

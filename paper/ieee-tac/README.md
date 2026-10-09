@@ -1,14 +1,16 @@
 # IEEE Transactions on Affective Computing working draft
 
-This directory preserves the long-form IEEE Transactions on Affective
-Computing (TAC) backup draft. Neural Computing and Applications is now the
-working CCF-C primary target.
+As of 2026-10-09, TAC is the provisional CCF-B target for the first of two
+thesis papers, with an October submission goal. The manuscript text now
+incorporates the newer NCA revision's MOSEI and C1/C2 evidence, but still
+requires source verification, additional experiments, compilation and author
+metadata. This TAC draft is **not yet submission-ready**. See the
+[October plan](../../docs/two-paper-thesis-and-october-2026-submission.md).
 
 ## Files
 
 - `main.tex`: IEEEtran wrapper, title, abstract, keywords, and bibliography.
-- `body.tex`: evidence-grounded manuscript body converted from
-  `../../docs/small-paper-draft-v2-en.md`.
+- `body.tex`: current evidence-grounded body synchronized from the NCA revision.
 - `submission-status.md`: unresolved evidence, format, and authorship checks.
 
 ## Build
@@ -29,7 +31,6 @@ PDF and page count have not yet been verified.
 
 ## Scope boundary
 
-CMU-MOSI results are frozen. CMU-MOSEI is an active experiment and is described
-only as future or ongoing validation. Do not add a MOSEI result until its
-comparison gate is complete and the value is copied from the frozen experiment
-record.
+The newer abstract/body state the completed MOSEI results, negative C1 audit,
+and seed-1111 C2 controls conservatively. C4, extended C2, P6/P7 raw archives,
+venue-specific formatting and author declarations remain open.

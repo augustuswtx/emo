@@ -1,5 +1,11 @@
 # Venue strategy
 
+> **Updated direction, 2026-10-09:** The user now needs to submit the first of two
+> thesis papers to a CCF-B venue in October 2026. The earlier NCA CCF-C primary
+> target below is historical. The current provisional target is the regular-paper
+> track of IEEE Transactions on Affective Computing (TAC), subject to the
+> [October evidence and submission gates](../docs/two-paper-thesis-and-october-2026-submission.md).
+
 Updated: 2026-09-14
 
 ## Primary target: Neural Computing and Applications

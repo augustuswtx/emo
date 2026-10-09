@@ -1,5 +1,7 @@
 # 大小论文一体化路线：非文本模态可信辅助学习
 
+> **历史方案。** 用户于 2026-10-09 将大论文要求改为整合两篇小论文，并要求第一篇在 2026 年 10 月内投稿。新的论文分工、证据闸门和排期以[双小论文与 10 月投稿冲刺](two-paper-thesis-and-october-2026-submission.md)为准；下文“唯一小论文”的安排不再适用。
+
 Date: 2026-09-28
 Status: current thesis integration plan
 
